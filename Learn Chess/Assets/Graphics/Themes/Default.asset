@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Default
   m_EditorClassIdentifier: 
   lightColors:
-    normal: {r: 0.7381185, g: 0.8167744, b: 0.9150943, a: 0}
+    normal: {r: 0.7971698, g: 0.88835037, b: 1, a: 0}
     legal: {r: 0, g: 1, b: 0.4532702, a: 0}
     selected: {r: 0.1462264, g: 0.22067071, b: 1, a: 0}
   darkColors:
-    normal: {r: 0.17096831, g: 0.24127625, b: 0.3207547, a: 0}
+    normal: {r: 0.16415983, g: 0.22337201, b: 0.2924528, a: 0}
     legal: {r: 0, g: 1, b: 0.45490196, a: 0}
     selected: {r: 0.14509805, g: 0.21960784, b: 1, a: 0}

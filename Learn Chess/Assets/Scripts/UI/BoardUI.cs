@@ -43,7 +43,6 @@ namespace UI
                     squarePieceRenderers[file, rank] = pieceRenderer;
                 }
             }
-
             ResetSquareColors();
         }
         
