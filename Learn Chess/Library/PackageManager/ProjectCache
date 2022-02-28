@@ -5,16 +5,16 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 637815979514405822
-    m_Hash: 1963389025
+      ticks: 637816440304846188
+    m_Hash: 2989432480
   m_LockFileStatus:
     m_FilePath: C:/Users/Quim/Documents/GitHub/Learn-Chess/Learn Chess/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 637815979639822133
-    m_Hash: 3265909920
+      ticks: 637816440358078839
+    m_Hash: 1323924065
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
 m_PackageAssets:
@@ -636,12 +636,12 @@ m_PackageAssets:
         url: 
         revision: 
         path: 
-    - packageId: com.unity.collab-proxy@1.15.7
+    - packageId: com.unity.collab-proxy@1.15.12
       testable: 0
       isDirectDependency: 1
-      version: 1.15.7
+      version: 1.15.12
       source: 1
-      resolvedPath: C:\Users\Quim\Documents\GitHub\Learn-Chess\Learn Chess\Library\PackageCache\com.unity.collab-proxy@1.15.7
+      resolvedPath: C:\Users\Quim\Documents\GitHub\Learn-Chess\Learn Chess\Library\PackageCache\com.unity.collab-proxy@1.15.12
       assetPath: Packages/com.unity.collab-proxy
       name: com.unity.collab-proxy
       displayName: Version Control
@@ -709,8 +709,6 @@ m_PackageAssets:
         - 2.1.0-preview.5
         - 2.1.0-preview.6
         compatible:
-        - 1.15.7
-        - 1.15.9
         - 1.15.12
         - 1.15.13
         - 2.0.0-preview.6
@@ -725,13 +723,9 @@ m_PackageAssets:
         - 2.1.0-preview.6
         verified: 1.15.13
       dependencies:
-      - name: com.unity.nuget.newtonsoft-json
-        version: 2.0.0
       - name: com.unity.services.core
         version: 1.0.1
       resolvedDependencies:
-      - name: com.unity.nuget.newtonsoft-json
-        version: 2.0.0
       - name: com.unity.services.core
         version: 1.0.1
       - name: com.unity.modules.unitywebrequest
@@ -762,13 +756,13 @@ m_PackageAssets:
       entitlements:
         isAllowed: 1
       isAssetStorePackage: 0
-      datePublishedTicks: 637744672890000000
+      datePublishedTicks: 637789721280000000
       documentationUrl: 
       hasRepository: 1
       repository:
         type: git
         url: https://github.cds.internal.unity3d.com/unity/com.unity.cloud.collaborate.git
-        revision: d208594e5483cdf10d303b6ee17df4d6bf58d3de
+        revision: 5ca1fd4ca9f999e087d19e98afaf99905a582771
         path: 
     - packageId: com.unity.ide.rider@2.0.7
       testable: 0
@@ -3339,82 +3333,6 @@ m_PackageAssets:
         url: https://github.cds.internal.unity3d.com/unity/com.unity.ext.nunit.git
         revision: 29ea4d6504a5f58fb3a6934db839aa80ae6d9d88
         path: 
-    - packageId: com.unity.nuget.newtonsoft-json@2.0.0
-      testable: 0
-      isDirectDependency: 0
-      version: 2.0.0
-      source: 1
-      resolvedPath: C:\Users\Quim\Documents\GitHub\Learn-Chess\Learn Chess\Library\PackageCache\com.unity.nuget.newtonsoft-json@2.0.0
-      assetPath: Packages/com.unity.nuget.newtonsoft-json
-      name: com.unity.nuget.newtonsoft-json
-      displayName: Newtonsoft Json
-      author:
-        name: 
-        email: 
-        url: 
-      category: 
-      type: 
-      description: 'Newtonsoft Json for use in Unity projects and Unity packages.
-        Currently synced to version 12.0.2.
-
-
-        This package is used for advanced
-        json serialization and deserialization. Most Unity users will be better suited
-        using the existing json tools built into Unity.
-
-        To avoid assembly
-        clashes, please use this package if you intend to use Newtonsoft Json.'
-      status: 4
-      errors: []
-      versions:
-        all:
-        - 1.0.0-preview.2
-        - 1.0.0-preview.3
-        - 1.0.0-preview.4
-        - 1.0.1-preview.1
-        - 1.1.2
-        - 2.0.0-preview
-        - 2.0.0-preview.1
-        - 2.0.0-preview.2
-        - 2.0.0
-        - 2.0.1-preview.1
-        - 2.0.2
-        compatible:
-        - 1.0.0-preview.2
-        - 1.0.0-preview.3
-        - 1.0.0-preview.4
-        - 1.0.1-preview.1
-        - 1.1.2
-        - 2.0.0-preview
-        - 2.0.0-preview.1
-        - 2.0.0-preview.2
-        - 2.0.0
-        - 2.0.1-preview.1
-        - 2.0.2
-        verified: 2.0.2
-      dependencies: []
-      resolvedDependencies: []
-      keywords: []
-      registry:
-        id: main
-        name: 
-        url: https://packages.unity.com
-        scopes: []
-        isDefault: 1
-        capabilities: 7
-      hasRegistry: 1
-      hideInEditor: 1
-      entitlements:
-        isAllowed: 1
-      isAssetStorePackage: 0
-      datePublishedTicks: 637237898320000000
-      documentationUrl: 
-      hasRepository: 1
-      repository:
-        type: git
-        url: https://github.cds.internal.unity3d.com/unity/com.unity.nuget.newtonsoft-json.git
-        revision: d2fd6ed876261bbd82f59199ad711e7667bf633a
-        path: 
     - packageId: com.unity.services.core@1.0.1
       testable: 0
       isDirectDependency: 0
@@ -3730,4 +3648,4 @@ m_PackageAssets:
   m_LocalPackages:
     m_LocalFileStatus: []
 m_ProjectPath: C:/Users/Quim/Documents/GitHub/Learn-Chess/Learn Chess/Packages
-m_EditorVersion: 2020.3.28f1 (f5400f52e03f)
+m_EditorVersion: 2020.3.30f1 (1fb1bf06830e)
