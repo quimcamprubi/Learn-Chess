@@ -127,4 +127,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isWhitePlaying: 1
-  boardColors: {fileID: 0}
+  boardColors: {fileID: 11400000, guid: f627e8aa402387349b899a4a03f70e36, type: 2}
+  pieceThemes: {fileID: 11400000, guid: 2bbd421cfad18d644aa2ae22ace5ba10, type: 2}

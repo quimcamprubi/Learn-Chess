@@ -11,6 +11,7 @@ namespace UI
     {
         public bool isWhitePlaying = true;
         public BoardColors boardColors;
+        public PieceThemes pieceThemes;
         private MeshRenderer[, ] squareRenderers;
         private SpriteRenderer[, ] squarePieceRenderers;
 
@@ -66,6 +67,19 @@ namespace UI
         {
             squareRenderers[square.fileIndex, square.rankIndex].material.color =
                 square.IsLightSquare() ? lightColor : darkColor;
+        }
+
+        public void UpdateBoard(Board primaryBoard)
+        {
+            for (int rank = 0; rank < Constants.NUM_RANKS; rank++)
+            {
+                for (int file = 0; file < Constants.NUM_FILES; file++)
+                {
+                    squarePieceRenderers[file, rank].sprite =
+                        pieceThemes.GetPieceSprite(primaryBoard.squares[rank * 8 + file]);
+                    squarePieceRenderers[file, rank].transform.position = PositionFromCoordinates(file, rank, -0.1f);
+                }
+            }
         }
     }
 }

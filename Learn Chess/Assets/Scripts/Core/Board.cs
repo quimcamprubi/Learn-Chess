@@ -1,7 +1,17 @@
-﻿namespace Core
+﻿using Utils;
+
+namespace Core
 {
     public class Board
     {
-        private uint[] bitboard = new uint[64];
+        public bool WhiteToMove; 
+        public int[] squares;
+
+        public void loadStartingPosition()
+        {
+            ChessPosition loadedPosition = FenDecoder.DecodePositionFromFen(Constants.startingFen);
+            squares = loadedPosition.squares;
+            WhiteToMove = loadedPosition.whiteToMove;
+        }
     }
 }
