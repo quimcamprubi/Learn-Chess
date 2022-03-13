@@ -2,6 +2,8 @@
 {
     public static class Piece
     {
+        // Each piece will be represented as Color (2 bits) | Type (3 bits)
+        
         public const int None = 0;      // x000
         public const int Pawn = 1;      // x001
         public const int Knight = 2;    // x010
@@ -21,6 +23,16 @@
         public static bool IsColor(int piece, int color)
         {
             return (piece & ColorMask) == color;
+        }
+
+        public static bool IsWhite(int piece)
+        {
+            return (piece & WhiteMask) == WhiteMask;
+        }
+
+        public static bool IsBlack(int piece)
+        {
+            return (piece & BlackMask) == BlackMask;
         }
         
         public static int PieceType (int piece) {

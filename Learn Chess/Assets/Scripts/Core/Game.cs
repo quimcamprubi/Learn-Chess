@@ -8,11 +8,8 @@ namespace Core
 {
     public class Game : MonoBehaviour
     {
-        public enum PlayerType { Human, AI }
-        public PlayerType whitePlayerType;
-        public PlayerType blackPlayerType;
         public BoardUI boardUi;
-
+        public int playerToMove;
         public enum InputState
         {
             None,
@@ -33,6 +30,7 @@ namespace Core
         {
             mainBoard.loadStartingPosition();
             boardUi.UpdateBoard(mainBoard);
+            playerToMove = Piece.White;
         }
     }
 }
