@@ -1,0 +1,34 @@
+@startuml 
+
+class Game {
+   
+
+}
+
+class Board {
+}
+
+class BoardUI {
+}
+
+class Piece {
+}
+
+enum PlayerStatus {
+}
+
+abstract class Player {
+}
+
+class ChessPosition {
+}
+
+Game "1" *--> "1" Board: mainBoard, secondBoard
+Game "1" *--> "1" BoardUI: boardUi
+Game "1" *--> "2" Player: player1, player2
+Player "1" *--> "16" Piece: pieces
+HumanPlayer -up-|> Player
+AIPlayer -up-|> Player
+Player "1" *--> "1" PlayerStatus: currentStatus
+
+@enduml

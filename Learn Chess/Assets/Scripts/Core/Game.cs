@@ -13,19 +13,26 @@ namespace Core
         public PlayerType blackPlayerType;
         public BoardUI boardUi;
 
-        private Board primaryBoard;
+        public enum InputState
+        {
+            None,
+            DraggingPiece
+        }
+
+        private Board mainBoard;
+        private InputState inputState;
 
         private void Start()
         {
             boardUi = FindObjectOfType<BoardUI>();
-            primaryBoard = new Board();
+            mainBoard = new Board();
             InitializeGame();
         }
 
         private void InitializeGame()
         {
-            primaryBoard.loadStartingPosition();
-            boardUi.UpdateBoard(primaryBoard);
+            mainBoard.loadStartingPosition();
+            boardUi.UpdateBoard(mainBoard);
         }
     }
 }
