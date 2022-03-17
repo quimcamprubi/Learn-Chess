@@ -1,5 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using Core;
+﻿using Core;
 using UnityEngine;
 
 namespace UI
@@ -23,8 +22,8 @@ namespace UI
 
         public Sprite GetPieceSprite(int piece)
         {
-            PieceColors colors = Piece.IsColor(piece, Piece.White) ? whitePieces : blackPieces;
-            switch (Piece.PieceType(piece))
+            PieceColors colors = Piece.IsWhite(piece) ? whitePieces : blackPieces;
+            switch (Piece.AbsolutePieceType(piece))
             {
                 case Piece.Pawn:
                     return colors.Pawn;

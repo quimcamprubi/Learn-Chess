@@ -2,41 +2,48 @@
 {
     public static class Piece
     {
-        // Each piece will be represented as Color (2 bits) | Type (3 bits)
         
-        public const int None = 0;      // x000
-        public const int Pawn = 1;      // x001
-        public const int Knight = 2;    // x010
-        public const int Bishop = 3;    // x011
-        public const int Rook = 4;      // x100
-        public const int Queen = 5;     // x101
-        public const int King = 6;      // x110
-
-        public const int White = 8;     // 1xxx
-        public const int Black = 16;     // 0xxx
+        public const int None = 0;
+        public const int Pawn = 1;
+        public const int Knight = 2;
+        public const int Bishop = 3;
+        public const int Rook = 4;
+        public const int Queen = 5;
+        public const int King = 6;
         
-        private const int TypeMask = 0b00111;
-        private const int BlackMask = 0b10000;
-        private const int WhiteMask = 0b01000;
-        private const int ColorMask = WhiteMask | BlackMask;
+        public const int White = 1;
+        public const int Black = 2;
         
-        public static bool IsColor(int piece, int color)
-        {
-            return (piece & ColorMask) == color;
-        }
+        public const int WhitePawn = 1;
+        public const int WhiteKnight = 2;
+        public const int WhiteBishop = 3;
+        public const int WhiteRook = 4;
+        public const int WhiteQueen = 5;
+        public const int WhiteKing = 6;
+        public const int BlackPawn = 7;
+        public const int BlackKnight = 8;
+        public const int BlackBishop = 9;
+        public const int BlackRook = 10;
+        public const int BlackQueen = 11;
+        public const int BlackKing = 12;
 
         public static bool IsWhite(int piece)
         {
-            return (piece & WhiteMask) == WhiteMask;
+            return (piece < 7) && (piece != 0);
         }
 
         public static bool IsBlack(int piece)
         {
-            return (piece & BlackMask) == BlackMask;
+            return piece > 6;
         }
-        
-        public static int PieceType (int piece) {
-            return piece & TypeMask;
+
+        public static int AbsolutePieceType(int piece)
+        {
+            if (piece > 6)
+            {
+                return piece - 6;
+            }
+            return piece;
         }
     }
 }

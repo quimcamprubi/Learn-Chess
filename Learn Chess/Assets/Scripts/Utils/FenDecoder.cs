@@ -8,8 +8,9 @@ namespace Utils
     {
         public static Dictionary<char, int> fenToPieceDictionary = new Dictionary<char, int>()
         {
-            ['p'] = Piece.Pawn, ['n'] = Piece.Knight, ['b'] = Piece.Bishop, ['r'] = Piece.Rook, ['q'] = Piece.Queen,
-            ['k'] = Piece.King
+            ['p'] = Piece.BlackPawn, ['n'] = Piece.BlackKnight, ['b'] = Piece.BlackBishop, ['r'] = Piece.BlackRook, ['q'] = Piece.BlackQueen,
+            ['k'] = Piece.BlackKing, ['P'] = Piece.WhitePawn, ['N'] = Piece.WhiteKnight, ['B'] = Piece.WhiteBishop, ['R'] = Piece.WhiteRook, ['Q'] = Piece.WhiteQueen,
+            ['K'] = Piece.WhiteKing
         };
         public static ChessPosition DecodePositionFromFen(string fen)
         {
@@ -33,9 +34,8 @@ namespace Utils
                     }
                     else
                     {
-                        int color = (char.IsUpper(symbol)) ? Piece.White : Piece.Black;
-                        int type = fenToPieceDictionary[char.ToLower(symbol)];
-                        positionToReturn.squares[rank * 8 + file] = color | type;
+                        int type = fenToPieceDictionary[symbol];
+                        positionToReturn.squares[rank * 8 + file] = type;
                         file++;
                     }
                 }
