@@ -12,7 +12,7 @@ namespace Core
         
         private int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];
         private int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];
-        private UInt64[] pawns = new UInt64[Constants.NUM_PIECE_VARIANTS];
+        private ulong[] pawns = new UInt64[Constants.NUM_PIECE_VARIANTS];
         private int[] kingSquares = new int[Constants.NUM_KINGS];
 
         private int sideToPlay;
@@ -23,12 +23,13 @@ namespace Core
         private int castlingRights;
         private Move[] gameHist = new Move[Constants.MAX_GAME_MOVES];
 
-        private UInt64 positionKey;
+        private ulong positionKey;
         
         private int[] pieceNumbers = new int[Constants.TOTAL_DIFF_PIECES];
         private int[] bigPieces = new int[Constants.PIECE_TYPE_VARIANTS];
         private int[] majorPieces = new int[Constants.PIECE_TYPE_VARIANTS];
         private int[] minorPieces = new int[Constants.PIECE_TYPE_VARIANTS];
+        private int[,] pieceList = new int[Constants.TOTAL_DIFF_PIECES, Constants.MAX_PIECES_OF_SAME_TYPE];
 
         public static int NoPlayer = 0;
         public static int White = 1;
@@ -74,14 +75,29 @@ namespace Core
                     square = frTo120Sq(file, rank);
                     sq64ToSq120[square64] = square;
                     sq120ToSq64[square] = square64;
+                    if (squares[rank * 8 + file] == Piece.WhitePawn)
+                    {
+                        pawns[White] |= (1UL << sq64From120(square));
+                    } 
+                    else if (squares[rank * 8 + file] == Piece.BlackPawn)
+                    {
+                        pawns[Black] |= (1UL << sq64From120(square));
+                    }
                     square64++;
                 }
             }
+
+            square64 = 0;
         }
 
-        public static int frTo120Sq(int file, int rank)
+        public int frTo120Sq(int file, int rank)
         {
             return (21 + file + rank * 10);
+        }
+
+        public int sq64From120(int square)
+        {
+            return sq120ToSq64[square];
         }
     }
 }

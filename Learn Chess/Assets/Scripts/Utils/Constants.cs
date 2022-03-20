@@ -11,6 +11,7 @@
         public static int NUM_KINGS = 2;
         public static int PIECE_TYPE_VARIANTS = 3;
         public static int MAX_GAME_MOVES = 2048;
+        public static int MAX_PIECES_OF_SAME_TYPE = 10;
         
         public static string startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     }
