@@ -38,7 +38,6 @@ namespace UI
                 case Piece.King:
                     return colors.King;
                 default:
-                    Debug.Log(piece);
                     return null;
             }
         }
