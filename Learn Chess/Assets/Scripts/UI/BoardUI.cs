@@ -77,7 +77,7 @@ namespace UI
                 for (int file = 0; file < Constants.NUM_FILES; file++)
                 {
                     squarePieceRenderers[file, rank].sprite =
-                        pieceThemes.GetPieceSprite(primaryBoard.squares[rank * 8 + file]);
+                        pieceThemes.GetPieceSprite(primaryBoard.squares[Board.sq120(rank * 8 + file)]);
                     squarePieceRenderers[file, rank].transform.position = PositionFromCoordinates(file, rank, -0.1f);
                 }
             }

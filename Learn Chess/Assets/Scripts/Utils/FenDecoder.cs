@@ -35,7 +35,7 @@ namespace Utils
                     else
                     {
                         int type = fenToPieceDictionary[symbol];
-                        positionToReturn.squares[rank * 8 + file] = type;
+                        positionToReturn.squares[Board.sq120(rank * 8 + file)] = type;
                         file++;
                     }
                 }

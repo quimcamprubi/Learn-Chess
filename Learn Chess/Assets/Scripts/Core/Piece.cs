@@ -3,7 +3,7 @@
     public static class Piece
     {
         
-        public const int None = 0;
+        public const int Empty = 0;
         public const int Pawn = 1;
         public const int Knight = 2;
         public const int Bishop = 3;
@@ -11,8 +11,8 @@
         public const int Queen = 5;
         public const int King = 6;
         
-        public const int White = 1;
-        public const int Black = 2;
+        public const int White = 0;
+        public const int Black = 1;
         
         public const int WhitePawn = 1;
         public const int WhiteKnight = 2;

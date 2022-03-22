@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using System.Text;
+using UnityEditor;
+using UnityEngine.Assertions;
 
 namespace Core
 {
@@ -13,21 +15,24 @@ namespace Core
         public int[] squares;
         
         // Indices
-        private int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];
-        private int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];
+        public static int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];
+        public static int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];
         private int[] kingSquares = new int[Constants.NUM_KINGS];
 
         // Game rules
         private int sideToPlay;
-        private int enPassantSquareInd;
+        private int enPassantSquare;
         private int fiftyMoveCounter;
         private int ply;
         private int histPly;
         private int castlingRights;
         private Move[] gameHist = new Move[Constants.MAX_GAME_MOVES];
 
-        // Position key
+        // Hash key
         private ulong positionKey;
+        private ulong[,] pieceKeys = new ulong[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
+        private ulong sideKey;
+        private ulong[] castleKeys = new ulong[16];
         
         // Piece lists
         private int[] pieceNumbers = new int[Constants.TOTAL_DIFF_PIECES];
@@ -37,13 +42,16 @@ namespace Core
         private int[,] pieceList = new int[Constants.TOTAL_DIFF_PIECES, Constants.MAX_PIECES_OF_SAME_TYPE];
 
         // Bitboard
-        private ulong[] pawns = new UInt64[Constants.NUM_PIECE_VARIANTS];
+        private ulong[] pawns = new ulong[Constants.NUM_PIECE_VARIANTS];
         private ulong[] setMask = new ulong[Constants.NUM_SQUARES];
         private ulong[] clearMask = new ulong[Constants.NUM_SQUARES];
         
-        public static int NoPlayer = 0;
-        public static int White = 1;
-        public static int Black = 2;
+        // 0 constants 
+        public static int None = 0;
+        
+        public static int White = 0;
+        public static int Black = 1;
+        public static int Both = 2;
 
         public enum Squares120Enum
         {
@@ -54,7 +62,7 @@ namespace Core
             A5 = 61, B5, C5, D5, E5, F5, G5, H5,
             A6 = 71, B6, C6, D6, E6, F6, G6, H6,
             A7 = 81, B7, C7, D7, E7, F7, G7, H7,
-            A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ
+            A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD
         }
 
         public enum SquaresEnum
@@ -71,15 +79,20 @@ namespace Core
 
         public void loadStartingPosition()
         {
+            initBoards();
             ChessPosition loadedPosition = FenDecoder.DecodePositionFromFen(Constants.startingFen);
             squares = loadedPosition.squares;
-            initBoards();
+            resetBoard();
+            initBitBoards();
+            initHashKeys();
+            printGameBoard();
+            print120Board();
+            printBitBoard(pawns[White], White);
+            printBitBoard(pawns[Black], Black);
         }
-
+        
         private void initBoards()
         {
-            int square = (int) Squares120Enum.A1;
-            int square64 = 0;
             for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
             {
                 sq120ToSq64[i] = 65;
@@ -97,28 +110,78 @@ namespace Core
                 setMask[i] |= (1UL << i);
                 clearMask[i] = ~setMask[i];
             }
-
+            
+            int square64 = 0;
             for (int rank = 0; rank < Constants.NUM_RANKS; rank++)
             {
                 for (int file = 0; file < Constants.NUM_FILES; file++)
                 {
-                    square = frTo120Sq(file, rank);
+                    int square = frTo120Sq(file, rank);
                     sq64ToSq120[square64] = square;
                     sq120ToSq64[square] = square64;
-                    if (squares[rank * 8 + file] == Piece.WhitePawn)
-                    {
-                        pawns[White] |= (1UL << sq64From120(square));
-                    } 
-                    else if (squares[rank * 8 + file] == Piece.BlackPawn)
-                    {
-                        pawns[Black] |= (1UL << sq64From120(square));
-                    }
                     square64++;
                 }
             }
-            printGameBoard();
-            printBitBoard(pawns[White], White);
-            printBitBoard(pawns[Black], Black);
+        }
+
+        private void resetBoard()
+        {
+            for (int i = 0; i < Constants.NUM_PIECE_VARIANTS; i++)
+            {
+                bigPieces[i] = 0;
+                majorPieces[i] = 0;
+                minorPieces[i] = 0;
+            }
+
+            for (int i = 0; i < Constants.TOTAL_DIFF_PIECES; i++)
+            {
+                pieceNumbers[i] = None;
+            }
+
+            kingSquares[White] = kingSquares[Black] = (int) Squares120Enum.NO_SQ;
+            sideToPlay = Both;
+            enPassantSquare = (int) Squares120Enum.NO_SQ;
+            fiftyMoveCounter = 0;
+            ply = 0;
+            histPly = 0;
+            castlingRights = 0;
+            positionKey = 0UL;
+        }
+
+        private void initBitBoards()
+        {
+            for (int rank = 0; rank < Constants.NUM_RANKS; rank++)
+            {
+                for (int file = 0; file < Constants.NUM_FILES; file++)
+                {
+                    int square = frTo120Sq(file, rank);
+                    if (squares[sq120(rank * 8 + file)] == Piece.WhitePawn)
+                    {
+                        pawns[White] |= (1UL << sq64(square));
+                    } 
+                    else if (squares[sq120(rank * 8 + file)] == Piece.BlackPawn)
+                    {
+                        pawns[Black] |= (1UL << sq64(square));
+                    }
+                }
+            } 
+        }
+
+        private void initHashKeys()
+        {
+            System.Random rand = new System.Random();
+            for (int i = 0; i < Constants.TOTAL_DIFF_PIECES; i++)
+            {
+                for (int j = 0; j < Constants.NUM_SQUARES_EXT; j++)
+                {
+                    pieceKeys[i, j] = Hashkey.rand64(rand);
+                }
+            }
+            sideKey = Hashkey.rand64(rand);
+            for (int i = 0; i < 16; i++)
+            {
+                castleKeys[i] = Hashkey.rand64(rand);
+            }
         }
 
         public int frTo120Sq(int file, int rank)
@@ -126,9 +189,14 @@ namespace Core
             return (21 + file + rank * 10);
         }
 
-        public int sq64From120(int square)
+        public static int sq64(int square)
         {
             return sq120ToSq64[square];
+        }
+
+        public static int sq120(int square)
+        {
+            return sq64ToSq120[square];
         }
 
         public void printGameBoard()
@@ -136,13 +204,13 @@ namespace Core
             StringBuilder sb = new StringBuilder();
             sb.Append("Game board");
             sb.AppendLine();
-            for (int i = 0; i < Constants.NUM_SQUARES; i++)
+            for (int i = Constants.NUM_SQUARES - 1; i >= None; i--)
             {
-                if (i % 8 == 0)
+                if ((i + 1) % 8 == 0)
                 {
                     sb.AppendLine();
                 }
-                sb.Append(squares[i].ToString());
+                sb.Append(squares[sq120(i)].ToString());
                 sb.Append("  ");
             }
             Debug.Log(sb.ToString());
@@ -153,13 +221,13 @@ namespace Core
             StringBuilder sb = new StringBuilder();
             sb.Append("120 board");
             sb.AppendLine();
-            for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
+            for (int i = Constants.NUM_SQUARES_EXT - 1; i >= None; i--)
             {
-                if (i % 10 == 0)
+                if ((i + 1) % 10 == 0)
                 {
                     sb.AppendLine();
                 }
-                sb.Append(sq120ToSq64[i].ToString());
+                sb.Append(squares[i].ToString());
                 sb.Append("  ");
             }
             Debug.Log(sb.ToString());
@@ -180,13 +248,17 @@ namespace Core
             {
                 sb.Append("Black BitBoard:");
             }
+            else
+            {
+                sb.Append("Specific BitBoard:");
+            }
             sb.AppendLine();
             for (int rank = 7; rank >= 0; rank--)
             {
                 for (int file = 0; file <= 7; file++)
                 {
                     square120 = frTo120Sq(file, rank);
-                    square64 = sq64From120(square120);
+                    square64 = sq64(square120);
                     if (((shiftMe << square64) & bitBoard) != 0)
                         sb.Append("X");
                     else 
@@ -208,6 +280,34 @@ namespace Core
         private void setBit(ref ulong bitBoard, int square)
         {
             bitBoard |= setMask[square];
+        }
+        
+        // Position key
+        public ulong generatePositionKey()
+        {
+            ulong finalKey = 0;
+            for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
+            {
+                int piece = squares[i];
+                if (piece != (int) Squares120Enum.NO_SQ && piece != Piece.Empty)
+                {
+                    Assert.IsTrue(piece >= Piece.WhitePawn && piece <= Piece.BlackKing);
+                    finalKey ^= pieceKeys[piece,i];
+                }
+            }
+            if (sideToPlay == White)
+            {
+                finalKey ^= sideKey;
+            }
+            if (enPassantSquare != (int) Squares120Enum.NO_SQ)
+            {
+                Assert.IsTrue(enPassantSquare >= 0 && enPassantSquare < Constants.NUM_SQUARES_EXT);
+                finalKey ^= pieceKeys[Piece.Empty, enPassantSquare];
+            }
+            Assert.IsTrue(castlingRights >= 0 && castlingRights <= 15);
+            finalKey ^= castleKeys[castlingRights];
+
+            return finalKey;
         }
     }
 }
