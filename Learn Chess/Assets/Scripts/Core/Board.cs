@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using System.Text;
+using UI;
 using UnityEditor;
 using UnityEngine.Assertions;
 
@@ -36,9 +37,10 @@ namespace Core
         
         // Piece lists
         private int[] pieceNumbers = new int[Constants.TOTAL_DIFF_PIECES];
-        private int[] bigPieces = new int[Constants.PIECE_TYPE_VARIANTS];
-        private int[] majorPieces = new int[Constants.PIECE_TYPE_VARIANTS];
-        private int[] minorPieces = new int[Constants.PIECE_TYPE_VARIANTS];
+        private int[] bigPieces = new int[Constants.NUM_PLAYERS];
+        private int[] majorPieces = new int[Constants.NUM_PLAYERS];
+        private int[] minorPieces = new int[Constants.NUM_PLAYERS];
+        private int[] material = new int[Constants.NUM_PLAYERS];
         private int[,] pieceList = new int[Constants.TOTAL_DIFF_PIECES, Constants.MAX_PIECES_OF_SAME_TYPE];
 
         // Bitboard
@@ -84,6 +86,7 @@ namespace Core
             initBitBoards();
             initHashKeys();
             positionKey = generatePositionKey();
+            updateListsMaterial();
             printGameBoard();
             print120Board();
             printBitBoard(pawns[White], White);
@@ -134,7 +137,7 @@ namespace Core
 
         private void resetBoard()
         {
-            for (int i = 0; i < Constants.NUM_PIECE_VARIANTS; i++)
+            for (int i = 0; i < Constants.NUM_PLAYERS; i++)
             {
                 bigPieces[i] = 0;
                 majorPieces[i] = 0;
@@ -189,6 +192,36 @@ namespace Core
             for (int i = 0; i < 16; i++)
             {
                 castleKeys[i] = Hashkey.rand64(rand);
+            }
+        }
+
+        private void updateListsMaterial()
+        {
+            int piece, square, color;
+            for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
+            {
+                square = i;
+                piece = squares[i];
+                if (piece != Piece.Empty && piece != (int) Squares120Enum.OFFBOARD)
+                {
+                    color = Piece.PieceCol[piece];
+                    if (Piece.PieceBig[piece]) bigPieces[color]++;
+                    if (Piece.PieceMaj[piece]) majorPieces[color]++;
+                    if (Piece.PieceMin[piece]) minorPieces[color]++;
+                    material[color] += Piece.PieceVal[piece];
+                    pieceList[piece,pieceNumbers[piece]] = square;
+                    pieceNumbers[piece]++;
+                    if (piece == Piece.WhiteKing)
+                    {
+                        Assert.IsTrue(color == Piece.White);
+                        kingSquares[color] = square;
+                    }
+                    else if (piece == Piece.BlackKing)
+                    {
+                        Assert.IsTrue(color == Piece.Black);
+                        kingSquares[color] = square;
+                    }
+                }
             }
         }
 
