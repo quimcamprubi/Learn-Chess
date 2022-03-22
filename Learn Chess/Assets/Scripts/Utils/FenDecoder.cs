@@ -6,6 +6,10 @@ namespace Utils
 {
     public static class FenDecoder
     {
+        private static int WKCA = 1;
+        private static int WQCA = 2;
+        private static int BKCA = 4;
+        private static int BQCA = 8;
         public static Dictionary<char, int> fenToPieceDictionary = new Dictionary<char, int>()
         {
             ['p'] = Piece.BlackPawn, ['n'] = Piece.BlackKnight, ['b'] = Piece.BlackBishop, ['r'] = Piece.BlackRook, ['q'] = Piece.BlackQueen,
@@ -44,17 +48,20 @@ namespace Utils
 
             // Castling Rights
             string castlingRights = sections[2];
-            positionToReturn.whiteKingSideCastling = castlingRights.Contains("K");
-            positionToReturn.whiteQueenSideCastling = castlingRights.Contains("Q");
-            positionToReturn.blackKingSideCastling = castlingRights.Contains("k");
-            positionToReturn.blackQueenSideCastling = castlingRights.Contains("q");
+            if (castlingRights.Contains("K")) positionToReturn.castlingRights |= WKCA;
+            if (castlingRights.Contains("Q")) positionToReturn.castlingRights |= WQCA;
+            if (castlingRights.Contains("k")) positionToReturn.castlingRights |= BKCA;
+            if (castlingRights.Contains("q")) positionToReturn.castlingRights |= BQCA;
 
             // En Passant
             if (sections.Length > 3) {
-                string enPassantFileName = sections[3][0].ToString ();
-                if (BoardSquares.files.Contains (enPassantFileName)) {
-                    positionToReturn.epFile = BoardSquares.files.IndexOf (enPassantFileName) + 1;
+                if (sections[3] != "-")
+                {
+                    int enPassantFile = sections[3][0] - 'a';
+                    int enPassantRank = sections[3][1] - '1';
+                    positionToReturn.enPassantSquare = Board.frTo120Sq(enPassantFile, enPassantRank);
                 }
+                
             }
 
             // Half-move clock

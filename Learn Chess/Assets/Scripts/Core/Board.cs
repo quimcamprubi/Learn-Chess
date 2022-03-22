@@ -15,21 +15,21 @@ namespace Core
         public int[] squares;
         
         // Indices
-        public static int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];
-        public static int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];
+        public static int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];       // 64 indices to 120 indices
+        public static int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];   // 120 indices to 64 indices
         private int[] kingSquares = new int[Constants.NUM_KINGS];
 
         // Game rules
-        private int sideToPlay;
-        private int enPassantSquare;
-        private int fiftyMoveCounter;
-        private int ply;
-        private int histPly;
-        private int castlingRights;
+        public int sideToPlay;                                         
+        public int enPassantSquare;                                            // EnPassant available square index
+        public int fiftyMoveCounter;                                           // If it reaches 100 (half-moves), game is drawn
+        public int ply;                                                        // Total half-moves played in game
+        public int histPly;                                                    // gameHist index
+        public int castlingRights;                                             // 4 bits for castling rights: WKCA WQCA BKCA BQCA
         private Move[] gameHist = new Move[Constants.MAX_GAME_MOVES];
 
         // Hash key
-        private ulong positionKey;
+        public ulong positionKey;
         private ulong[,] pieceKeys = new ulong[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
         private ulong sideKey;
         private ulong[] castleKeys = new ulong[16];
@@ -46,8 +46,7 @@ namespace Core
         private ulong[] setMask = new ulong[Constants.NUM_SQUARES];
         private ulong[] clearMask = new ulong[Constants.NUM_SQUARES];
         
-        // 0 constants 
-        public static int None = 0;
+        public static int None = 0; // 0 constant
         
         public static int White = 0;
         public static int Black = 1;
@@ -80,11 +79,11 @@ namespace Core
         public void loadStartingPosition()
         {
             initBoards();
-            ChessPosition loadedPosition = FenDecoder.DecodePositionFromFen(Constants.startingFen);
-            squares = loadedPosition.squares;
             resetBoard();
+            initFromPosition(FenDecoder.DecodePositionFromFen(Constants.startingFen));
             initBitBoards();
             initHashKeys();
+            positionKey = generatePositionKey();
             printGameBoard();
             print120Board();
             printBitBoard(pawns[White], White);
@@ -122,6 +121,15 @@ namespace Core
                     square64++;
                 }
             }
+        }
+
+        private void initFromPosition(ChessPosition loadedPosition)
+        {
+            squares = loadedPosition.squares;
+            sideToPlay = loadedPosition.whiteToMove ? White : Black;
+            castlingRights = loadedPosition.castlingRights;
+            enPassantSquare = loadedPosition.enPassantSquare;
+            ply = loadedPosition.plyCount;
         }
 
         private void resetBoard()
@@ -184,7 +192,7 @@ namespace Core
             }
         }
 
-        public int frTo120Sq(int file, int rank)
+        public static int frTo120Sq(int file, int rank)
         {
             return (21 + file + rank * 10);
         }
@@ -289,7 +297,7 @@ namespace Core
             for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
             {
                 int piece = squares[i];
-                if (piece != (int) Squares120Enum.NO_SQ && piece != Piece.Empty)
+                if (piece != (int) Squares120Enum.NO_SQ && piece != Piece.Empty && piece != (int) Squares120Enum.OFFBOARD)
                 {
                     Assert.IsTrue(piece >= Piece.WhitePawn && piece <= Piece.BlackKing);
                     finalKey ^= pieceKeys[piece,i];

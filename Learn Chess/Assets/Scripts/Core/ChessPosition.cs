@@ -6,17 +6,16 @@ namespace Core
     {
         public int[] squares;
         public bool whiteToMove;
-        public bool whiteKingSideCastling;
-        public bool whiteQueenSideCastling;
-        public bool blackKingSideCastling;
-        public bool blackQueenSideCastling;
-        public int epFile;
+        public int castlingRights;
+        public int enPassantSquare;
         public int plyCount;
         
         public ChessPosition()
         {
             squares = new int[120];
-
+            castlingRights = 0;
+            enPassantSquare = (int) Board.Squares120Enum.NO_SQ;
+            plyCount = 0;
             for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
             {
                 squares[i] = (int) Board.Squares120Enum.OFFBOARD;
