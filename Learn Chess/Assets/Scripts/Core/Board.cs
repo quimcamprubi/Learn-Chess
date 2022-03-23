@@ -13,12 +13,14 @@ namespace Core
     public class Board
     {
         // Game board
-        public int[] squares;
+        public int[] squares = new int[Constants.NUM_SQUARES_EXT];
         
         // Indices
         public static int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];       // 64 indices to 120 indices
         public static int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];   // 120 indices to 64 indices
         private int[] kingSquares = new int[Constants.NUM_KINGS];
+        public static int[] squareFile = new int[Constants.NUM_SQUARES_EXT];
+        public static int[] squareRank = new int[Constants.NUM_SQUARES_EXT];
 
         // Game rules
         public int sideToPlay;                                         
@@ -82,15 +84,16 @@ namespace Core
         {
             initBoards();
             resetBoard();
-            initFromPosition(FenDecoder.DecodePositionFromFen(Constants.startingFen));
-            initBitBoards();
+            initFromPosition(FenDecoder.DecodePositionFromFen(Constants.fen4));
             initHashKeys();
             positionKey = generatePositionKey();
             updateListsMaterial();
+            checkBoard();
             printGameBoard();
             print120Board();
             printBitBoard(pawns[White], White);
             printBitBoard(pawns[Black], Black);
+            printBitBoard(pawns[Both], Both);
         }
         
         private void initBoards()
@@ -98,6 +101,8 @@ namespace Core
             for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
             {
                 sq120ToSq64[i] = 65;
+                squareFile[i] = (int) Squares120Enum.OFFBOARD;
+                squareRank[i] = (int) Squares120Enum.OFFBOARD;
             }
 
             for (int i = 0; i < Constants.NUM_SQUARES; i++)
@@ -121,6 +126,8 @@ namespace Core
                     int square = frTo120Sq(file, rank);
                     sq64ToSq120[square64] = square;
                     sq120ToSq64[square] = square64;
+                    squareFile[square] = file;
+                    squareRank[square] = rank;
                     square64++;
                 }
             }
@@ -137,11 +144,22 @@ namespace Core
 
         private void resetBoard()
         {
+            for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++)
+            {
+                squares[i] = (int) Squares120Enum.OFFBOARD;
+            }
+
+            for (int i = 0; i < Constants.NUM_SQUARES; i++)
+            {
+                squares[sq120(i)] = Piece.Empty;
+            }
+            
             for (int i = 0; i < Constants.NUM_PLAYERS; i++)
             {
                 bigPieces[i] = 0;
                 majorPieces[i] = 0;
                 minorPieces[i] = 0;
+                material[i] = 0;
             }
 
             for (int i = 0; i < Constants.TOTAL_DIFF_PIECES; i++)
@@ -211,15 +229,27 @@ namespace Core
                     material[color] += Piece.PieceVal[piece];
                     pieceList[piece,pieceNumbers[piece]] = square;
                     pieceNumbers[piece]++;
-                    if (piece == Piece.WhiteKing)
+
+                    switch (piece)
                     {
-                        Assert.IsTrue(color == Piece.White);
-                        kingSquares[color] = square;
-                    }
-                    else if (piece == Piece.BlackKing)
-                    {
-                        Assert.IsTrue(color == Piece.Black);
-                        kingSquares[color] = square;
+                        case Piece.WhiteKing:
+                            Assert.IsTrue(color == Piece.White);
+                            kingSquares[color] = square;
+                            break;
+                        case Piece.BlackKing:
+                            Assert.IsTrue(color == Piece.Black);
+                            kingSquares[color] = square;
+                            break;
+                        case Piece.WhitePawn:
+                            Assert.IsTrue(color == Piece.White);
+                            setBit(ref pawns[White], sq64(square));
+                            setBit(ref pawns[Both], sq64(square));
+                            break;
+                        case Piece.BlackPawn:
+                            Assert.IsTrue(color == Piece.Black);
+                            setBit(ref pawns[Black], sq64(square));
+                            setBit(ref pawns[Both], sq64(square));
+                            break;
                     }
                 }
             }
@@ -289,6 +319,10 @@ namespace Core
             {
                 sb.Append("Black BitBoard:");
             }
+            else if (player == Both)
+            {
+                sb.Append("Both BitBoard:");
+            }
             else
             {
                 sb.Append("Specific BitBoard:");
@@ -311,6 +345,87 @@ namespace Core
             Debug.Log(sb.ToString());
         }
 
+        private bool checkBoard()
+        {
+            // This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
+            // Board class variables in order to check that they are correct at all times.
+            int[] tPieceNumbers = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            int[] tBigPieces = new int[2] { 0, 0};
+            int[] tMajorPieces = new int[2] { 0, 0};
+            int[] tMinorPieces = new int[2] { 0, 0};
+            int[] tMaterial = new int[2] { 0, 0};
+            int tPiece, color, sq64;
+            ulong[] tPawns = new ulong[3] {0UL, 0UL, 0UL};
+            tPawns[White] = pawns[White];
+            tPawns[Black] = pawns[Black];
+            tPawns[Both] = pawns[Both];
+
+            // Check piece lists
+            for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++)
+            {
+                for (int tPieceNumber = 0; tPieceNumber < pieceNumbers[tPiece]; tPieceNumber++)
+                {
+                    int sq120 = pieceList[tPiece, tPieceNumber];
+                    Assert.IsTrue(squares[sq120] == tPiece);
+                }
+            }
+            for (sq64 = 0; sq64 < Constants.NUM_SQUARES; sq64++)
+            {
+                int sq120 = Board.sq120(sq64);
+                tPiece = squares[sq120];
+                if (tPiece != Piece.Empty)
+                {
+                    tPieceNumbers[tPiece]++;
+                    color = Piece.PieceCol[tPiece];
+                    if (Piece.PieceBig[tPiece]) tBigPieces[color]++;
+                    if (Piece.PieceMaj[tPiece]) tMajorPieces[color]++;
+                    if (Piece.PieceMin[tPiece]) tMinorPieces[color]++;
+                    tMaterial[color] += Piece.PieceVal[tPiece];
+                }
+            }
+
+            // Check piece numbers
+            for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++)
+            {
+                Assert.IsTrue(tPieceNumbers[tPiece] == pieceNumbers[tPiece]);
+            }
+            
+            // Check BitBoards
+            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn]);
+            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn]);
+            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn]);
+
+            // Check BitBoards squares
+            while (tPawns[White] != 0)
+            {
+                sq64 = BitBoardUtils.popBit(ref tPawns[White]);
+                Assert.IsTrue(squares[sq120(sq64)] == Piece.WhitePawn);
+            }
+            while (tPawns[Black] != 0)
+            {
+                sq64 = BitBoardUtils.popBit(ref tPawns[Black]);
+                Assert.IsTrue(squares[sq120(sq64)] == Piece.BlackPawn);
+            }
+            while (tPawns[Both] != 0)
+            {
+                sq64 = BitBoardUtils.popBit(ref tPawns[Both]);
+                Assert.IsTrue(squares[sq120(sq64)] == Piece.WhitePawn || squares[sq120(sq64)] == Piece.BlackPawn);
+            }
+            
+            // Various checks
+            Assert.IsTrue(tMaterial[White] == material[White] && tMaterial[Black] == material[Black]);
+            Assert.IsTrue(tMinorPieces[White] == minorPieces[White] && tMinorPieces[Black] == minorPieces[Black]);
+            Assert.IsTrue(tMajorPieces[White] == majorPieces[White] && tMajorPieces[Black]== majorPieces[Black]);
+            Assert.IsTrue(tBigPieces[White] == bigPieces[White] && tBigPieces[Black] == bigPieces[Black]);
+            Assert.IsTrue(sideToPlay == White || sideToPlay == Black);
+            Assert.IsTrue(generatePositionKey() == positionKey);
+            Assert.IsTrue(enPassantSquare == (int) Squares120Enum.NO_SQ || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
+                                            || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black);
+            Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing);
+            Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing);
+            
+            return true;
+        }
         
         // Bitboard operations
         private void clearBit(ref ulong bitBoard, int square)

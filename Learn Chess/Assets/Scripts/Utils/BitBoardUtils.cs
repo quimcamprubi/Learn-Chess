@@ -9,7 +9,7 @@
             58, 20, 37, 17, 36, 8
         };
         
-        public static int PopBit(ref ulong bitBoard) {
+        public static int popBit(ref ulong bitBoard) {
             ulong b = bitBoard ^ (bitBoard - 1);
             uint fold = (uint) ((b & 0xffffffff) ^ (b >> 32));
             bitBoard &= (bitBoard - 1);
