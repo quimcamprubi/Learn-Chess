@@ -83,6 +83,7 @@ namespace Core
         public void loadStartingPosition()
         {
             initBoards();
+            initBoards();
             resetBoard();
             initFromPosition(FenDecoder.DecodePositionFromFen(Constants.fen4));
             initHashKeys();
@@ -233,20 +234,20 @@ namespace Core
                     switch (piece)
                     {
                         case Piece.WhiteKing:
-                            Assert.IsTrue(color == Piece.White);
+                            Assert.IsTrue(color == Piece.White, "Piece color set incorrectly in board");
                             kingSquares[color] = square;
                             break;
                         case Piece.BlackKing:
-                            Assert.IsTrue(color == Piece.Black);
+                            Assert.IsTrue(color == Piece.Black, "Piece color set incorrectly in board");
                             kingSquares[color] = square;
                             break;
                         case Piece.WhitePawn:
-                            Assert.IsTrue(color == Piece.White);
+                            Assert.IsTrue(color == Piece.White, "Piece color set incorrectly in board");
                             setBit(ref pawns[White], sq64(square));
                             setBit(ref pawns[Both], sq64(square));
                             break;
                         case Piece.BlackPawn:
-                            Assert.IsTrue(color == Piece.Black);
+                            Assert.IsTrue(color == Piece.Black, "Piece color set incorrectly in board");
                             setBit(ref pawns[Black], sq64(square));
                             setBit(ref pawns[Both], sq64(square));
                             break;
@@ -366,7 +367,7 @@ namespace Core
                 for (int tPieceNumber = 0; tPieceNumber < pieceNumbers[tPiece]; tPieceNumber++)
                 {
                     int sq120 = pieceList[tPiece, tPieceNumber];
-                    Assert.IsTrue(squares[sq120] == tPiece);
+                    Assert.IsTrue(squares[sq120] == tPiece, "checkBoard() failed: Piece found in Piece List was not found in the board.");
                 }
             }
             for (sq64 = 0; sq64 < Constants.NUM_SQUARES; sq64++)
@@ -387,42 +388,42 @@ namespace Core
             // Check piece numbers
             for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++)
             {
-                Assert.IsTrue(tPieceNumbers[tPiece] == pieceNumbers[tPiece]);
+                Assert.IsTrue(tPieceNumbers[tPiece] == pieceNumbers[tPiece],"checkBoard() failed: pieceNumbers list set incorrectly.");
             }
             
             // Check BitBoards
-            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn]);
-            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn]);
-            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn]);
+            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn], "checkBoard() failed: White pawns set incorrectly in BitBoard.");
+            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Black pawns set incorrectly in BitBoard.");
+            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Both pawns set incorrectly in BitBoard.");
 
             // Check BitBoards squares
             while (tPawns[White] != 0)
             {
                 sq64 = BitBoardUtils.popBit(ref tPawns[White]);
-                Assert.IsTrue(squares[sq120(sq64)] == Piece.WhitePawn);
+                Assert.IsTrue(squares[sq120(sq64)] == Piece.WhitePawn, "checkBoard() failed: White pawn not found in BitBoard.");
             }
             while (tPawns[Black] != 0)
             {
                 sq64 = BitBoardUtils.popBit(ref tPawns[Black]);
-                Assert.IsTrue(squares[sq120(sq64)] == Piece.BlackPawn);
+                Assert.IsTrue(squares[sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Black pawn not found in BitBoard.");
             }
             while (tPawns[Both] != 0)
             {
                 sq64 = BitBoardUtils.popBit(ref tPawns[Both]);
-                Assert.IsTrue(squares[sq120(sq64)] == Piece.WhitePawn || squares[sq120(sq64)] == Piece.BlackPawn);
+                Assert.IsTrue(squares[sq120(sq64)] == Piece.WhitePawn || squares[sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Both pawn not found in BitBoard.");
             }
             
             // Various checks
-            Assert.IsTrue(tMaterial[White] == material[White] && tMaterial[Black] == material[Black]);
-            Assert.IsTrue(tMinorPieces[White] == minorPieces[White] && tMinorPieces[Black] == minorPieces[Black]);
-            Assert.IsTrue(tMajorPieces[White] == majorPieces[White] && tMajorPieces[Black]== majorPieces[Black]);
-            Assert.IsTrue(tBigPieces[White] == bigPieces[White] && tBigPieces[Black] == bigPieces[Black]);
-            Assert.IsTrue(sideToPlay == White || sideToPlay == Black);
-            Assert.IsTrue(generatePositionKey() == positionKey);
+            Assert.IsTrue(tMaterial[White] == material[White] && tMaterial[Black] == material[Black], "checkBoard() failed: Material count not equal.");
+            Assert.IsTrue(tMinorPieces[White] == minorPieces[White] && tMinorPieces[Black] == minorPieces[Black], "checkBoard() failed: Minor pieces count not equal.");
+            Assert.IsTrue(tMajorPieces[White] == majorPieces[White] && tMajorPieces[Black]== majorPieces[Black], "checkBoard() failed: Major pieces count not equal.");
+            Assert.IsTrue(tBigPieces[White] == bigPieces[White] && tBigPieces[Black] == bigPieces[Black], "checkBoard() failed: Big pieces pieces count not equal.");
+            Assert.IsTrue(sideToPlay == White || sideToPlay == Black, "checkBoard() failed: Side to play not set to White or Black.");
+            Assert.IsTrue(generatePositionKey() == positionKey, "checkBoard() failed: Incorrect Position Key.");
             Assert.IsTrue(enPassantSquare == (int) Squares120Enum.NO_SQ || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
-                                            || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black);
-            Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing);
-            Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing);
+                                            || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black, "checkBoard() failed: Incorrect enPassant rank.");
+            Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing, "checkBoard() failed: White King not found in expected square.");
+            Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing, "checkBoard() failed: Black King not found in expected square.");
             
             return true;
         }
