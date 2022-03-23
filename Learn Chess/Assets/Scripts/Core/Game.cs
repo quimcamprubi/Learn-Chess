@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UI;
 using UnityEngine;
 using UnityEngine.UI;
+using Utils;
 
 namespace Core
 {
@@ -42,11 +43,14 @@ namespace Core
                 "En Passant square: " + mainBoard.enPassantSquare;
             castlingRightsText.GetComponent<ShowText>().textValue = getCastlingRightsString(mainBoard.castlingRights);
             positionKeyText.GetComponent<ShowText>().textValue = "Position Key: " + mainBoard.positionKey;
+            
         }
 
         private void InitializeGame()
         {
             mainBoard.loadStartingPosition();
+            boardUi.UpdateBoard(mainBoard);
+            mainBoard.loadPosition(FenDecoder.DecodePositionFromFen(Constants.fen1));
             boardUi.UpdateBoard(mainBoard);
         }
 

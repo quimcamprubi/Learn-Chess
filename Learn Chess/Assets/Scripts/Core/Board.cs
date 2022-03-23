@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using UI;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEngine.Assertions;
 
 namespace Core
@@ -83,13 +84,20 @@ namespace Core
         public void loadStartingPosition()
         {
             initBoards();
+            resetBoard();
+            initFromPosition(FenDecoder.DecodePositionFromFen(Constants.startingFen));
+            printGameBoard();
+            print120Board();
+            printBitBoard(pawns[White], White);
+            printBitBoard(pawns[Black], Black);
+            printBitBoard(pawns[Both], Both);
+        }
+
+        public void loadPosition(ChessPosition position)
+        {
             initBoards();
             resetBoard();
-            initFromPosition(FenDecoder.DecodePositionFromFen(Constants.fen4));
-            initHashKeys();
-            positionKey = generatePositionKey();
-            updateListsMaterial();
-            checkBoard();
+            initFromPosition(position);
             printGameBoard();
             print120Board();
             printBitBoard(pawns[White], White);
@@ -141,6 +149,10 @@ namespace Core
             castlingRights = loadedPosition.castlingRights;
             enPassantSquare = loadedPosition.enPassantSquare;
             ply = loadedPosition.plyCount;
+            initHashKeys();
+            positionKey = generatePositionKey();
+            updateListsMaterial();
+            checkBoard();
         }
 
         private void resetBoard()
@@ -176,6 +188,7 @@ namespace Core
             histPly = 0;
             castlingRights = 0;
             positionKey = 0UL;
+            pawns = new ulong[3] { 0UL, 0UL, 0UL } ;
         }
 
         private void initBitBoards()
