@@ -59,6 +59,11 @@ namespace Core {
             move = Move.CreateMove(from, to, captured, promoted, enPassantCapture: true, pawnStart: false,
                 castlingMove: true);
             Move.PrintMoveData(move);
+            move = Move.CreateMove((int) Board.Squares120Enum.A2, (int) Board.Squares120Enum.H7, Piece.WhiteRook,
+                Piece.BlackKing);
+            Debug.Log("Algrebraic from: " + BoardSquares.GetAlgebraicSquare(Move.FromSquare(move)));
+            Debug.Log("Algrebraic to: " + BoardSquares.GetAlgebraicSquare(Move.ToSquare(move)));
+            Debug.Log("Algebraic move: " + BoardSquares.GetAlgebraicMove(move));
         }
 
         private string GetSideToPlayString(int sideToPlay) {

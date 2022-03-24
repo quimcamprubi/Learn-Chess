@@ -35,6 +35,8 @@ namespace Core {
                       + "\nPawn start: " + IsPawnStartMove(move) + "\nCastling move: " + IsCastlingMove(move) + "\n");
         }
 
+        
+
     }
     
     /* ----- move variable -----

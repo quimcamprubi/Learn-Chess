@@ -44,25 +44,6 @@
             return piece;
         }
 
-        /*public static bool isPieceBig(int piece)
-        {
-            int pieceType = AbsolutePieceType(piece);
-            return pieceType == Knight || pieceType == Bishop || pieceType == Rook || pieceType == Queen ||
-                    pieceType == King;
-        }
-
-        public static bool isPieceMajor(int piece)
-        {
-            int pieceType = AbsolutePieceType(piece);
-            return pieceType == Rook || pieceType == Queen || pieceType == King;
-        }
-
-        public static bool isPieceMinor(int piece)
-        {
-            int pieceType = AbsolutePieceType(piece);
-            return pieceType == Knight || pieceType == Bishop;
-        }
-
         public static int getPieceValue(int piece)
         {
             switch (AbsolutePieceType(piece))
@@ -82,8 +63,12 @@
                 default:
                     return 0;
             }
-        }*/
-        
+        }
+        public static bool IsPiecePawn(int piece) { return piece == WhitePawn || piece == BlackPawn; }
+        public static bool IsPieceBishop(int piece) { return piece == WhiteBishop || piece == BlackBishop; }
+        public static bool IsPieceRook(int piece) { return piece == WhiteRook || piece == BlackRook; }
+        public static bool IsPieceQueen(int piece) { return piece == WhiteQueen || piece == BlackQueen; }
+
         public static bool[] PieceBig = new bool[13] { false, false, true, true, true, true, true, false, true, true, true, true, true };
         public static bool[] PieceMaj = new bool[13] { false, false, false, false, true, true, true, false, false, false, true, true, true };
         public static bool[] PieceMin = new bool[13] { false, false, true, true, false, false, false, false, true, true, false, false, false };

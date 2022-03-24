@@ -55,5 +55,34 @@ namespace Core {
         public static string SquareNameFromCoordinate (Coordinates coord) {
             return SquareNameFromCoordinate (coord.fileIndex, coord.rankIndex);
         }
+        
+        public static string GetAlgebraicSquare(int square) {
+            if (SquareNameDictionary.ContainsKey(square)) {
+                return SquareNameDictionary[Move.FromSquare(square)];
+            }
+            return "Invalid square";
+        }
+
+        public static string GetAlgebraicMove(int move) {
+            if (SquareNameDictionary.ContainsKey(Move.FromSquare(move))) {
+                string returnString = "";
+                returnString += SquareNameDictionary[Move.FromSquare(move)];
+                returnString += SquareNameDictionary[Move.ToSquare(move)];
+                int promoted = Move.PromotedPiece(move);
+                if (promoted != 0) {
+                    char promotedPiece = 'q';
+                    if (Board.IsPieceKnight(promoted)) {
+                        promotedPiece = 'n';
+                    } else if (Piece.IsPieceRook(promoted)) {
+                        promotedPiece = 'r';
+                    } else if (Piece.IsPieceBishop(promoted)) {
+                        promotedPiece = 'b';
+                    }
+                    returnString += promotedPiece;
+                }
+                return returnString;
+            }
+            return "Invalid move";
+        }
     }
 }

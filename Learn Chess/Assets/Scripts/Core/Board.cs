@@ -170,7 +170,7 @@ namespace Core {
             pawns = new ulong[3] { 0UL, 0UL, 0UL } ;
         }
 
-        private void initBitBoards() {
+        private void InitBitBoards() {
             for (int rank = 0; rank < Constants.NUM_RANKS; rank++) {
                 for (int file = 0; file < Constants.NUM_FILES; file++) {
                     int square = FrTo120Sq(file, rank);
