@@ -48,6 +48,17 @@ namespace Core {
             /*mainBoard.ShowSquaresAttackedBySide(Board.White);
             mainBoard.ShowSquaresAttackedBySide(Board.Black);*/
             boardUi.UpdateBoard(mainBoard);
+            int from = 6;
+            int to = 12;
+            int captured = Piece.WhiteRook;
+            int promoted = Piece.BlackRook;
+            int move = Move.CreateMove(from, to, captured, promoted);
+            Move.PrintMoveData(move);
+            move |= Move.MaskPawnStart;
+            Move.PrintMoveData(move);
+            move = Move.CreateMove(from, to, captured, promoted, enPassantCapture: true, pawnStart: false,
+                castlingMove: true);
+            Move.PrintMoveData(move);
         }
 
         private string GetSideToPlayString(int sideToPlay) {
