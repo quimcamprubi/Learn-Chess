@@ -1,7 +1,5 @@
-﻿namespace Utils
-{
-    public static class BitBoardUtils
-    {
+﻿namespace Utils {
+    public static class BitBoardUtils {
         private static readonly int[] BitTable = new int[] {
             63, 30, 3, 32, 25, 41, 22, 33, 15, 50, 42, 13, 11, 53, 19, 34, 61, 29, 2,
             51, 21, 43, 45, 10, 18, 47, 1, 54, 9, 57, 0, 35, 62, 31, 40, 4, 49, 5, 52,
@@ -16,8 +14,7 @@
             return BitTable[(fold * 0x783a9b23) >> 26];
         }
 
-        public static int countBitBoard(ulong bitBoard)
-        {
+        public static int countBitBoard(ulong bitBoard) {
             int count = 0;
             while (bitBoard != 0) {
                 count += (int) bitBoard & 1;

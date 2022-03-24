@@ -1,17 +1,14 @@
 ﻿using Core;
 using UnityEngine;
 
-namespace UI
-{
+namespace UI {
     [CreateAssetMenu (menuName = "Theme/Piece Themes")]
-    public class PieceThemes : ScriptableObject
-    {
+    public class PieceThemes : ScriptableObject {
         public PieceColors whitePieces;
         public PieceColors blackPieces;
 
         [System.Serializable]
-        public struct PieceColors
-        {
+        public struct PieceColors {
             public Sprite Pawn;
             public Sprite Knight;
             public Sprite Bishop;
@@ -20,11 +17,9 @@ namespace UI
             public Sprite King;
         }
 
-        public Sprite GetPieceSprite(int piece)
-        {
+        public Sprite GetPieceSprite(int piece) {
             PieceColors colors = Piece.IsWhite(piece) ? whitePieces : blackPieces;
-            switch (Piece.AbsolutePieceType(piece))
-            {
+            switch (Piece.AbsolutePieceType(piece)) {
                 case Piece.Pawn:
                     return colors.Pawn;
                 case Piece.Knight:

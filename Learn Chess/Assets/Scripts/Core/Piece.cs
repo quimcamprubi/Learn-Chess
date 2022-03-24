@@ -1,7 +1,5 @@
-﻿namespace Core
-{
-    public static class Piece
-    {
+﻿namespace Core {
+    public static class Piece {
         
         public const int Empty = 0;
         public const int Pawn = 1;
@@ -28,38 +26,23 @@
         public const int BlackQueen = 11;
         public const int BlackKing = 12;
 
-        public static bool IsWhite(int piece)
-        {
-            return (piece < 7) && (piece != 0);
-        }
-
-        public static bool IsBlack(int piece)
-        {
-            return piece > 6;
-        }
-
-        public static int getColor(int piece)
-        {
-            if ((piece < 7) && (piece >= 0))
-            {
+        public static bool IsWhite(int piece) { return (piece < 7) && (piece != 0); }
+        public static bool IsBlack(int piece) { return piece > 6; }
+        public static int GetColor(int piece) {
+            if ((piece < 7) && (piece >= 0)) {
                 return White;
             }
-            if (piece >= 7 && piece <= 12)
-            {
+            if (piece >= 7 && piece <= 12) {
                 return Black;
             }
             return Both;
         }
-        
-        public static int AbsolutePieceType(int piece)
-        {
-            if (piece > 6)
-            {
+        public static int AbsolutePieceType(int piece) {
+            if (piece > 6) {
                 return piece - 6;
             }
             return piece;
         }
-
 
         /*public static bool isPieceBig(int piece)
         {
@@ -100,11 +83,16 @@
                     return 0;
             }
         }*/
+        
         public static bool[] PieceBig = new bool[13] { false, false, true, true, true, true, true, false, true, true, true, true, true };
         public static bool[] PieceMaj = new bool[13] { false, false, false, false, true, true, true, false, false, false, true, true, true };
         public static bool[] PieceMin = new bool[13] { false, false, true, true, false, false, false, false, true, true, false, false, false };
         public static int[] PieceVal = new int[13] { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
-        public static int[] PieceCol = new int[13] { Piece.Both, Piece.White, Piece.White, Piece.White, Piece.White, Piece.White, Piece.White,
-            Piece.Black, Piece.Black, Piece.Black, Piece.Black, Piece.Black, Piece.Black };
+        public static int[] PieceColor = new int[13] { Both, White, White, White, White, White, White,
+            Black, Black, Black, Black, Black, Black };
+        public static bool[] IsPieceKnight = new bool[13] { false, false, true, false, false, false, false, false, true, false, false, false, false };
+        public static bool[] IsPieceKing = new bool[13] { false, false, false, false, false, false, true, false, false, false, false, false, true };
+        public static bool[] IsPieceRookQueen = new bool[13] { false, false, false, false, true, true, false, false, false, false, true, true, false };
+        public static bool[] IsPieceBishopQueen = new bool[13] { false, false, false, true, false, true, false, false, false, true, false, true, false };
     }
 }
