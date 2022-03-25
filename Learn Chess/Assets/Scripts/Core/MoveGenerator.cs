@@ -7,22 +7,24 @@ using Utils;
 
 namespace Core {
     public static class MoveGenerator {
+        public static int[] LoopSlidePieces = new int[8] {
+            Piece.WhiteBishop, Piece.WhiteRook, Piece.WhiteQueen, 0, Piece.BlackBishop, Piece.BlackRook,
+            Piece.BlackQueen, 0
+        };
+        public static int[] LoopSlideIndex = new int[2] { 0, 4 };
+        public static int[] LoopNonSlidePieces = new int[6] { 
+            Piece.WhiteKnight, Piece.WhiteKing, 0, Piece.BlackKnight, Piece.BlackKing, 0 };
+        public static int[] LoopNonSlideIndex = new int[2] { 0, 3 };
+        
         public static List<Move> GenerateMoves(Board board) {
             return new List<Move>();
         }
 
-        public static void AddQuietMove(Board board, int moveValue, List<Move> moveList) {
-            moveList.Add(new Move(moveValue));
-        }
-        public static void AddCaptureMove(Board board, int moveValue, List<Move> moveList) {
-            moveList.Add(new Move(moveValue));
-        }
-        public static void AddEnPassantMove(Board board, int moveValue, List<Move> moveList) {
-            moveList.Add(new Move(moveValue));
-        }
-
         // White pieces
         public static void AddWhitePawnCaptureMove(int fromSquare, int toSquare, int capture, List<Move> moveList) {
+            Assert.IsTrue(Validations.IsPieceValidOrEmpty(capture), "Piece to capture is invalid.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in White Pawn capture move.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in White Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_7) { // Promotion
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.WhiteQueen));
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.WhiteRook));
@@ -33,6 +35,8 @@ namespace Core {
             }
         }
         public static void AddWhitePawnMove(int fromSquare, int toSquare, List<Move> moveList) {
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in White Pawn capture move.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in White Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_7) { // Promotion
                 moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteQueen));
                 moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteRook));
@@ -45,6 +49,9 @@ namespace Core {
         
         // Black pieces
         public static void AddBlackPawnCaptureMove(int fromSquare, int toSquare, int capture, List<Move> moveList) {
+            Assert.IsTrue(Validations.IsPieceValidOrEmpty(capture), "Piece to capture is invalid.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in Black Pawn capture move.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in Black Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_2) { // Promotion
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.BlackQueen));
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.BlackRook));
@@ -55,6 +62,8 @@ namespace Core {
             }
         }
         public static void AddBlackPawnMove(int fromSquare, int toSquare, List<Move> moveList) {
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in Black Pawn capture move.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in Black Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_2) { // Promotion
                 moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackQueen));
                 moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackRook));
@@ -68,7 +77,7 @@ namespace Core {
         // Generate all moves in a given position
         public static void GenerateAllMoves(Board board, List<Move> moveList) {
             board.CheckBoard();
-            if (board.sideToPlay == Board.White) {
+            if (board.sideToPlay == Board.White) { // White pawns
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.WhitePawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.WhitePawn, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square));
@@ -98,7 +107,7 @@ namespace Core {
                     }
                 }
             }
-            else { // Black pieces
+            else { // Black pawns
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.BlackPawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.BlackPawn, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square));
@@ -127,6 +136,73 @@ namespace Core {
                     }
                 }
             }
+            
+            // Sliding pieces
+            int side = board.sideToPlay;
+            int pieceIndex = LoopSlideIndex[side];
+            int piece = LoopSlidePieces[pieceIndex];
+            while (piece != 0) {
+                Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
+                Debug.Log("Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
+                StringBuilder sb = new StringBuilder();
+                for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
+                    int square = board.pieceList[piece, pieceNumber];
+                    Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
+                    sb.AppendLine("Piece: " + Piece.PieceStrings[piece] + " on square " + BoardSquares.GetAlgebraicSquare(square));
+                    List<int> directionsList = Directions.PieceDirections[piece];
+                    
+                    foreach (int direction in directionsList) {
+                        int targetSquare = square + direction;
+
+                        while (Validations.IsSquareOnBoard(targetSquare)) { // Keep sliding until we reach the end of the board
+                            if (board.squares[targetSquare] != Piece.Empty) {
+                                if (Piece.PieceColor[board.squares[targetSquare]] == (side ^ 1)) { // If piece belongs to opposing side, we capture
+                                    sb.AppendLine("Capture on " + BoardSquares.GetAlgebraicSquare(targetSquare));
+                                }
+                                break; // A piece of the same side is blocking the path, we can not slide any longer
+                            }
+                            sb.AppendLine("Normal move on " + BoardSquares.GetAlgebraicSquare(targetSquare)); // If square is empty, we can make a normal move
+                            targetSquare += direction;
+                        }
+
+                        
+                    }
+                    Debug.Log(sb.ToString());
+                    sb = new StringBuilder();
+                }
+                
+                piece = LoopSlidePieces[++pieceIndex];
+            }
+            
+            // Non-sliding pieces
+            pieceIndex = LoopNonSlideIndex[side];
+            piece = LoopNonSlidePieces[pieceIndex];
+            while (piece != 0) {
+                Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
+                Debug.Log("Non Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
+                StringBuilder sb = new StringBuilder();
+                for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
+                    int square = board.pieceList[piece, pieceNumber];
+                    Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
+                    sb.AppendLine("Piece: " + Piece.PieceStrings[piece] + " on square " + BoardSquares.GetAlgebraicSquare(square));
+                    List<int> directionsList = Directions.PieceDirections[piece];
+                    foreach (int direction in directionsList) {
+                        int targetSquare = square + direction;
+                        if (!Validations.IsSquareOnBoard(targetSquare)) continue; // If square is offboard, we ignore the move
+                        if (board.squares[targetSquare] != Piece.Empty) {
+                            if (Piece.PieceColor[board.squares[targetSquare]] == (side ^ 1)) { // If piece belongs to opposing side, we capture
+                                sb.AppendLine("Capture on " + BoardSquares.GetAlgebraicSquare(targetSquare));
+                            }
+                            continue;
+                        }
+                        sb.AppendLine("Normal move on " + BoardSquares.GetAlgebraicSquare(targetSquare)); // If square is empty, we can make a normal move
+                    }
+                    Debug.Log(sb.ToString());
+                    sb = new StringBuilder();
+                }
+                piece = LoopNonSlidePieces[++pieceIndex];
+            }
+            
         }
 
         public static void PrintMoveList(List<Move> moveList) {

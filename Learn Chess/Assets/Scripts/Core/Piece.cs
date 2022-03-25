@@ -1,4 +1,6 @@
-﻿namespace Core {
+﻿using System.Collections.Generic;
+
+namespace Core {
     public static class Piece {
         
         public const int Empty = 0;
@@ -26,6 +28,22 @@
         public const int BlackQueen = 11;
         public const int BlackKing = 12;
 
+        public static Dictionary<int, string> PieceStrings = new Dictionary<int, string>() {
+            [Empty] = "Empty",
+            [WhitePawn] = "White Pawn",
+            [WhiteKnight] = "White Knight",
+            [WhiteBishop] = "White Bishop",
+            [WhiteRook] = "White Rook",
+            [WhiteQueen] = "White Queen",
+            [WhiteKing] = "White King",
+            [BlackPawn] = "Black Pawn",
+            [BlackKnight] = "Black Knight",
+            [BlackBishop] = "Black Bishop",
+            [BlackRook] = "Black Rook",
+            [BlackQueen] = "Black Queen",
+            [BlackKing] = "Black King"
+        };
+        
         public static bool IsWhite(int piece) { return (piece < 7) && (piece != 0); }
         public static bool IsBlack(int piece) { return piece > 6; }
         public static int GetColor(int piece) {
@@ -79,5 +97,6 @@
         public static bool[] IsPieceKing = new bool[13] { false, false, false, false, false, false, true, false, false, false, false, false, true };
         public static bool[] IsPieceRookQueen = new bool[13] { false, false, false, false, true, true, false, false, false, false, true, true, false };
         public static bool[] IsPieceBishopQueen = new bool[13] { false, false, false, true, false, true, false, false, false, true, false, true, false };
+        public static bool[] IsPieceSliding = new bool[13] { false, false, false, true, true, true, false, false, false, true, true, true, false };
     }
 }

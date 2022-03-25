@@ -52,7 +52,7 @@ namespace Core {
             MoveGenerator.GenerateAllMoves(mainBoard, moveList);
             MoveGenerator.PrintMoveList(moveList);
             moveList = new List<Move>();
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.blackPawnMovesFen));
+            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.bishopMovesFen));
             boardUi.UpdateBoard(mainBoard);
             MoveGenerator.GenerateAllMoves(mainBoard, moveList);
             MoveGenerator.PrintMoveList(moveList);
