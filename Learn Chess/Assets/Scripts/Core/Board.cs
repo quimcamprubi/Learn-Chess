@@ -38,12 +38,12 @@ namespace Core {
         private ulong[] castleKeys = new ulong[16];
         
         // Piece lists
-        private int[] pieceNumbers = new int[Constants.TOTAL_DIFF_PIECES];
-        private int[] bigPieces = new int[Constants.NUM_PLAYERS];
-        private int[] majorPieces = new int[Constants.NUM_PLAYERS];
-        private int[] minorPieces = new int[Constants.NUM_PLAYERS];
-        private int[] material = new int[Constants.NUM_PLAYERS];
-        private int[,] pieceList = new int[Constants.TOTAL_DIFF_PIECES, Constants.MAX_PIECES_OF_SAME_TYPE];
+        public int[] pieceNumbers = new int[Constants.TOTAL_DIFF_PIECES];
+        public int[] bigPieces = new int[Constants.NUM_PLAYERS];
+        public int[] majorPieces = new int[Constants.NUM_PLAYERS];
+        public int[] minorPieces = new int[Constants.NUM_PLAYERS];
+        public int[] material = new int[Constants.NUM_PLAYERS];
+        public int[,] pieceList = new int[Constants.TOTAL_DIFF_PIECES, Constants.MAX_PIECES_OF_SAME_TYPE];
 
         // Bitboard
         private ulong[] pawns = new ulong[Constants.NUM_PIECE_VARIANTS];
@@ -235,7 +235,7 @@ namespace Core {
             }
         }
         
-        private bool CheckBoard() {
+        public bool CheckBoard() {
             // This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
             // Board class variables in order to check that they are correct at all times.
             int[] tPieceNumbers = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -408,6 +408,9 @@ namespace Core {
         
         // Is Square attacked?
         public bool IsSquareAttacked(int square, int attackingSide) {
+            Assert.IsTrue(Validations.IsSquareOnBoard(square), "Invalid square attacked index.");
+            Assert.IsTrue(Validations.IsSideValid(attackingSide), "Incorrect attackign side.");
+            Assert.IsTrue(CheckBoard(), "CheckBoard validation incorrect at IsSquareAttacked()");
             // Check if a Pawn is attacking the square
             if (attackingSide == White) {
                 if (squares[square - 11] == Piece.WhitePawn || squares[square - 9] == Piece.WhitePawn) {

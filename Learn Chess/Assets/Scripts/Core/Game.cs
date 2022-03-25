@@ -44,26 +44,35 @@ namespace Core {
         private void InitializeGame() {
             mainBoard.LoadStartingPosition();
             boardUi.UpdateBoard(mainBoard);
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.fen4));
+            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.whitePawnMovesFen));
             /*mainBoard.ShowSquaresAttackedBySide(Board.White);
             mainBoard.ShowSquaresAttackedBySide(Board.Black);*/
             boardUi.UpdateBoard(mainBoard);
-            int from = 6;
+            List<Move> moveList = new List<Move>();
+            MoveGenerator.GenerateAllMoves(mainBoard, moveList);
+            MoveGenerator.PrintMoveList(moveList);
+            moveList = new List<Move>();
+            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.blackPawnMovesFen));
+            boardUi.UpdateBoard(mainBoard);
+            MoveGenerator.GenerateAllMoves(mainBoard, moveList);
+            MoveGenerator.PrintMoveList(moveList);
+            /*int from = 6;
             int to = 12;
             int captured = Piece.WhiteRook;
             int promoted = Piece.BlackRook;
-            int move = Move.CreateMove(from, to, captured, promoted);
+            Move move = new Move(from, to, captured, promoted);
             Move.PrintMoveData(move);
-            move |= Move.MaskPawnStart;
+            move.move |= Move.MaskPawnStart;
             Move.PrintMoveData(move);
-            move = Move.CreateMove(from, to, captured, promoted, enPassantCapture: true, pawnStart: false,
+            move.move = Move.CreateMoveInteger(from, to, captured, promoted, enPassantCapture: true, pawnStart: false,
                 castlingMove: true);
             Move.PrintMoveData(move);
-            move = Move.CreateMove((int) Board.Squares120Enum.A2, (int) Board.Squares120Enum.H7, Piece.WhiteRook,
+            move.move = Move.CreateMoveInteger((int) Board.Squares120Enum.A2, (int) Board.Squares120Enum.H7, Piece.WhiteRook,
                 Piece.BlackKing);
-            Debug.Log("Algrebraic from: " + BoardSquares.GetAlgebraicSquare(Move.FromSquare(move)));
-            Debug.Log("Algrebraic to: " + BoardSquares.GetAlgebraicSquare(Move.ToSquare(move)));
-            Debug.Log("Algebraic move: " + BoardSquares.GetAlgebraicMove(move));
+            Debug.Log("Algrebraic from: " + BoardSquares.GetAlgebraicSquare(Move.FromSquare(move.move)));
+            Debug.Log("Algrebraic to: " + BoardSquares.GetAlgebraicSquare(Move.ToSquare(move.move)));
+            Debug.Log("Algebraic move: " + BoardSquares.GetAlgebraicMove(move.move));*/
+
         }
 
         private string GetSideToPlayString(int sideToPlay) {

@@ -5,6 +5,21 @@ namespace Core {
     public class Move {
         public int move;
         public int score;
+
+        public Move(int fromSquare, int toSquare, int capturedPiece, int promotedPiece, bool enPassantCapture = false,
+            bool pawnStart = false, bool castlingMove = false) {
+            move = CreateMoveInteger(fromSquare, toSquare, capturedPiece, promotedPiece, enPassantCapture, pawnStart,
+                castlingMove);
+            score = 0;
+        }
+        public Move(int move) {
+            this.move = move;
+            score = 0;
+        }
+        public Move(int move, int score) {
+            this.move = move;
+            this.score = score;
+        }
         
         public static int MaskEnPassant = 0x40000;
         public static int MaskPawnStart = 0x80000;
@@ -18,7 +33,7 @@ namespace Core {
         public static bool IsCastlingMove(int move) { return (move & 0x1000000) != 0; }
         public static bool IsMoveCapture(int move) { return (move & 0x7C000) != 0; }
         public static bool IsMovePromotion(int move) { return (move & 0xF00000) != 0; }
-        public static int CreateMove(int fromSquare, int toSquare, int capturedPiece, int promotedPiece, bool enPassantCapture = false,
+        public static int CreateMoveInteger(int fromSquare, int toSquare, int capturedPiece, int promotedPiece, bool enPassantCapture = false,
             bool pawnStart = false, bool castlingMove = false) {
             int move = fromSquare | (toSquare << 7) | (capturedPiece << 14) | (promotedPiece << 20);
             if (enPassantCapture) move |= MaskEnPassant;
@@ -29,14 +44,26 @@ namespace Core {
         public static void PrintDecMove(int move) { Debug.Log("Move: " + move); }
         public static void PrintHexMove(int move) { Debug.Log("Hex move: " + move.ToString("X")); }
         public static void PrintBinMove(int move) { Debug.Log("Binary move: " + Convert.ToString(move, 2)); }
-        public static void PrintMoveData(int move) {
+        public static void PrintMoveData(Move moveData) {
+            int move = moveData.move;
             Debug.Log("Move " + move.ToString("X") + "\nFrom: " + FromSquare(move) + "\nTo: " + ToSquare(move) + "\nCaptured: " 
                       + CapturedPiece(move) + "\nPromoted: " + PromotedPiece(move) + "\nEn Passant capture: " + IsEnPassantCapture(move)
                       + "\nPawn start: " + IsPawnStartMove(move) + "\nCastling move: " + IsCastlingMove(move) + "\n");
         }
+        public static string GetMoveData(Move moveData) {
+            int move = moveData.move;
+            return "Move " + move.ToString("X") + "\nFrom: " + FromSquare(move) + "\nTo: " + ToSquare(move) + "\nCaptured: " 
+                      + CapturedPiece(move) + "\nPromoted: " + PromotedPiece(move) + "\nEn Passant capture: " + IsEnPassantCapture(move)
+                      + "\nPawn start: " + IsPawnStartMove(move) + "\nCastling move: " + IsCastlingMove(move) + "\n";
+        }
 
+        public static string GetMoveString(Move move) {
+            return "Move " + BoardSquares.GetAlgebraicMove(move.move) + " - From: " + FromSquare(move.move) + " - To: " + ToSquare(move.move) +
+                   " - Captured: " + CapturedPiece(move.move) + " - Promoted: " + PromotedPiece(move.move) + " - En Passant capture: " +
+                   IsEnPassantCapture(move.move) + " - Pawn start: " + IsPawnStartMove(move.move) + " - Castling move: " 
+                   + IsCastlingMove(move.move) + " - Score: " + move.score;
+        }
         
-
     }
     
     /* ----- move variable -----
