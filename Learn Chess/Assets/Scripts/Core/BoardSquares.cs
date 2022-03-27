@@ -6,8 +6,8 @@ using Utils;
 
 namespace Core {
     public static class BoardSquares {
-        public const string RANKS = "12345678";
-        public const string files = "abcdefgh";
+        public static string RANKS = "12345678";
+        public static string files = "abcdefgh";
         public static Dictionary<int, string> SquareNameDictionary = new Dictionary<int, string>() {
             [21] = "a1", [22] = "b1", [23] = "c1", [24] = "d1", [25] = "e1", [26] = "f1", [27] = "g1", [28] = "h1",
             [31] = "a2", [32] = "b2", [33] = "c2", [34] = "d2", [35] = "e2", [36] = "f2", [37] = "g2", [38] = "h2",

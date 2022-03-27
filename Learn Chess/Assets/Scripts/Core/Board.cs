@@ -158,6 +158,7 @@ namespace Core {
                 minorPieces[i] = 0;
                 material[i] = 0;
             }
+            pawns = new ulong[3] { 0UL, 0UL, 0UL } ;
             for (int i = 0; i < Constants.TOTAL_DIFF_PIECES; i++) {
                 pieceNumbers[i] = None;
             }
@@ -169,7 +170,6 @@ namespace Core {
             histPly = 0;
             castlingRights = 0;
             positionKey = 0UL;
-            pawns = new ulong[3] { 0UL, 0UL, 0UL } ;
         }
 
         private void InitBitBoards() {

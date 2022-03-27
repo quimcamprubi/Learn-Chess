@@ -21,9 +21,9 @@ namespace Core {
             this.score = score;
         }
         
-        public static int MaskEnPassant = 0x40000;
-        public static int MaskPawnStart = 0x80000;
-        public static int MaskCastlingMove = 0x1000000;
+        public static readonly int MaskEnPassant = 0x40000;
+        public static readonly int MaskPawnStart = 0x80000;
+        public static readonly int MaskCastlingMove = 0x1000000;
         public static int FromSquare(int move) { return move & 0x7F; }
         public static int ToSquare(int move) { return (move >> 7) & 0x7F; }
         public static int CapturedPiece(int move) { return (move >> 14) & 0xF; }

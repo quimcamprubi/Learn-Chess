@@ -7,14 +7,13 @@ using Utils;
 
 namespace Core {
     public static class MoveGenerator {
-        public static int[] LoopSlidePieces = new int[8] {
+        public static readonly int[] LoopSlidePieces = {
             Piece.WhiteBishop, Piece.WhiteRook, Piece.WhiteQueen, 0, Piece.BlackBishop, Piece.BlackRook,
             Piece.BlackQueen, 0
         };
-        public static int[] LoopSlideIndex = new int[2] { 0, 4 };
-        public static int[] LoopNonSlidePieces = new int[6] { 
-            Piece.WhiteKnight, Piece.WhiteKing, 0, Piece.BlackKnight, Piece.BlackKing, 0 };
-        public static int[] LoopNonSlideIndex = new int[2] { 0, 3 };
+        public static readonly int[] LoopSlideIndex = { 0, 4 };
+        public static readonly int[] LoopNonSlidePieces = { Piece.WhiteKnight, Piece.WhiteKing, 0, Piece.BlackKnight, Piece.BlackKing, 0 };
+        public static readonly int[] LoopNonSlideIndex = { 0, 3 };
         
         public static List<Move> GenerateMoves(Board board) {
             return new List<Move>();

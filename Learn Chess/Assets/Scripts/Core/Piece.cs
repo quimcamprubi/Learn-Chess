@@ -87,16 +87,16 @@ namespace Core {
         public static bool IsPieceRook(int piece) { return piece == WhiteRook || piece == BlackRook; }
         public static bool IsPieceQueen(int piece) { return piece == WhiteQueen || piece == BlackQueen; }
 
-        public static bool[] PieceBig = new bool[13] { false, false, true, true, true, true, true, false, true, true, true, true, true };
-        public static bool[] PieceMaj = new bool[13] { false, false, false, false, true, true, true, false, false, false, true, true, true };
-        public static bool[] PieceMin = new bool[13] { false, false, true, true, false, false, false, false, true, true, false, false, false };
-        public static int[] PieceVal = new int[13] { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
-        public static int[] PieceColor = new int[13] { Both, White, White, White, White, White, White,
+        public static readonly bool[] PieceBig = { false, false, true, true, true, true, true, false, true, true, true, true, true };
+        public static readonly bool[] PieceMaj = { false, false, false, false, true, true, true, false, false, false, true, true, true };
+        public static readonly bool[] PieceMin = { false, false, true, true, false, false, false, false, true, true, false, false, false };
+        public static readonly int[] PieceVal = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
+        public static readonly int[] PieceColor = { Both, White, White, White, White, White, White,
             Black, Black, Black, Black, Black, Black };
-        public static bool[] IsPieceKnight = new bool[13] { false, false, true, false, false, false, false, false, true, false, false, false, false };
-        public static bool[] IsPieceKing = new bool[13] { false, false, false, false, false, false, true, false, false, false, false, false, true };
-        public static bool[] IsPieceRookQueen = new bool[13] { false, false, false, false, true, true, false, false, false, false, true, true, false };
-        public static bool[] IsPieceBishopQueen = new bool[13] { false, false, false, true, false, true, false, false, false, true, false, true, false };
-        public static bool[] IsPieceSliding = new bool[13] { false, false, false, true, true, true, false, false, false, true, true, true, false };
+        public static readonly bool[] IsPieceKnight = { false, false, true, false, false, false, false, false, true, false, false, false, false };
+        public static readonly bool[] IsPieceKing = { false, false, false, false, false, false, true, false, false, false, false, false, true };
+        public static readonly bool[] IsPieceRookQueen = { false, false, false, false, true, true, false, false, false, false, true, true, false };
+        public static readonly bool[] IsPieceBishopQueen = { false, false, false, true, false, true, false, false, false, true, false, true, false };
+        public static readonly bool[] IsPieceSliding = { false, false, false, true, true, true, false, false, false, true, true, true, false };
     }
 }
