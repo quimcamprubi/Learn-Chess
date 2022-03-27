@@ -14,7 +14,7 @@ namespace Core {
             enPassantSquare = (int) Board.Squares120Enum.NO_SQ;
             plyCount = 0;
             for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++) {
-                squares[i] = (int) Board.Squares120Enum.OFFBOARD;
+                squares[i] = Board.OFFBOARD;
             }
             for (int i = 0; i < Constants.NUM_SQUARES; i++) {
                 squares[Board.Sq120(i)] = Piece.Empty;

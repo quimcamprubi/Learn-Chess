@@ -42,19 +42,18 @@ namespace Core {
         }
 
         private void InitializeGame() {
-            mainBoard.LoadStartingPosition();
+            /*mainBoard.LoadStartingPosition();
             boardUi.UpdateBoard(mainBoard);
             mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.whitePawnMovesFen));
-            /*mainBoard.ShowSquaresAttackedBySide(Board.White);
-            mainBoard.ShowSquaresAttackedBySide(Board.Black);*/
+            mainBoard.ShowSquaresAttackedBySide(Board.White);
+            mainBoard.ShowSquaresAttackedBySide(Board.Black);
             boardUi.UpdateBoard(mainBoard);
-            List<Move> moveList = new List<Move>();
-            MoveGenerator.GenerateAllMoves(mainBoard, moveList);
-            MoveGenerator.PrintMoveList(moveList);
-            moveList = new List<Move>();
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.bishopMovesFen));
+            List<Move> moveList =  MoveGenerator.GenerateAllMoves(mainBoard);
+            MoveGenerator.PrintMoveList(moveList);*/
+            
+            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.globalMoveGenFen));
             boardUi.UpdateBoard(mainBoard);
-            MoveGenerator.GenerateAllMoves(mainBoard, moveList);
+            List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             MoveGenerator.PrintMoveList(moveList);
             /*int from = 6;
             int to = 12;

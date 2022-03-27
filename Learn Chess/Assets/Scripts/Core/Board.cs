@@ -79,8 +79,11 @@ namespace Core {
             A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ
         }
 
-        public void LoadStartingPosition() {
+        public Board() {
             InitBoards();
+        }
+
+        public void LoadStartingPosition() {
             ResetBoard();
             InitFromPosition(FenDecoder.DecodePositionFromFen(Constants.startingFen));
             CheckBoard();
@@ -92,7 +95,6 @@ namespace Core {
         }
 
         public void LoadPosition(ChessPosition position) {
-            InitBoards();
             ResetBoard();
             InitFromPosition(position);
             CheckBoard();

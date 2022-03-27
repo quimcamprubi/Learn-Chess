@@ -27,6 +27,9 @@ namespace Utils {
         public static string rookMovesFen = "6k1/8/5r2/8/1nR5/5N2/8/6K1 w - - 0 1";
         public static string queenMovesFen = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 w - - 0 1";
         public static string bishopMovesFen = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 w - - 0 1";
+        public static string castlingFen1 = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+        public static string castlingFen2 = "3rk2r/8/8/8/8/8/6p1/R3K2R w KQk - 0 1";
+        public static string globalMoveGenFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
         
         public enum RanksEnum { RANK_1 = 0, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8 }
         public enum FilesEnum { FILE_A = 0, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H }

@@ -75,9 +75,10 @@ namespace Core {
         }
         
         // Generate all moves in a given position
-        public static void GenerateAllMoves(Board board, List<Move> moveList) {
+        public static List<Move> GenerateAllMoves(Board board) {
+            List<Move> moveList = new List<Move>();
             board.CheckBoard();
-            if (board.sideToPlay == Board.White) { // White pawns
+            if (board.sideToPlay == Board.White) { // White pawns (and castling moves)
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.WhitePawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.WhitePawn, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square));
@@ -106,8 +107,29 @@ namespace Core {
                         moveList.Add(new Move(square, squareAttackRight, Piece.BlackPawn, Piece.Empty, enPassantCapture: true));
                     }
                 }
+                // Castling moves
+                if ((board.castlingRights & (int) CastlingRights.WKCA) != 0) { // White Kingside castling
+                    if (board.squares[(int) Board.Squares120Enum.F1] == Piece.Empty &&
+                        board.squares[(int) Board.Squares120Enum.G1] == Piece.Empty) {
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.F1, Board.Black) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.G1, Board.Black)) {
+                            moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.G1, Piece.Empty, Piece.Empty, castlingMove: true));
+                        }
+                    }
+                } 
+                if ((board.castlingRights & (int) CastlingRights.WQCA) != 0) { // White Queenside castling
+                    if (board.squares[(int) Board.Squares120Enum.D1] == Piece.Empty &&
+                        board.squares[(int) Board.Squares120Enum.C1] == Piece.Empty && 
+                        board.squares[(int) Board.Squares120Enum.B1] == Piece.Empty) {
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.D1, Board.Black) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.C1, Board.Black) && 
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.B1, Board.Black)) {
+                            moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.C1, Piece.Empty, Piece.Empty, castlingMove: true));
+                        }
+                    }
+                } 
             }
-            else { // Black pawns
+            else { // Black pawns (and castling moves)
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.BlackPawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.BlackPawn, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square));
@@ -135,6 +157,27 @@ namespace Core {
                         moveList.Add(new Move(square, squareAttackRight, Piece.WhitePawn, Piece.Empty, enPassantCapture: true));
                     }
                 }
+                // Castling moves
+                if ((board.castlingRights & (int) CastlingRights.BKCA) != 0) { // Black Kingside castling
+                    if (board.squares[(int) Board.Squares120Enum.F8] == Piece.Empty &&
+                        board.squares[(int) Board.Squares120Enum.G8] == Piece.Empty) {
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.F8, Board.White) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.G8, Board.White)) {
+                            moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true));
+                        }
+                    }
+                } 
+                if ((board.castlingRights & (int) CastlingRights.BQCA) != 0) { // Black Queenside castling
+                    if (board.squares[(int) Board.Squares120Enum.D8] == Piece.Empty &&
+                        board.squares[(int) Board.Squares120Enum.C8] == Piece.Empty && 
+                        board.squares[(int) Board.Squares120Enum.B8] == Piece.Empty) {
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.D8, Board.White) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.C8, Board.White) && 
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.B8, Board.White)) {
+                            moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true));
+                        }
+                    }
+                }
             }
             
             // Sliding pieces
@@ -144,33 +187,24 @@ namespace Core {
             while (piece != 0) {
                 Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
                 Debug.Log("Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
-                StringBuilder sb = new StringBuilder();
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
-                    sb.AppendLine("Piece: " + Piece.PieceStrings[piece] + " on square " + BoardSquares.GetAlgebraicSquare(square));
                     List<int> directionsList = Directions.PieceDirections[piece];
-                    
                     foreach (int direction in directionsList) {
                         int targetSquare = square + direction;
-
                         while (Validations.IsSquareOnBoard(targetSquare)) { // Keep sliding until we reach the end of the board
                             if (board.squares[targetSquare] != Piece.Empty) {
                                 if (Piece.PieceColor[board.squares[targetSquare]] == (side ^ 1)) { // If piece belongs to opposing side, we capture
-                                    sb.AppendLine("Capture on " + BoardSquares.GetAlgebraicSquare(targetSquare));
+                                    moveList.Add(new Move(square, targetSquare, board.squares[targetSquare], Piece.Empty));
                                 }
                                 break; // A piece of the same side is blocking the path, we can not slide any longer
                             }
-                            sb.AppendLine("Normal move on " + BoardSquares.GetAlgebraicSquare(targetSquare)); // If square is empty, we can make a normal move
+                            moveList.Add(new Move(square, targetSquare, Piece.Empty, Piece.Empty));
                             targetSquare += direction;
                         }
-
-                        
                     }
-                    Debug.Log(sb.ToString());
-                    sb = new StringBuilder();
                 }
-                
                 piece = LoopSlidePieces[++pieceIndex];
             }
             
@@ -180,29 +214,26 @@ namespace Core {
             while (piece != 0) {
                 Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
                 Debug.Log("Non Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
-                StringBuilder sb = new StringBuilder();
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
-                    sb.AppendLine("Piece: " + Piece.PieceStrings[piece] + " on square " + BoardSquares.GetAlgebraicSquare(square));
                     List<int> directionsList = Directions.PieceDirections[piece];
                     foreach (int direction in directionsList) {
                         int targetSquare = square + direction;
                         if (!Validations.IsSquareOnBoard(targetSquare)) continue; // If square is offboard, we ignore the move
                         if (board.squares[targetSquare] != Piece.Empty) {
                             if (Piece.PieceColor[board.squares[targetSquare]] == (side ^ 1)) { // If piece belongs to opposing side, we capture
-                                sb.AppendLine("Capture on " + BoardSquares.GetAlgebraicSquare(targetSquare));
+                                moveList.Add(new Move(square, targetSquare, board.squares[targetSquare], Piece.Empty));
                             }
                             continue;
                         }
-                        sb.AppendLine("Normal move on " + BoardSquares.GetAlgebraicSquare(targetSquare)); // If square is empty, we can make a normal move
+                        moveList.Add(new Move(square, targetSquare, Piece.Empty, Piece.Empty));
                     }
-                    Debug.Log(sb.ToString());
-                    sb = new StringBuilder();
                 }
                 piece = LoopNonSlidePieces[++pieceIndex];
             }
             
+            return moveList;
         }
 
         public static void PrintMoveList(List<Move> moveList) {
