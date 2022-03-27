@@ -26,8 +26,8 @@ namespace Core {
         public int sideToPlay;                                         
         public int enPassantSquare;                                            // EnPassant available square index
         public int fiftyMoveCounter;                                           // If it reaches 100 (half-moves), game is drawn
-        public int ply;                                                        // Total half-moves played in game
-        public int histPly;                                                    // gameHist index
+        public int ply;                                                        // Total half-moves played in current search
+        public int histPly;                                                    // Total half-moves played in the game (and used to index gameHist)
         public int castlingRights;                                             // 4 bits for castling rights: WKCA WQCA BKCA BQCA
         private UndoMove[] gameHist = new UndoMove[Constants.MAX_GAME_MOVES];
 
@@ -504,7 +504,239 @@ namespace Core {
             }
             Debug.Log(sb.ToString());
         }
+
+        public bool MakeMove(Move move) { // If after making the move, the playing side King is in check, we will return false (illegal move).
+            // If the playing side King is not in check after the move, the move is legal. 
+            CheckBoard();
+            int fromSquare = Move.FromSquare(move.move);
+            int toSquare = Move.ToSquare(move.move);
+            int side = sideToPlay;
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square for MakeMove() not on board");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square for MakeMove() not on board");
+            Assert.IsTrue(Validations.IsSideValid(side));
+            Assert.IsTrue(Validations.IsPieceValid(squares[fromSquare]));
+            gameHist[histPly].positionKey = positionKey;
+            if (Move.IsEnPassantCapture(move.move)) {
+                if (side == White) {
+                    ClearPiece(toSquare - Directions.PawnForward);
+                } else {
+                    ClearPiece(toSquare + Directions.PawnForward);
+                }
+            } else if (Move.IsCastlingMove(move.move)) {
+                switch (toSquare) {
+                    case (int) Squares120Enum.C1:
+                        MovePiece((int) Squares120Enum.A1, (int) Squares120Enum.D1);
+                        break;
+                    case (int) Squares120Enum.G1:
+                        MovePiece((int) Squares120Enum.H1, (int) Squares120Enum.F1);
+                        break;
+                    case (int) Squares120Enum.C8:
+                        MovePiece((int) Squares120Enum.A8, (int) Squares120Enum.D8);
+                        break;
+                    case (int) Squares120Enum.G8:
+                        MovePiece((int) Squares120Enum.H8, (int) Squares120Enum.F8);
+                        break;
+                    default: Assert.IsTrue(false, "Castling move target square is wrong.");
+                        break;
+                }
+            }
+            
+            if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
+            HashCastling(); // Hash out the current state
+            gameHist[histPly].move = move.move;
+            gameHist[histPly].fiftyMove = fiftyMoveCounter;
+            gameHist[histPly].enPassant = enPassantSquare;
+            gameHist[histPly].castlingRights = castlingRights;
+            castlingRights &= CastlingRights.CastlePerm[fromSquare];
+            castlingRights &= CastlingRights.CastlePerm[toSquare];
+            enPassantSquare = (int) Squares120Enum.NO_SQ;
+            HashCastling(); // Hash the new castling rights
+
+            histPly++;
+            ply++;
+            int capturedPiece = Move.CapturedPiece(move.move);
+            fiftyMoveCounter++;
+            if (capturedPiece != Piece.Empty) {
+                Assert.IsTrue(Validations.IsPieceValid(capturedPiece), "Captured piece in MakeMove() is not valid.");
+                ClearPiece(toSquare);
+                fiftyMoveCounter = 0;
+            }
+            if (Piece.IsPiecePawn(squares[fromSquare])) {
+                fiftyMoveCounter = 0;
+                if (Move.IsPawnStartMove(move.move)) {
+                    if (side == White) {
+                        enPassantSquare = fromSquare + Directions.PawnForward;
+                        Assert.IsTrue(squareRank[fromSquare + Directions.PawnForward] == (int) Constants.RanksEnum.RANK_3, "En Passant square being set is invalid.");
+                    } else {
+                        enPassantSquare = fromSquare - Directions.PawnForward;
+                        Assert.IsTrue(squareRank[fromSquare - Directions.PawnForward] == (int) Constants.RanksEnum.RANK_6, "En Passant square being set is invalid.");
+                    }
+                    HashEnPassant();
+                }
+            }
+            MovePiece(fromSquare, toSquare);
+            int promotedPiece = Move.PromotedPiece(move.move);
+            if (promotedPiece != Piece.Empty) {
+                Assert.IsTrue(Validations.IsPieceValid(promotedPiece) && !Piece.IsPiecePawn(promotedPiece), "Promoted piece is invalid.");
+                ClearPiece(toSquare);
+                AddPiece(toSquare, promotedPiece);
+            }
+            if (Piece.IsPieceKing[squares[toSquare]]) {
+                kingSquares[side] = toSquare;
+            }
+            sideToPlay ^= 1;
+            HashSide();
+            CheckBoard();
+            // We must now check if the King is in check after the move. In case it is not, the move is illegal.
+            if (IsSquareAttacked(kingSquares[side], sideToPlay)) { // If opposing player is attacking our King, move is legal.
+                RevertLastMove();
+                return false;
+            }
+            // Otherwise, the move is legal.
+            return true;
+        }
+
+        public void RevertLastMove() { // This function reverts the last played move stored in our game history.
+            CheckBoard();
+            histPly--;
+            ply--;
+            int move = gameHist[histPly].move; // We retrieve the last move that was played.
+            int fromSquare = Move.FromSquare(move);
+            int toSquare = Move.ToSquare(move);
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square for RevertLastMove() not on board");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square for RevertLastMove() not on board");
+            
+            if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
+            HashCastling(); // Hash out the current state
+            castlingRights = gameHist[histPly].castlingRights;
+            fiftyMoveCounter = gameHist[histPly].fiftyMove;
+            enPassantSquare = gameHist[histPly].enPassant;
+            if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
+            HashCastling(); // Hash the new castling rights
+            enPassantSquare = (int) Squares120Enum.NO_SQ;
+            sideToPlay ^= 1;
+            HashSide();
+
+            if (Move.IsEnPassantCapture(move)) {
+                if (sideToPlay == White) {
+                    AddPiece(toSquare - Directions.PawnForward, Piece.BlackPawn);
+                } else {
+                    AddPiece(toSquare + Directions.PawnForward, Piece.WhitePawn);
+                }
+            } else if (Move.IsCastlingMove(move)) {
+                switch (toSquare) {
+                    case (int) Squares120Enum.C1:
+                        MovePiece((int) Squares120Enum.D1, (int) Squares120Enum.A1);
+                        break;
+                    case (int) Squares120Enum.G1:
+                        MovePiece((int) Squares120Enum.F1, (int) Squares120Enum.H1);
+                        break;
+                    case (int) Squares120Enum.C8:
+                        MovePiece((int) Squares120Enum.D8, (int) Squares120Enum.A8);
+                        break;
+                    case (int) Squares120Enum.G8:
+                        MovePiece((int) Squares120Enum.F8, (int) Squares120Enum.H8);
+                        break;
+                    default: Assert.IsTrue(false, "Castling move target square is wrong.");
+                        break;
+                }
+            }
+            MovePiece(toSquare, fromSquare);
+            if (Piece.IsPieceKing[squares[fromSquare]]) {
+                kingSquares[sideToPlay] = fromSquare;
+            }
+            int capturedPiece = Move.CapturedPiece(move);
+            if (capturedPiece != Piece.Empty) {
+                Assert.IsTrue(Validations.IsPieceValid(capturedPiece), "Captured piece in RevertLastMove() is not valid.");
+                AddPiece(toSquare, capturedPiece);
+            }
+            int promotedPiece = Move.PromotedPiece(move);
+            if (promotedPiece != Piece.Empty) {
+                Assert.IsTrue(Validations.IsPieceValid(promotedPiece) && !Piece.IsPiecePawn(promotedPiece), "Promoted piece is invalid.");
+                ClearPiece(fromSquare);
+                AddPiece(fromSquare, sideToPlay == White ? Piece.WhitePawn : Piece.BlackPawn);
+            }
+            CheckBoard();
+        }
         
+        // MakeMove sub-functions
+        public void ClearPiece(int square) {
+            Assert.IsTrue(Validations.IsSquareOnBoard(square), "Square to clear is not on board");
+            int piece = squares[square];
+            int color = Piece.PieceColor[piece];
+            int tPieceNumber = -1;
+            HashPiece(piece, square);
+            squares[square] = Piece.Empty;
+            material[color] -= Piece.getPieceValue(piece);
+            if (Piece.PieceBig[piece]) {
+                bigPieces[color]--;
+                if (Piece.PieceMaj[piece]) {
+                    majorPieces[color]--;
+                } else {
+                    minorPieces[color]--;
+                }
+            } else { // Piece is pawn
+                ClearBit(ref pawns[color], Sq64(square));
+                ClearBit(ref pawns[Both], Sq64(square));
+            }
+            for (int i = 0; i < pieceNumbers[piece]; i++) {
+                if (pieceList[piece, i] == square) {
+                    tPieceNumber = i;
+                    break;
+                }
+            }
+            Assert.IsTrue(tPieceNumber != 1, "Piece to clear not found in Piece List.");
+            pieceNumbers[piece]--;
+            pieceList[piece, tPieceNumber] = pieceList[piece, pieceNumbers[piece]]; 
+            // We move the last piece in the pieceList to the cleared position and we update the number of pieces.
+            // The last piece in pieceList is never checked again (even though it's still there) as our pieceNumbers goes one position lower.
+        }
+
+        public void AddPiece(int square, int piece) {
+            Assert.IsTrue(Validations.IsPieceValid(piece), "Piece to add is invalid.");
+            Assert.IsTrue(Validations.IsSquareOnBoard(square), "Square to add piece on is not on board");
+            int color = Piece.PieceColor[piece];
+            HashPiece(piece, square);
+            squares[square] = piece;
+            if (Piece.PieceBig[piece]) {
+                bigPieces[color]++;
+                if (Piece.PieceMaj[piece]) {
+                    majorPieces[color]++;
+                } else {
+                    minorPieces[color]++;
+                }
+            } else { // Piece is pawn
+                SetBit(ref pawns[color], Sq64(square));
+                SetBit(ref pawns[Both], Sq64(square));
+            }
+            material[color] += Piece.getPieceValue(piece);
+            pieceList[piece, pieceNumbers[piece]++] = square;
+        }
+
+        public void MovePiece(int fromSquare, int toSquare) {
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square is not on board in MovePiece()");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square is not on board in MovePiece()");
+            int piece = squares[fromSquare];
+            int color = Piece.PieceColor[piece];
+            HashPiece(piece, fromSquare);
+            squares[fromSquare] = Piece.Empty;
+            HashPiece(piece, toSquare);
+            squares[toSquare] = piece;
+            if (!Piece.PieceBig[piece]) { // If it's a pawn, we update the BitBoards
+                ClearBit(ref pawns[color], Sq64(fromSquare));
+                ClearBit(ref pawns[Both], Sq64(fromSquare));
+                SetBit(ref pawns[color], Sq64(toSquare));
+                SetBit(ref pawns[Both], Sq64(toSquare));
+            }
+            for (int i = 0; i < pieceNumbers[piece]; i++)
+            {
+                if (pieceList[piece, i] == fromSquare) {
+                    pieceList[piece, i] = toSquare;
+                    break;
+                }
+            }
+        }
+
         // Index conversions
         public static int FrTo120Sq(int file, int rank) { return (21 + file + rank * 10); }
         public static int Sq64(int square) { return sq120ToSq64[square]; }
@@ -515,5 +747,10 @@ namespace Core {
         public static bool IsPieceKing(int piece) { return Piece.IsPieceKing[piece]; }
         public static bool IsPieceRookQueen(int piece) { return Piece.IsPieceRookQueen[piece]; }
         public static bool IsPieceBishopQueen(int piece) { return Piece.IsPieceBishopQueen[piece]; }
+        
+        public void HashPiece(int piece, int square) { positionKey ^= pieceKeys[piece, square]; }
+        public void HashCastling() { positionKey ^= castleKeys[castlingRights]; }
+        public void HashSide() { positionKey ^= sideKey; }
+        public void HashEnPassant() { positionKey ^= pieceKeys[Piece.Empty, enPassantSquare]; }
     }
 }

@@ -15,7 +15,7 @@ namespace Core {
         public static readonly int[] LoopNonSlidePieces = { Piece.WhiteKnight, Piece.WhiteKing, 0, Piece.BlackKnight, Piece.BlackKing, 0 };
         public static readonly int[] LoopNonSlideIndex = { 0, 3 };
         
-        public static List<Move> GenerateMoves(Board board) {
+        public static List<Move> GenerateMoves(Board board) { 
             return new List<Move>();
         }
 
@@ -107,7 +107,7 @@ namespace Core {
                     }
                 }
                 // Castling moves
-                if ((board.castlingRights & (int) CastlingRights.WKCA) != 0) { // White Kingside castling
+                if ((board.castlingRights & (int) CastlingRightsEnum.WKCA) != 0) { // White Kingside castling
                     if (board.squares[(int) Board.Squares120Enum.F1] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.G1] == Piece.Empty) {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.F1, Board.Black) &&
@@ -116,7 +116,7 @@ namespace Core {
                         }
                     }
                 } 
-                if ((board.castlingRights & (int) CastlingRights.WQCA) != 0) { // White Queenside castling
+                if ((board.castlingRights & (int) CastlingRightsEnum.WQCA) != 0) { // White Queenside castling
                     if (board.squares[(int) Board.Squares120Enum.D1] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.C1] == Piece.Empty && 
                         board.squares[(int) Board.Squares120Enum.B1] == Piece.Empty) {
@@ -157,7 +157,7 @@ namespace Core {
                     }
                 }
                 // Castling moves
-                if ((board.castlingRights & (int) CastlingRights.BKCA) != 0) { // Black Kingside castling
+                if ((board.castlingRights & (int) CastlingRightsEnum.BKCA) != 0) { // Black Kingside castling
                     if (board.squares[(int) Board.Squares120Enum.F8] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.G8] == Piece.Empty) {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.F8, Board.White) &&
@@ -166,7 +166,7 @@ namespace Core {
                         }
                     }
                 } 
-                if ((board.castlingRights & (int) CastlingRights.BQCA) != 0) { // Black Queenside castling
+                if ((board.castlingRights & (int) CastlingRightsEnum.BQCA) != 0) { // Black Queenside castling
                     if (board.squares[(int) Board.Squares120Enum.D8] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.C8] == Piece.Empty && 
                         board.squares[(int) Board.Squares120Enum.B8] == Piece.Empty) {

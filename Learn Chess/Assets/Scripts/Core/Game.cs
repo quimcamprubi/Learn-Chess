@@ -80,10 +80,10 @@ namespace Core {
 
         private string GetCastlingRightsString(int castlingRights) {
             string returnString = "Castling rights: ";
-            returnString += (castlingRights & (int) CastlingRights.WKCA) != 0 ? "K" : "-";
-            returnString += (castlingRights & (int) CastlingRights.WQCA) != 0 ? "Q" : "-";
-            returnString += (castlingRights & (int) CastlingRights.BKCA) != 0 ? "k" : "-";
-            returnString += (castlingRights & (int) CastlingRights.BQCA) != 0 ? "q" : "-";
+            returnString += (castlingRights & (int) CastlingRightsEnum.WKCA) != 0 ? "K" : "-";
+            returnString += (castlingRights & (int) CastlingRightsEnum.WQCA) != 0 ? "Q" : "-";
+            returnString += (castlingRights & (int) CastlingRightsEnum.BKCA) != 0 ? "k" : "-";
+            returnString += (castlingRights & (int) CastlingRightsEnum.BQCA) != 0 ? "q" : "-";
             return returnString;
         }
     }
