@@ -9,6 +9,7 @@ using UI;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine.Assertions;
+using UnityEngine.UIElements;
 
 namespace Core {
     public class Board {
@@ -29,7 +30,7 @@ namespace Core {
         public int ply;                                                        // Total half-moves played in current search
         public int histPly;                                                    // Total half-moves played in the game (and used to index gameHist)
         public int castlingRights;                                             // 4 bits for castling rights: WKCA WQCA BKCA BQCA
-        private UndoMove[] gameHist = new UndoMove[Constants.MAX_GAME_MOVES];
+        private UndoMove[] gameHist = new UndoMove[Constants.MAX_GAME_MOVES].Populate(() => new UndoMove());
 
         // Hash key
         public ulong positionKey;
@@ -87,22 +88,17 @@ namespace Core {
             ResetBoard();
             InitFromPosition(FenDecoder.DecodePositionFromFen(Constants.startingFen));
             CheckBoard();
-            PrintGameBoard();
-            Print120Board();
-            PrintBitBoard(pawns[White], White);
-            PrintBitBoard(pawns[Black], Black);
-            PrintBitBoard(pawns[Both], Both);
         }
 
         public void LoadPosition(ChessPosition position) {
             ResetBoard();
             InitFromPosition(position);
             CheckBoard();
-            PrintGameBoard();
+            /*PrintGameBoard();
             Print120Board();
             PrintBitBoard(pawns[White], White);
             PrintBitBoard(pawns[Black], Black);
-            PrintBitBoard(pawns[Both], Both);
+            PrintBitBoard(pawns[Both], Both);*/
         }
         
         // Board initialization
@@ -552,8 +548,6 @@ namespace Core {
             enPassantSquare = (int) Squares120Enum.NO_SQ;
             HashCastling(); // Hash the new castling rights
 
-            histPly++;
-            ply++;
             int capturedPiece = Move.CapturedPiece(move.move);
             fiftyMoveCounter++;
             if (capturedPiece != Piece.Empty) {
@@ -561,6 +555,9 @@ namespace Core {
                 ClearPiece(toSquare);
                 fiftyMoveCounter = 0;
             }
+            histPly++;
+            ply++;
+            
             if (Piece.IsPiecePawn(squares[fromSquare])) {
                 fiftyMoveCounter = 0;
                 if (Move.IsPawnStartMove(move.move)) {
@@ -589,22 +586,22 @@ namespace Core {
             CheckBoard();
             // We must now check if the King is in check after the move. In case it is not, the move is illegal.
             if (IsSquareAttacked(kingSquares[side], sideToPlay)) { // If opposing player is attacking our King, move is legal.
-                RevertLastMove();
+                UnmakeMove();
                 return false;
             }
             // Otherwise, the move is legal.
             return true;
         }
 
-        public void RevertLastMove() { // This function reverts the last played move stored in our game history.
+        public void UnmakeMove() { // This function reverts the last played move stored in our game history.
             CheckBoard();
             histPly--;
             ply--;
             int move = gameHist[histPly].move; // We retrieve the last move that was played.
             int fromSquare = Move.FromSquare(move);
             int toSquare = Move.ToSquare(move);
-            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square for RevertLastMove() not on board");
-            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square for RevertLastMove() not on board");
+            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square for UnmakeMove() not on board");
+            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square for UnmakeMove() not on board");
             
             if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
             HashCastling(); // Hash out the current state
@@ -613,7 +610,7 @@ namespace Core {
             enPassantSquare = gameHist[histPly].enPassant;
             if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
             HashCastling(); // Hash the new castling rights
-            enPassantSquare = (int) Squares120Enum.NO_SQ;
+            //enPassantSquare = (int) Squares120Enum.NO_SQ;
             sideToPlay ^= 1;
             HashSide();
 
@@ -647,7 +644,7 @@ namespace Core {
             }
             int capturedPiece = Move.CapturedPiece(move);
             if (capturedPiece != Piece.Empty) {
-                Assert.IsTrue(Validations.IsPieceValid(capturedPiece), "Captured piece in RevertLastMove() is not valid.");
+                Assert.IsTrue(Validations.IsPieceValid(capturedPiece), "Captured piece in UnmakeMove() is not valid.");
                 AddPiece(toSquare, capturedPiece);
             }
             int promotedPiece = Move.PromotedPiece(move);
@@ -735,6 +732,18 @@ namespace Core {
                     break;
                 }
             }
+        }
+        
+        public List<Move> GetLegalMovesForSquare(int square, List<Move> currentPseudoLegalMoves) {
+            List<Move> pieceMoves = currentPseudoLegalMoves.Where(move => Move.FromSquare(move.move) == square).ToList();
+            List<Move> legalMoves = new List<Move>();
+            foreach (Move pseudoLegalMove in pieceMoves) {
+                if (MakeMove(pseudoLegalMove)) {
+                    UnmakeMove();
+                    legalMoves.Add(pseudoLegalMove);
+                }
+            }
+            return legalMoves;
         }
 
         // Index conversions

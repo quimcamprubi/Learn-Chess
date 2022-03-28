@@ -47,7 +47,7 @@ namespace Core {
         public static bool IsWhite(int piece) { return (piece < 7) && (piece != 0); }
         public static bool IsBlack(int piece) { return piece > 6; }
         public static int GetColor(int piece) {
-            if ((piece < 7) && (piece >= 0)) {
+            if ((piece < 7) && (piece > 0)) {
                 return White;
             }
             if (piece >= 7 && piece <= 12) {

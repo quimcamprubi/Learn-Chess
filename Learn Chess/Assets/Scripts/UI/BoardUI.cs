@@ -13,7 +13,7 @@ namespace UI {
         public PieceThemes pieceThemes;
         private MeshRenderer[, ] squareRenderers;
         private SpriteRenderer[, ] squarePieceRenderers;
-
+        public bool playerIsWhite = true;
         private void Awake() {
             GenerateBoard();
         }
@@ -69,6 +69,25 @@ namespace UI {
                         pieceThemes.GetPieceSprite(primaryBoard.squares[Board.Sq120(rank * 8 + file)]);
                     squarePieceRenderers[file, rank].transform.position = PositionFromCoordinates(file, rank, -0.1f);
                 }
+            }
+        }
+        
+        public bool TryGetSquareUnderMouse (Vector2 mouseWorld, out int selectedFile, out int selectedRank) {
+            int file = (int) (mouseWorld.x + 4);
+            int rank = (int) (mouseWorld.y + 4);
+            if (!playerIsWhite) {
+                file = 7 - file;
+                rank = 7 - rank;
+            }
+            selectedFile = file;
+            selectedRank = rank;
+            return file >= 0 && file < 8 && rank >= 0 && rank < 8;
+        }
+
+        public void HighlightLegalMoves(List<Move> legalMovesForSquare) {
+            foreach (Move move in legalMovesForSquare) {
+                Coordinates coordinates = BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
+                SetSquareColor(coordinates, boardColors.lightColors.legal, boardColors.darkColors.legal);
             }
         }
     }

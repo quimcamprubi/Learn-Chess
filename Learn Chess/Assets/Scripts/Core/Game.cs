@@ -13,14 +13,20 @@ namespace Core {
         private GameObject enPassantText;
         private GameObject castlingRightsText;
         private GameObject positionKeyText;
-
+        private Camera cam;
+        private int selectedRank;
+        private int selectedFile;
+        public List<Move> currentPseudoLegalMoves;
+        public List<Move> currentAvailableMoves;
+        private int lastSelectedIndex = -1;
+        
         public enum InputState {
             None,
-            DraggingPiece
+            PieceSelected
         }
 
         private Board mainBoard;
-        private InputState inputState;
+        private InputState currentState;
 
         private void Start() {
             sideToPlayText = GameObject.Find("SideToPlayText");
@@ -30,17 +36,10 @@ namespace Core {
             boardUi = FindObjectOfType<BoardUI>();
             mainBoard = new Board();
             InitializeGame();
+            cam = Camera.main;
+            currentState = InputState.None;
         }
-
-        private void Update() {
-            sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
-            enPassantText.GetComponent<ShowText>().textValue =
-                "En Passant square: " + mainBoard.enPassantSquare;
-            castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
-            positionKeyText.GetComponent<ShowText>().textValue = "Position Key: " + mainBoard.positionKey;
-            
-        }
-
+        
         private void InitializeGame() {
             /*mainBoard.LoadStartingPosition();
             boardUi.UpdateBoard(mainBoard);
@@ -51,27 +50,90 @@ namespace Core {
             List<Move> moveList =  MoveGenerator.GenerateAllMoves(mainBoard);
             MoveGenerator.PrintMoveList(moveList);*/
             
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.globalMoveGenFen));
+            mainBoard.LoadStartingPosition();
             boardUi.UpdateBoard(mainBoard);
-            List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
-            MoveGenerator.PrintMoveList(moveList);
-            /*int from = 6;
-            int to = 12;
-            int captured = Piece.WhiteRook;
-            int promoted = Piece.BlackRook;
-            Move move = new Move(from, to, captured, promoted);
-            Move.PrintMoveData(move);
-            move.move |= Move.MaskPawnStart;
-            Move.PrintMoveData(move);
-            move.move = Move.CreateMoveInteger(from, to, captured, promoted, enPassantCapture: true, pawnStart: false,
-                castlingMove: true);
-            Move.PrintMoveData(move);
-            move.move = Move.CreateMoveInteger((int) Board.Squares120Enum.A2, (int) Board.Squares120Enum.H7, Piece.WhiteRook,
-                Piece.BlackKing);
-            Debug.Log("Algrebraic from: " + BoardSquares.GetAlgebraicSquare(Move.FromSquare(move.move)));
-            Debug.Log("Algrebraic to: " + BoardSquares.GetAlgebraicSquare(Move.ToSquare(move.move)));
-            Debug.Log("Algebraic move: " + BoardSquares.GetAlgebraicMove(move.move));*/
+            /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
+            StartCoroutine(TestMoveGenerator(moveList));*/
+            currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
+            
 
+        }
+
+        IEnumerator TestMoveGenerator(List<Move> moveList) {
+            foreach (Move move in moveList) {
+                if (!mainBoard.MakeMove(move)) {
+                    continue;
+                }
+                Debug.Log("Made move: " + BoardSquares.GetAlgebraicMove(move.move));
+                mainBoard.PrintGameBoard();
+                boardUi.UpdateBoard(mainBoard);
+                yield return new WaitForSeconds (1.0f);
+                mainBoard.UnmakeMove();
+                Debug.Log("Unmade move: " + BoardSquares.GetAlgebraicMove(move.move));
+                mainBoard.PrintGameBoard();
+                boardUi.UpdateBoard(mainBoard);
+            }
+        }
+
+        private void Update() {
+            sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
+            enPassantText.GetComponent<ShowText>().textValue =
+                "En Passant square: " + mainBoard.enPassantSquare;
+            castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
+            positionKeyText.GetComponent<ShowText>().textValue = "Position Key: " + mainBoard.positionKey;
+            if (currentPseudoLegalMoves != null) HandleInput();
+        }
+
+        private void HandleInput() {
+            Vector2 mousePosition = cam.ScreenToWorldPoint(Input.mousePosition);
+            if (Input.GetMouseButtonDown(0)) {
+                if (currentState == InputState.None) {
+                    AttemptSelectPiece(mousePosition);
+                } else {
+                    CheckSquareSelected(mousePosition);
+                }
+            }
+        }
+
+        private void CheckSquareSelected(Vector2 mousePosition) {
+            if (boardUi.TryGetSquareUnderMouse(mousePosition, out selectedFile, out selectedRank)) {
+                int index = Board.FrTo120Sq(selectedFile, selectedRank);
+                if (index != lastSelectedIndex) {
+                    boardUi.ResetSquareColors();
+                    int color = Piece.GetColor(mainBoard.squares[index]);
+                    if (color != mainBoard.sideToPlay) {
+                        int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
+                        if (moveIndex >= 0) {
+                            mainBoard.MakeMove(currentAvailableMoves[moveIndex]);
+                            boardUi.UpdateBoard(mainBoard);
+                            currentState = InputState.None;
+                            ChangeTurn();
+                        }
+                    } else {
+                        lastSelectedIndex = index;
+                        currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
+                        boardUi.HighlightLegalMoves(currentAvailableMoves);
+                        currentState = InputState.PieceSelected;
+                    }
+                }
+            }
+        }
+
+        private void AttemptSelectPiece(Vector2 mousePosition) {
+            if (boardUi.TryGetSquareUnderMouse(mousePosition, out selectedFile, out selectedRank)) {
+                int index = Board.FrTo120Sq(selectedFile, selectedRank);
+                int color = Piece.GetColor(mainBoard.squares[index]);
+                //if (color == mainBoard.sideToPlay) {
+                    lastSelectedIndex = index;
+                    currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
+                    boardUi.HighlightLegalMoves(currentAvailableMoves);
+                    currentState = InputState.PieceSelected;
+                //}
+            }
+        }
+
+        public void ChangeTurn() {
+            currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
         }
 
         private string GetSideToPlayString(int sideToPlay) {
@@ -86,5 +148,7 @@ namespace Core {
             returnString += (castlingRights & (int) CastlingRightsEnum.BQCA) != 0 ? "q" : "-";
             return returnString;
         }
+        
+        
     }
 }
