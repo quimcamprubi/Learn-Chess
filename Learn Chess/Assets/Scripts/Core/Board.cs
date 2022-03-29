@@ -746,6 +746,17 @@ namespace Core {
             return legalMoves;
         }
 
+        public List<Move> GetLegalMovesInPosition(List<Move> currentPseudoLegalMoves) {
+            List<Move> legalMoves = new List<Move>();
+            foreach (Move pseudoLegalMove in currentPseudoLegalMoves) {
+                if (MakeMove(pseudoLegalMove)) {
+                    UnmakeMove();
+                    legalMoves.Add(pseudoLegalMove);
+                }
+            }
+            return legalMoves;
+        }
+
         // Index conversions
         public static int FrTo120Sq(int file, int rank) { return (21 + file + rank * 10); }
         public static int Sq64(int square) { return sq120ToSq64[square]; }

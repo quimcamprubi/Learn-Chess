@@ -162,12 +162,13 @@ namespace Core {
         }
 
         private void CheckEnding() {
-            if (currentPseudoLegalMoves.Count == 0) { // Player has no legal moves
+            List<Move> currentLegalMoves = mainBoard.GetLegalMovesInPosition(currentPseudoLegalMoves);
+            if (currentLegalMoves.Count == 0) {
                 if (mainBoard.IsKingInCheck()) {
                     Checkmate();
                 } else {
                     Stalemate();
-                }
+                } 
             }
         }
 
