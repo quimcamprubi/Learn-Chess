@@ -105,12 +105,20 @@ namespace Core {
                         int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
                         if (moveIndex >= 0) {
                             mainBoard.MakeMove(currentAvailableMoves[moveIndex]);
+                            Coordinates fromCoordinates =
+                                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(currentAvailableMoves[moveIndex].move)));
+                            Coordinates toCoordinates =
+                                BoardSquares.CoordFromIndex(Board.Sq64(index));
+                            boardUi.SetHighlightColor(fromCoordinates);
+                            boardUi.SetHighlightColor(toCoordinates);
                             boardUi.UpdateBoard(mainBoard);
                             currentState = InputState.None;
                             ChangeTurn();
                         } 
                     } else {
                         lastSelectedIndex = index;
+                        Coordinates coordinates = BoardSquares.CoordFromIndex(Board.Sq64(index));
+                        boardUi.SetSelectedColor(coordinates);
                         currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
                         boardUi.HighlightLegalMoves(currentAvailableMoves);
                         currentState = InputState.PieceSelected;
@@ -128,16 +136,12 @@ namespace Core {
                 int color = Piece.GetColor(mainBoard.squares[index]);
                 if (color == mainBoard.sideToPlay) {
                     lastSelectedIndex = index;
+                    Coordinates coordinates = BoardSquares.CoordFromIndex(Board.Sq64(index));
+                    boardUi.SetSelectedColor(coordinates);
                     currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
                     if (currentAvailableMoves.Count > 0) {
                         boardUi.HighlightLegalMoves(currentAvailableMoves);
                         currentState = InputState.PieceSelected;
-                    } else {
-                        if (mainBoard.IsKingInCheck()) {
-                            Checkmate();
-                        } else {
-                            Stalemate();
-                        }
                     }
                 }
             }

@@ -10,6 +10,7 @@ namespace UI {
             public Color normal;
             public Color legal;
             public Color selected;
+            public Color highlightMove;
         }
     }
 }
