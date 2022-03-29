@@ -69,15 +69,15 @@ namespace Core {
                 case Pawn:
                     return 100;
                 case Knight:
-                    return 350;
+                    return 325;
                 case Bishop:
-                    return 350;
+                    return 325;
                 case Rook:
-                    return 525;
+                    return 550;
                 case Queen:
                     return 1000;
                 case King:
-                    return 40000;
+                    return 50000;
                 default:
                     return 0;
             }

@@ -550,7 +550,7 @@ namespace Core {
 
             int capturedPiece = Move.CapturedPiece(move.move);
             fiftyMoveCounter++;
-            if (capturedPiece != Piece.Empty) {
+            if (capturedPiece != Piece.Empty && !Move.IsEnPassantCapture(move.move)) {
                 Assert.IsTrue(Validations.IsPieceValid(capturedPiece), "Captured piece in MakeMove() is not valid.");
                 ClearPiece(toSquare);
                 fiftyMoveCounter = 0;
@@ -643,7 +643,7 @@ namespace Core {
                 kingSquares[sideToPlay] = fromSquare;
             }
             int capturedPiece = Move.CapturedPiece(move);
-            if (capturedPiece != Piece.Empty) {
+            if (capturedPiece != Piece.Empty && !Move.IsEnPassantCapture(move)) {
                 Assert.IsTrue(Validations.IsPieceValid(capturedPiece), "Captured piece in UnmakeMove() is not valid.");
                 AddPiece(toSquare, capturedPiece);
             }
@@ -664,7 +664,7 @@ namespace Core {
             int tPieceNumber = -1;
             HashPiece(piece, square);
             squares[square] = Piece.Empty;
-            material[color] -= Piece.getPieceValue(piece);
+            material[color] -= Piece.PieceVal[piece];
             if (Piece.PieceBig[piece]) {
                 bigPieces[color]--;
                 if (Piece.PieceMaj[piece]) {
@@ -682,7 +682,7 @@ namespace Core {
                     break;
                 }
             }
-            Assert.IsTrue(tPieceNumber != 1, "Piece to clear not found in Piece List.");
+            Assert.IsTrue(tPieceNumber != -1, "Piece to clear not found in Piece List.");
             pieceNumbers[piece]--;
             pieceList[piece, tPieceNumber] = pieceList[piece, pieceNumbers[piece]]; 
             // We move the last piece in the pieceList to the cleared position and we update the number of pieces.
@@ -706,7 +706,7 @@ namespace Core {
                 SetBit(ref pawns[color], Sq64(square));
                 SetBit(ref pawns[Both], Sq64(square));
             }
-            material[color] += Piece.getPieceValue(piece);
+            material[color] += Piece.PieceVal[piece];
             pieceList[piece, pieceNumbers[piece]++] = square;
         }
 
@@ -761,5 +761,12 @@ namespace Core {
         public void HashCastling() { positionKey ^= castleKeys[castlingRights]; }
         public void HashSide() { positionKey ^= sideKey; }
         public void HashEnPassant() { positionKey ^= pieceKeys[Piece.Empty, enPassantSquare]; }
+
+        public bool IsKingInCheck() {
+            if (IsSquareAttacked(kingSquares[sideToPlay], sideToPlay ^ 1)) {
+                return true;
+            }
+            return false;
+        }
     }
 }

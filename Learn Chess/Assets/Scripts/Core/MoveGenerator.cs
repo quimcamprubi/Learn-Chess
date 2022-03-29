@@ -185,7 +185,7 @@ namespace Core {
             int piece = LoopSlidePieces[pieceIndex];
             while (piece != 0) {
                 Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
-                Debug.Log("Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
+                //Debug.Log("Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
@@ -212,7 +212,7 @@ namespace Core {
             piece = LoopNonSlidePieces[pieceIndex];
             while (piece != 0) {
                 Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
-                Debug.Log("Non Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
+                //Debug.Log("Non Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");

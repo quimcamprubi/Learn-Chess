@@ -108,13 +108,16 @@ namespace Core {
                             boardUi.UpdateBoard(mainBoard);
                             currentState = InputState.None;
                             ChangeTurn();
-                        }
+                        } 
                     } else {
                         lastSelectedIndex = index;
                         currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
                         boardUi.HighlightLegalMoves(currentAvailableMoves);
                         currentState = InputState.PieceSelected;
                     }
+                } else {
+                    boardUi.ResetSquareColors();
+                    lastSelectedIndex = -1;
                 }
             }
         }
@@ -123,17 +126,26 @@ namespace Core {
             if (boardUi.TryGetSquareUnderMouse(mousePosition, out selectedFile, out selectedRank)) {
                 int index = Board.FrTo120Sq(selectedFile, selectedRank);
                 int color = Piece.GetColor(mainBoard.squares[index]);
-                //if (color == mainBoard.sideToPlay) {
+                if (color == mainBoard.sideToPlay) {
                     lastSelectedIndex = index;
                     currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
-                    boardUi.HighlightLegalMoves(currentAvailableMoves);
-                    currentState = InputState.PieceSelected;
-                //}
+                    if (currentAvailableMoves.Count > 0) {
+                        boardUi.HighlightLegalMoves(currentAvailableMoves);
+                        currentState = InputState.PieceSelected;
+                    } else {
+                        if (mainBoard.IsKingInCheck()) {
+                            Checkmate();
+                        } else {
+                            Stalemate();
+                        }
+                    }
+                }
             }
         }
 
         public void ChangeTurn() {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
+            CheckEnding();
         }
 
         private string GetSideToPlayString(int sideToPlay) {
@@ -148,7 +160,25 @@ namespace Core {
             returnString += (castlingRights & (int) CastlingRightsEnum.BQCA) != 0 ? "q" : "-";
             return returnString;
         }
-        
-        
+
+        private void CheckEnding() {
+            if (currentPseudoLegalMoves.Count == 0) { // Player has no legal moves
+                if (mainBoard.IsKingInCheck()) {
+                    Checkmate();
+                } else {
+                    Stalemate();
+                }
+            }
+        }
+
+        private void Checkmate() {
+            Debug.Log("Checkmate");
+            // TODO END GAME MESSAGE
+        }
+
+        private void Stalemate() {
+            Debug.Log("Stalemate");
+            // TODO STALEMATE MESSAGE
+        }
     }
 }
