@@ -19,7 +19,9 @@ namespace Core {
         public List<Move> currentPseudoLegalMoves;
         public List<Move> currentAvailableMoves;
         private int lastSelectedIndex = -1;
-        
+        public static bool GameIsPaused = false;
+        public event System.Action<Move> onMoveMade;
+
         public enum InputState {
             None,
             PieceSelected
@@ -27,6 +29,7 @@ namespace Core {
 
         private Board mainBoard;
         private InputState currentState;
+        private PromotionMenu promotionMenu;
 
         private void Start() {
             sideToPlayText = GameObject.Find("SideToPlayText");
@@ -35,6 +38,7 @@ namespace Core {
             positionKeyText = GameObject.Find("PositionKeyText");
             boardUi = FindObjectOfType<BoardUI>();
             mainBoard = new Board();
+            promotionMenu = FindObjectOfType<PromotionMenu>();
             InitializeGame();
             cam = Camera.main;
             currentState = InputState.None;
@@ -81,7 +85,7 @@ namespace Core {
                 "En Passant square: " + mainBoard.enPassantSquare;
             castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
             positionKeyText.GetComponent<ShowText>().textValue = "Position Key: " + mainBoard.positionKey;
-            if (currentPseudoLegalMoves != null) HandleInput();
+            if (currentPseudoLegalMoves != null && !GameIsPaused) HandleInput();
         }
 
         private void HandleInput() {
@@ -104,16 +108,21 @@ namespace Core {
                     if (color != mainBoard.sideToPlay) {
                         int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
                         if (moveIndex >= 0) {
-                            mainBoard.MakeMove(currentAvailableMoves[moveIndex]);
-                            Coordinates fromCoordinates =
-                                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(currentAvailableMoves[moveIndex].move)));
-                            Coordinates toCoordinates =
-                                BoardSquares.CoordFromIndex(Board.Sq64(index));
-                            boardUi.SetHighlightColor(fromCoordinates);
-                            boardUi.SetHighlightColor(toCoordinates);
-                            boardUi.UpdateBoard(mainBoard);
-                            currentState = InputState.None;
-                            ChangeTurn();
+                            Move moveToMake = currentAvailableMoves[moveIndex];
+                            if (!Move.IsMovePromotion(moveToMake.move)) {
+                                mainBoard.MakeMove(moveToMake);
+                                Coordinates fromCoordinates =
+                                    BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(moveToMake.move)));
+                                Coordinates toCoordinates =
+                                    BoardSquares.CoordFromIndex(Board.Sq64(index));
+                                boardUi.SetHighlightColor(fromCoordinates);
+                                boardUi.SetHighlightColor(toCoordinates);
+                                boardUi.UpdateBoard(mainBoard);
+                                currentState = InputState.None;
+                                ChangeTurn();
+                            } else {
+                                promotionMenu.SelectPromotionMove(moveToMake, mainBoard.sideToPlay,this);
+                            }
                         } 
                     } else {
                         lastSelectedIndex = index;
@@ -145,6 +154,19 @@ namespace Core {
                     }
                 }
             }
+        }
+
+        public void MakePromotionMove(Move move) {
+            mainBoard.MakeMove(move);
+            Coordinates fromCoordinates =
+                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
+            Coordinates toCoordinates =
+                BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
+            boardUi.SetHighlightColor(fromCoordinates);
+            boardUi.SetHighlightColor(toCoordinates);
+            boardUi.UpdateBoard(mainBoard);
+            currentState = InputState.None;
+            ChangeTurn();
         }
 
         public void ChangeTurn() {

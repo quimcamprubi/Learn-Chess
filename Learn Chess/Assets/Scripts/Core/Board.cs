@@ -58,6 +58,8 @@ namespace Core {
         public static int Black = 1;
         public static int Both = 2;
 
+        public static int NoEnPassant = -1;
+
         public enum Squares120Enum {
             A1 = 21, B1, C1, D1, E1, F1, G1, H1,
             A2 = 31, B2, C2, D2, E2, F2, G2, H2,
@@ -160,7 +162,7 @@ namespace Core {
             }
             kingSquares[White] = kingSquares[Black] = (int) Squares120Enum.NO_SQ;
             sideToPlay = Both;
-            enPassantSquare = (int) Squares120Enum.NO_SQ;
+            enPassantSquare = NoEnPassant;
             fiftyMoveCounter = 0;
             ply = 0;
             histPly = 0;
@@ -298,7 +300,7 @@ namespace Core {
             Assert.IsTrue(tBigPieces[White] == bigPieces[White] && tBigPieces[Black] == bigPieces[Black], "checkBoard() failed: Big pieces pieces count not equal.");
             Assert.IsTrue(sideToPlay == White || sideToPlay == Black, "checkBoard() failed: Side to play not set to White or Black.");
             Assert.IsTrue(GeneratePositionKey() == positionKey, "checkBoard() failed: Incorrect Position Key.");
-            Assert.IsTrue(enPassantSquare == (int) Squares120Enum.NO_SQ || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
+            Assert.IsTrue(enPassantSquare == NoEnPassant || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
                                             || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black, "checkBoard() failed: Incorrect enPassant rank.");
             Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing, "checkBoard() failed: White King not found in expected square.");
             Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing, "checkBoard() failed: Black King not found in expected square.");
@@ -395,7 +397,7 @@ namespace Core {
             if (sideToPlay == White) {
                 finalKey ^= sideKey;
             }
-            if (enPassantSquare != (int) Squares120Enum.NO_SQ) {
+            if (enPassantSquare != NoEnPassant) {
                 Assert.IsTrue(enPassantSquare >= 0 && enPassantSquare < Constants.NUM_SQUARES_EXT);
                 finalKey ^= pieceKeys[Piece.Empty, enPassantSquare];
             }
@@ -537,7 +539,7 @@ namespace Core {
                 }
             }
             
-            if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
+            if (enPassantSquare != NoEnPassant) HashEnPassant();
             HashCastling(); // Hash out the current state
             gameHist[histPly].move = move.move;
             gameHist[histPly].fiftyMove = fiftyMoveCounter;
@@ -545,7 +547,7 @@ namespace Core {
             gameHist[histPly].castlingRights = castlingRights;
             castlingRights &= CastlingRights.CastlePerm[fromSquare];
             castlingRights &= CastlingRights.CastlePerm[toSquare];
-            enPassantSquare = (int) Squares120Enum.NO_SQ;
+            enPassantSquare = NoEnPassant;
             HashCastling(); // Hash the new castling rights
 
             int capturedPiece = Move.CapturedPiece(move.move);
@@ -603,14 +605,13 @@ namespace Core {
             Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square for UnmakeMove() not on board");
             Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square for UnmakeMove() not on board");
             
-            if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
+            if (enPassantSquare != NoEnPassant) HashEnPassant();
             HashCastling(); // Hash out the current state
             castlingRights = gameHist[histPly].castlingRights;
             fiftyMoveCounter = gameHist[histPly].fiftyMove;
             enPassantSquare = gameHist[histPly].enPassant;
-            if (enPassantSquare != (int) Squares120Enum.NO_SQ) HashEnPassant();
+            if (enPassantSquare != NoEnPassant) HashEnPassant();
             HashCastling(); // Hash the new castling rights
-            //enPassantSquare = (int) Squares120Enum.NO_SQ;
             sideToPlay ^= 1;
             HashSide();
 

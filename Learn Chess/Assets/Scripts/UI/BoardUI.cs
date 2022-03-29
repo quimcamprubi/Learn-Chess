@@ -14,6 +14,7 @@ namespace UI {
         private MeshRenderer[, ] squareRenderers;
         private SpriteRenderer[, ] squarePieceRenderers;
         public bool playerIsWhite = true;
+        private Move lastMadeMove;
         private void Awake() {
             GenerateBoard();
         }
@@ -47,6 +48,10 @@ namespace UI {
                 return new Vector3 (-3.5f + file, -3.5f + rank, depth);
             }
             return new Vector3 (-3.5f + 7 - file, 7 - rank - 3.5f, depth);
+        }
+        
+        public Vector3 PositionFromCoordinates (Coordinates coord, float depth = 0) {
+            return PositionFromCoordinates (coord.fileIndex, coord.rankIndex, depth);
         }
 
         public void ResetSquareColors() {
@@ -99,6 +104,38 @@ namespace UI {
                 Coordinates coordinates = BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
                 SetSquareColor(coordinates, boardColors.lightColors.legal, boardColors.darkColors.legal);
             }
+        }
+        
+        public void OnMoveMade (Board board, Move move, bool animate = false) {
+            lastMadeMove = move;
+            if (animate) {
+        		StartCoroutine (AnimateMove (move, board));
+        	} else {
+        		UpdateBoard(board);
+        		ResetSquareColors();
+        	}
+        }
+        
+        IEnumerator AnimateMove (Move move, Board board) {
+        	float t = 0;
+        	const float moveAnimDuration = 0.15f;
+            Coordinates fromCoordinates =
+                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
+            Coordinates toCoordinates =
+                BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
+        	Transform pieceT = squarePieceRenderers[fromCoordinates.fileIndex, fromCoordinates.rankIndex].transform;
+        	Vector3 startPos = PositionFromCoordinates(fromCoordinates);
+        	Vector3 targetPos = PositionFromCoordinates(toCoordinates);
+
+            while (t <= 1) {
+        		yield return null;
+        		t += Time.deltaTime * 1 / moveAnimDuration;
+                pieceT.position = Vector3.Lerp (startPos, targetPos, t);
+                Debug.Log(pieceT.position);
+        	}
+            UpdateBoard(board);
+            ResetSquareColors();
+        	pieceT.position = startPos;
         }
     }
 }

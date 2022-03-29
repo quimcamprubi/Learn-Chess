@@ -11,7 +11,7 @@ namespace Core {
         public ChessPosition() {
             squares = new int[120];
             castlingRights = 0;
-            enPassantSquare = (int) Board.Squares120Enum.NO_SQ;
+            enPassantSquare = Board.NoEnPassant;
             plyCount = 0;
             for (int i = 0; i < Constants.NUM_SQUARES_EXT; i++) {
                 squares[i] = Board.OFFBOARD;
