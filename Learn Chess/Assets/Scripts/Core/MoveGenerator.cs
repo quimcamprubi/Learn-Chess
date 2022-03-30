@@ -173,7 +173,7 @@ namespace Core {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.D8, Board.White) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.C8, Board.White) && 
                             !board.IsSquareAttacked((int) Board.Squares120Enum.B8, Board.White)) {
-                            moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true));
+                            moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.C8, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
                 }

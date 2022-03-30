@@ -208,7 +208,6 @@ namespace Core {
 
         private void CheckEnding() {
             List<Move> currentLegalMoves = mainBoard.GetLegalMovesInPosition(currentPseudoLegalMoves);
-            //MoveGenerator.PrintMoveList(currentLegalMoves);
             if (currentLegalMoves.Count == 0) {
                 if (mainBoard.IsKingInCheck()) {
                     Checkmate();
