@@ -4,23 +4,26 @@ using System.Collections.Generic;
 using UI;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using Utils;
 
 namespace Core {
     public class Game : MonoBehaviour {
         public BoardUI boardUi;
+        public List<Move> currentPseudoLegalMoves;
+        public List<Move> currentAvailableMoves;
+        public static bool GameIsPaused = false;
+        
         private GameObject sideToPlayText;
         private GameObject enPassantText;
         private GameObject castlingRightsText;
-        private GameObject positionKeyText;
+        private GameObject lastMoveText;
         private Camera cam;
         private int selectedRank;
         private int selectedFile;
-        public List<Move> currentPseudoLegalMoves;
-        public List<Move> currentAvailableMoves;
         private int lastSelectedIndex = -1;
-        public static bool GameIsPaused = false;
-        public event System.Action<Move> onMoveMade;
+        private int playerSide = Board.White;
+        private Move lastPlayedMove = null;
 
         public enum InputState {
             None,
@@ -35,7 +38,7 @@ namespace Core {
             sideToPlayText = GameObject.Find("SideToPlayText");
             enPassantText = GameObject.Find("EnPassantText");
             castlingRightsText = GameObject.Find("CastlingRightsText");
-            positionKeyText = GameObject.Find("PositionKeyText");
+            lastMoveText = GameObject.Find("LastMoveText");
             boardUi = FindObjectOfType<BoardUI>();
             mainBoard = new Board();
             promotionMenu = FindObjectOfType<PromotionMenu>();
@@ -56,11 +59,23 @@ namespace Core {
             
             mainBoard.LoadStartingPosition();
             boardUi.UpdateBoard(mainBoard);
+            boardUi.ResetSquareColors();
             /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             StartCoroutine(TestMoveGenerator(moveList));*/
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
-            
+        }
 
+        public void SwitchSides() {
+            if (playerSide == Board.White) {
+                boardUi.SetPerspective(false);
+                playerSide = Board.Black;
+                boardUi.isBottomWhite = false;
+            } else {
+                boardUi.SetPerspective(true);
+                playerSide = Board.White;
+                boardUi.isBottomWhite = true;
+            }
+            InitializeGame();
         }
 
         IEnumerator TestMoveGenerator(List<Move> moveList) {
@@ -80,11 +95,13 @@ namespace Core {
         }
 
         private void Update() {
+            string lastPlayedMoveString =
+                lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);
             sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
             enPassantText.GetComponent<ShowText>().textValue =
-                "En Passant square: " + mainBoard.enPassantSquare;
+                "En Passant square: " + BoardSquares.SquareNameDictionary[mainBoard.enPassantSquare];
             castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
-            positionKeyText.GetComponent<ShowText>().textValue = "Position Key: " + mainBoard.positionKey;
+            lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
             if (currentPseudoLegalMoves != null && !GameIsPaused) HandleInput();
         }
 
@@ -119,6 +136,7 @@ namespace Core {
                                 boardUi.SetHighlightColor(toCoordinates);
                                 boardUi.UpdateBoard(mainBoard);
                                 currentState = InputState.None;
+                                lastPlayedMove = moveToMake;
                                 ChangeTurn();
                             } else {
                                 promotionMenu.SelectPromotionMove(moveToMake, mainBoard.sideToPlay,this);
@@ -166,6 +184,7 @@ namespace Core {
             boardUi.SetHighlightColor(toCoordinates);
             boardUi.UpdateBoard(mainBoard);
             currentState = InputState.None;
+            lastPlayedMove = move;
             ChangeTurn();
         }
 
@@ -189,6 +208,7 @@ namespace Core {
 
         private void CheckEnding() {
             List<Move> currentLegalMoves = mainBoard.GetLegalMovesInPosition(currentPseudoLegalMoves);
+            //MoveGenerator.PrintMoveList(currentLegalMoves);
             if (currentLegalMoves.Count == 0) {
                 if (mainBoard.IsKingInCheck()) {
                     Checkmate();

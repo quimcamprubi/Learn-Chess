@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Core;
+using UnityEngine.Serialization;
 using Utils;
 
 namespace UI {
     public class BoardUI : MonoBehaviour {
-        public bool isWhitePlaying = true;
+        public bool isBottomWhite = true;
         public BoardColors boardColors;
         public PieceThemes pieceThemes;
         private MeshRenderer[, ] squareRenderers;
         private SpriteRenderer[, ] squarePieceRenderers;
-        public bool playerIsWhite = true;
         private Move lastMadeMove;
         private void Awake() {
             GenerateBoard();
@@ -44,7 +44,7 @@ namespace UI {
         }
         
         public Vector3 PositionFromCoordinates (int file, int rank, float depth = 0) {
-            if (isWhitePlaying) {
+            if (isBottomWhite) {
                 return new Vector3 (-3.5f + file, -3.5f + rank, depth);
             }
             return new Vector3 (-3.5f + 7 - file, 7 - rank - 3.5f, depth);
@@ -52,6 +52,11 @@ namespace UI {
         
         public Vector3 PositionFromCoordinates (Coordinates coord, float depth = 0) {
             return PositionFromCoordinates (coord.fileIndex, coord.rankIndex, depth);
+        }
+        
+        public void SetPerspective (bool whitePOV) {
+            isBottomWhite = whitePOV;
+            ResetSquarePositions ();
         }
 
         public void ResetSquareColors() {
@@ -90,7 +95,7 @@ namespace UI {
         public bool TryGetSquareUnderMouse (Vector2 mouseWorld, out int selectedFile, out int selectedRank) {
             int file = (int) (mouseWorld.x + 4);
             int rank = (int) (mouseWorld.y + 4);
-            if (!playerIsWhite) {
+            if (!isBottomWhite) {
                 file = 7 - file;
                 rank = 7 - rank;
             }
@@ -136,6 +141,15 @@ namespace UI {
             UpdateBoard(board);
             ResetSquareColors();
         	pieceT.position = startPos;
+        }
+        
+        void ResetSquarePositions () {
+            for (int rank = 0; rank < 8; rank++) {
+                for (int file = 0; file < 8; file++) {
+                    squareRenderers[file, rank].transform.position = PositionFromCoordinates(file, rank, -0.1f);
+                    squarePieceRenderers[file, rank].transform.position = PositionFromCoordinates(file, rank, -0.1f);
+                }
+            }
         }
     }
 }

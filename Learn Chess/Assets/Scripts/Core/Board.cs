@@ -750,6 +750,7 @@ namespace Core {
         public List<Move> GetLegalMovesInPosition(List<Move> currentPseudoLegalMoves) {
             List<Move> legalMoves = new List<Move>();
             foreach (Move pseudoLegalMove in currentPseudoLegalMoves) {
+                Debug.Log("Checking move legality" + Move.GetMoveString(pseudoLegalMove));
                 if (MakeMove(pseudoLegalMove)) {
                     UnmakeMove();
                     legalMoves.Add(pseudoLegalMove);

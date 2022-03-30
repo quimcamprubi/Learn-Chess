@@ -9,7 +9,7 @@ namespace Core {
         public static string RANKS = "12345678";
         public static string files = "abcdefgh";
         public static Dictionary<int, string> SquareNameDictionary = new Dictionary<int, string>() {
-            [21] = "a1", [22] = "b1", [23] = "c1", [24] = "d1", [25] = "e1", [26] = "f1", [27] = "g1", [28] = "h1",
+            [-1] = "None", [21] = "a1", [22] = "b1", [23] = "c1", [24] = "d1", [25] = "e1", [26] = "f1", [27] = "g1", [28] = "h1",
             [31] = "a2", [32] = "b2", [33] = "c2", [34] = "d2", [35] = "e2", [36] = "f2", [37] = "g2", [38] = "h2",
             [41] = "a3", [42] = "b3", [43] = "c3", [44] = "d3", [45] = "e3", [46] = "f3", [47] = "g3", [48] = "h3", 
             [51] = "a4", [52] = "b4", [53] = "c4", [54] = "d4", [55] = "e4", [56] = "f4", [57] = "g4", [58] = "h4",
