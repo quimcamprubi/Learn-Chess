@@ -18,6 +18,23 @@ namespace Core {
         private GameObject enPassantText;
         private GameObject castlingRightsText;
         private GameObject lastMoveText;
+        private GameObject file1Text;
+        private GameObject file2Text;
+        private GameObject file3Text;
+        private GameObject file4Text;
+        private GameObject file5Text;
+        private GameObject file6Text;
+        private GameObject file7Text;
+        private GameObject file8Text;
+        private GameObject rank1Text;
+        private GameObject rank2Text;
+        private GameObject rank3Text;
+        private GameObject rank4Text;
+        private GameObject rank5Text;
+        private GameObject rank6Text;
+        private GameObject rank7Text;
+        private GameObject rank8Text;
+        
         private Camera cam;
         private int selectedRank;
         private int selectedFile;
@@ -39,6 +56,22 @@ namespace Core {
             enPassantText = GameObject.Find("EnPassantText");
             castlingRightsText = GameObject.Find("CastlingRightsText");
             lastMoveText = GameObject.Find("LastMoveText");
+            file1Text = GameObject.Find("File1");
+            file2Text = GameObject.Find("File2");
+            file3Text = GameObject.Find("File3");
+            file4Text = GameObject.Find("File4");
+            file5Text = GameObject.Find("File5");
+            file6Text = GameObject.Find("File6");
+            file7Text = GameObject.Find("File7");
+            file8Text = GameObject.Find("File8");
+            rank1Text = GameObject.Find("Rank1");
+            rank2Text = GameObject.Find("Rank2");
+            rank3Text = GameObject.Find("Rank3");
+            rank4Text = GameObject.Find("Rank4");
+            rank5Text = GameObject.Find("Rank5");
+            rank6Text = GameObject.Find("Rank6");
+            rank7Text = GameObject.Find("Rank7");
+            rank8Text = GameObject.Find("Rank8");
             boardUi = FindObjectOfType<BoardUI>();
             mainBoard = new Board();
             promotionMenu = FindObjectOfType<PromotionMenu>();
@@ -75,6 +108,7 @@ namespace Core {
                 playerSide = Board.White;
                 boardUi.isBottomWhite = true;
             }
+            SetFilesRanksText();
             InitializeGame();
         }
 
@@ -225,6 +259,44 @@ namespace Core {
         private void Stalemate() {
             Debug.Log("Stalemate");
             // TODO STALEMATE MESSAGE
+        }
+        
+        private void SetFilesRanksText() {
+            if (playerSide == Board.White) {
+                file1Text.GetComponent<ShowText>().textValue = "A";
+                file2Text.GetComponent<ShowText>().textValue = "B";
+                file3Text.GetComponent<ShowText>().textValue = "C";
+                file4Text.GetComponent<ShowText>().textValue = "D";
+                file5Text.GetComponent<ShowText>().textValue = "E";
+                file6Text.GetComponent<ShowText>().textValue = "F";
+                file7Text.GetComponent<ShowText>().textValue = "G";
+                file8Text.GetComponent<ShowText>().textValue = "H";
+                rank1Text.GetComponent<ShowText>().textValue = "1";
+                rank2Text.GetComponent<ShowText>().textValue = "2";
+                rank3Text.GetComponent<ShowText>().textValue = "3";
+                rank4Text.GetComponent<ShowText>().textValue = "4";
+                rank5Text.GetComponent<ShowText>().textValue = "5";
+                rank6Text.GetComponent<ShowText>().textValue = "6";
+                rank7Text.GetComponent<ShowText>().textValue = "7";
+                rank8Text.GetComponent<ShowText>().textValue = "8";
+            } else {
+                file1Text.GetComponent<ShowText>().textValue = "H";
+                file2Text.GetComponent<ShowText>().textValue = "G";
+                file3Text.GetComponent<ShowText>().textValue = "F";
+                file4Text.GetComponent<ShowText>().textValue = "E";
+                file5Text.GetComponent<ShowText>().textValue = "D";
+                file6Text.GetComponent<ShowText>().textValue = "C";
+                file7Text.GetComponent<ShowText>().textValue = "B";
+                file8Text.GetComponent<ShowText>().textValue = "A";
+                rank1Text.GetComponent<ShowText>().textValue = "8";
+                rank2Text.GetComponent<ShowText>().textValue = "7";
+                rank3Text.GetComponent<ShowText>().textValue = "6";
+                rank4Text.GetComponent<ShowText>().textValue = "5";
+                rank5Text.GetComponent<ShowText>().textValue = "4";
+                rank6Text.GetComponent<ShowText>().textValue = "3";
+                rank7Text.GetComponent<ShowText>().textValue = "2";
+                rank8Text.GetComponent<ShowText>().textValue = "1";
+            }
         }
     }
 }

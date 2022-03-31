@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 4
+      value: Rank4
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -465,7 +465,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 2
+      value: Rank2
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -670,7 +670,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 5
+      value: Rank5
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -1083,7 +1083,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 6
+      value: Rank6
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -1733,7 +1733,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 7
+      value: Rank7
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -1838,7 +1838,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 8
+      value: Rank8
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -3198,7 +3198,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 3
+      value: Rank3
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057262, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Text
@@ -3947,7 +3947,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2777606761069057248, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Name
-      value: 1
+      value: Rank1
       objectReference: {fileID: 0}
     - target: {fileID: 2777606761069057263, guid: 1549d280e00cb2645a473a21aa38a024, type: 3}
       propertyPath: m_Pivot.x
