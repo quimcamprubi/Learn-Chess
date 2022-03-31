@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using UI;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
@@ -89,13 +88,13 @@ namespace Core {
         public void LoadStartingPosition() {
             ResetBoard();
             InitFromPosition(FenDecoder.DecodePositionFromFen(Constants.startingFen));
-            CheckBoard();
+            Assert.IsTrue(CheckBoard());
         }
 
         public void LoadPosition(ChessPosition position) {
             ResetBoard();
             InitFromPosition(position);
-            CheckBoard();
+            Assert.IsTrue(CheckBoard());
             /*PrintGameBoard();
             Print120Board();
             PrintBitBoard(pawns[White], White);
@@ -505,7 +504,7 @@ namespace Core {
 
         public bool MakeMove(Move move) { // If after making the move, the playing side King is in check, we will return false (illegal move).
             // If the playing side King is not in check after the move, the move is legal. 
-            CheckBoard();
+            Assert.IsTrue(CheckBoard());
             int fromSquare = Move.FromSquare(move.move);
             int toSquare = Move.ToSquare(move.move);
             int side = sideToPlay;
@@ -585,7 +584,7 @@ namespace Core {
             }
             sideToPlay ^= 1;
             HashSide();
-            CheckBoard();
+            Assert.IsTrue(CheckBoard());
             // We must now check if the King is in check after the move. In case it is not, the move is illegal.
             if (IsSquareAttacked(kingSquares[side], sideToPlay)) { // If opposing player is attacking our King, move is legal.
                 UnmakeMove();
@@ -596,7 +595,7 @@ namespace Core {
         }
 
         public void UnmakeMove() { // This function reverts the last played move stored in our game history.
-            CheckBoard();
+            Assert.IsTrue(CheckBoard());
             histPly--;
             ply--;
             int move = gameHist[histPly].move; // We retrieve the last move that was played.
@@ -654,7 +653,7 @@ namespace Core {
                 ClearPiece(fromSquare);
                 AddPiece(fromSquare, sideToPlay == White ? Piece.WhitePawn : Piece.BlackPawn);
             }
-            CheckBoard();
+            Assert.IsTrue(CheckBoard());
         }
         
         // MakeMove sub-functions

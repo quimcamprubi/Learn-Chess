@@ -76,7 +76,7 @@ namespace Core {
         // Generate all moves in a given position
         public static List<Move> GenerateAllMoves(Board board) {
             List<Move> moveList = new List<Move>();
-            board.CheckBoard();
+            Assert.IsTrue(board.CheckBoard());
             if (board.sideToPlay == Board.White) { // White pawns (and castling moves)
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.WhitePawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.WhitePawn, pieceNumber];
@@ -110,7 +110,8 @@ namespace Core {
                 if ((board.castlingRights & (int) CastlingRightsEnum.WKCA) != 0) { // White Kingside castling
                     if (board.squares[(int) Board.Squares120Enum.F1] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.G1] == Piece.Empty) {
-                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.F1, Board.Black) &&
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.E1, Board.Black) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.F1, Board.Black) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.G1, Board.Black)) {
                             moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.G1, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
@@ -120,9 +121,9 @@ namespace Core {
                     if (board.squares[(int) Board.Squares120Enum.D1] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.C1] == Piece.Empty && 
                         board.squares[(int) Board.Squares120Enum.B1] == Piece.Empty) {
-                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.D1, Board.Black) &&
-                            !board.IsSquareAttacked((int) Board.Squares120Enum.C1, Board.Black) && 
-                            !board.IsSquareAttacked((int) Board.Squares120Enum.B1, Board.Black)) {
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.E1, Board.Black) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.D1, Board.Black) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.C1, Board.Black)) {
                             moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.C1, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
@@ -160,7 +161,8 @@ namespace Core {
                 if ((board.castlingRights & (int) CastlingRightsEnum.BKCA) != 0) { // Black Kingside castling
                     if (board.squares[(int) Board.Squares120Enum.F8] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.G8] == Piece.Empty) {
-                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.F8, Board.White) &&
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.E8, Board.White) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.F8, Board.White) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.G8, Board.White)) {
                             moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
@@ -170,9 +172,9 @@ namespace Core {
                     if (board.squares[(int) Board.Squares120Enum.D8] == Piece.Empty &&
                         board.squares[(int) Board.Squares120Enum.C8] == Piece.Empty && 
                         board.squares[(int) Board.Squares120Enum.B8] == Piece.Empty) {
-                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.D8, Board.White) &&
-                            !board.IsSquareAttacked((int) Board.Squares120Enum.C8, Board.White) && 
-                            !board.IsSquareAttacked((int) Board.Squares120Enum.B8, Board.White)) {
+                        if (!board.IsSquareAttacked((int) Board.Squares120Enum.E8, Board.White) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.D8, Board.White) &&
+                            !board.IsSquareAttacked((int) Board.Squares120Enum.C8, Board.White)) {
                             moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.C8, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
