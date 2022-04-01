@@ -90,8 +90,8 @@ namespace Core {
             List<Move> moveList =  MoveGenerator.GenerateAllMoves(mainBoard);
             MoveGenerator.PrintMoveList(moveList);*/
             
-            //mainBoard.LoadStartingPosition();
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
+            mainBoard.LoadStartingPosition();
+            //mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
             boardUi.UpdateBoard(mainBoard);
             boardUi.ResetSquareColors();
             //PerftTesting.PerftTest(mainBoard, 4);
