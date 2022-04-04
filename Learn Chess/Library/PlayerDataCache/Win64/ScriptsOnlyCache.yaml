@@ -12,7 +12,6 @@ ScriptsOnlyBuild:
     - UnityEditor.U2D.Animation.BoneGizmo
     Unity.2D.IK.Editor.dll:
     - UnityEditor.U2D.IK.IKEditorManager
-    - UnityEditor.U2D.IK.IKGizmos
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
     - UnityEditor.Tilemaps.GridPaletteBrushes
@@ -62,35 +61,35 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 1454}
+      Script: {instanceID: 1460}
     - Class: 114
-      Script: {instanceID: 1520}
+      Script: {instanceID: 1528}
     - Class: 114
-      Script: {instanceID: 1760}
+      Script: {instanceID: 1768}
     - Class: 114
-      Script: {instanceID: 2686}
+      Script: {instanceID: 2694}
     - Class: 114
-      Script: {instanceID: 2860}
+      Script: {instanceID: 2868}
     - Class: 114
-      Script: {instanceID: 2934}
+      Script: {instanceID: 2900}
     - Class: 114
-      Script: {instanceID: 3104}
+      Script: {instanceID: 2944}
     - Class: 114
-      Script: {instanceID: 3352}
+      Script: {instanceID: 3114}
     - Class: 114
-      Script: {instanceID: 3474}
+      Script: {instanceID: 3362}
     - Class: 114
-      Script: {instanceID: 3496}
+      Script: {instanceID: 3484}
     - Class: 114
-      Script: {instanceID: 5346}
+      Script: {instanceID: 3506}
     - Class: 114
-      Script: {instanceID: 5384}
+      Script: {instanceID: 5356}
     - Class: 114
-      Script: {instanceID: 5520}
+      Script: {instanceID: 5394}
     - Class: 114
-      Script: {instanceID: 5786}
+      Script: {instanceID: 5530}
     - Class: 114
-      Script: {instanceID: 41668}
+      Script: {instanceID: 5796}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -266,6 +265,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: TimelineAsset
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: ConsoleToGUI
   - hash:
       serializedVersion: 2
       Hash: 760787567e1b60d64a3e421ab83ee14a
@@ -656,12 +661,6 @@ ScriptsOnlyBuild:
     assemblyName: Unity.2D.IK.Runtime.dll
     namespaceName: UnityEngine.U2D.IK
     className: FabrikSolver2D
-  - hash:
-      serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: ConsoleToGUI
   platform: 19
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
