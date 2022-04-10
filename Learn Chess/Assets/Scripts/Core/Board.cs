@@ -275,21 +275,21 @@ namespace Core {
             }
             
             // Check BitBoards
-            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn], "checkBoard() failed: White pawns set incorrectly in BitBoard.");
-            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Black pawns set incorrectly in BitBoard.");
-            Assert.IsTrue(BitBoardUtils.countBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Both pawns set incorrectly in BitBoard.");
+            Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn], "checkBoard() failed: White pawns set incorrectly in BitBoard.");
+            Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Black pawns set incorrectly in BitBoard.");
+            Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Both pawns set incorrectly in BitBoard.");
 
             // Check BitBoards squares
             while (tPawns[White] != 0) {
-                sq64 = BitBoardUtils.popBit(ref tPawns[White]);
+                sq64 = BitBoardUtils.PopBit(ref tPawns[White]);
                 Assert.IsTrue(squares[Sq120(sq64)] == Piece.WhitePawn, "checkBoard() failed: White pawn not found in BitBoard.");
             }
             while (tPawns[Black] != 0) {
-                sq64 = BitBoardUtils.popBit(ref tPawns[Black]);
+                sq64 = BitBoardUtils.PopBit(ref tPawns[Black]);
                 Assert.IsTrue(squares[Sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Black pawn not found in BitBoard.");
             }
             while (tPawns[Both] != 0) {
-                sq64 = BitBoardUtils.popBit(ref tPawns[Both]);
+                sq64 = BitBoardUtils.PopBit(ref tPawns[Both]);
                 Assert.IsTrue(squares[Sq120(sq64)] == Piece.WhitePawn || squares[Sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Both pawn not found in BitBoard.");
             }
             
@@ -528,6 +528,7 @@ namespace Core {
                     case (int) Squares120Enum.G1:
                         MovePiece((int) Squares120Enum.H1, (int) Squares120Enum.F1);
                         break;
+
                     case (int) Squares120Enum.C8:
                         MovePiece((int) Squares120Enum.A8, (int) Squares120Enum.D8);
                         break;

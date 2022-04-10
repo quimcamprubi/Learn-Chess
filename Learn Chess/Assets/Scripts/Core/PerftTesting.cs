@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -11,7 +12,7 @@ namespace Core {
                 LeafNodes++;
                 return;
             }
-            List<Move> moveList = MoveGenerator.GenerateAllMoves(board);
+            Move[] moveList = MoveGenerator.GenerateAllMoves(board).ToArray();
             foreach (Move move in moveList) {
                 if (!board.MakeMove(move)) { // If move is illegal, do not explore any further
                     continue;
@@ -24,11 +25,10 @@ namespace Core {
         public static int PerftTest(Board board, int depth) {
             int nodes = 0;
             Assert.IsTrue(board.CheckBoard());
-            board.PrintGameBoard();
             LeafNodes = 0;
             Debug.Log("Starting Perft test to depth = " + depth);
-            List<Move> moveList = MoveGenerator.GenerateAllMoves(board);
-            for (int i = 0; i < moveList.Count; i++) {
+            Move[] moveList = MoveGenerator.GenerateAllMoves(board).ToArray();
+            for (int i = 0; i < moveList.Length; i++) {
                 Move move = moveList[i];
                 if (!board.MakeMove(move)) { // If move is illegal, do not explore branch
                     continue;

@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UI;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Utils;
+using Debug = UnityEngine.Debug;
 
 namespace Core {
     public class Game : MonoBehaviour {
@@ -90,11 +93,14 @@ namespace Core {
             List<Move> moveList =  MoveGenerator.GenerateAllMoves(mainBoard);
             MoveGenerator.PrintMoveList(moveList);*/
             
-            //mainBoard.LoadStartingPosition();
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
+            mainBoard.LoadStartingPosition();
+            //mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
             boardUi.UpdateBoard(mainBoard);
             boardUi.ResetSquareColors();
-            PerftTesting.PerftTest(mainBoard, 6);
+            Stopwatch watch = Stopwatch.StartNew();
+            PerftTesting.PerftTest(mainBoard, 7);
+            watch.Stop();
+            Debug.Log("Elapsed time: " + watch.Elapsed);
             /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             StartCoroutine(TestMoveGenerator(moveList));*/
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
@@ -183,7 +189,7 @@ namespace Core {
                         Coordinates coordinates = BoardSquares.CoordFromIndex(Board.Sq64(index));
                         boardUi.SetSelectedColor(coordinates);
                         currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
-                        boardUi.HighlightLegalMoves(currentAvailableMoves);
+                        boardUi.HighlightLegalMoves(currentAvailableMoves.ToArray());
                         currentState = InputState.PieceSelected;
                     }
                 } else {
@@ -203,7 +209,7 @@ namespace Core {
                     boardUi.SetSelectedColor(coordinates);
                     currentAvailableMoves = mainBoard.GetLegalMovesForSquare(index, currentPseudoLegalMoves);
                     if (currentAvailableMoves.Count > 0) {
-                        boardUi.HighlightLegalMoves(currentAvailableMoves);
+                        boardUi.HighlightLegalMoves(currentAvailableMoves.ToArray());
                         currentState = InputState.PieceSelected;
                     }
                 }

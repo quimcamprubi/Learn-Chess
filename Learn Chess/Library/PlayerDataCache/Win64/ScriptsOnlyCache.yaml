@@ -12,6 +12,7 @@ ScriptsOnlyBuild:
     - UnityEditor.U2D.Animation.BoneGizmo
     Unity.2D.IK.Editor.dll:
     - UnityEditor.U2D.IK.IKEditorManager
+    - UnityEditor.U2D.IK.IKGizmos
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
     - UnityEditor.Tilemaps.GridPaletteBrushes
@@ -63,33 +64,33 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1460}
     - Class: 114
-      Script: {instanceID: 1528}
+      Script: {instanceID: 1526}
     - Class: 114
-      Script: {instanceID: 1768}
+      Script: {instanceID: 1766}
     - Class: 114
-      Script: {instanceID: 2694}
+      Script: {instanceID: 2692}
     - Class: 114
-      Script: {instanceID: 2868}
+      Script: {instanceID: 2866}
     - Class: 114
-      Script: {instanceID: 2900}
+      Script: {instanceID: 2898}
     - Class: 114
-      Script: {instanceID: 2944}
+      Script: {instanceID: 2942}
     - Class: 114
-      Script: {instanceID: 3114}
+      Script: {instanceID: 3112}
     - Class: 114
-      Script: {instanceID: 3362}
+      Script: {instanceID: 3360}
     - Class: 114
-      Script: {instanceID: 3484}
+      Script: {instanceID: 3482}
     - Class: 114
-      Script: {instanceID: 3506}
+      Script: {instanceID: 3504}
     - Class: 114
-      Script: {instanceID: 5356}
+      Script: {instanceID: 5354}
     - Class: 114
-      Script: {instanceID: 5394}
+      Script: {instanceID: 5392}
     - Class: 114
-      Script: {instanceID: 5530}
+      Script: {instanceID: 5528}
     - Class: 114
-      Script: {instanceID: 5796}
+      Script: {instanceID: 5794}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128

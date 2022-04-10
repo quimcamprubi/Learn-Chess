@@ -11,20 +11,20 @@ namespace Core {
         public static readonly int PawnCapLeft = 9; // Capture left
         public static readonly int PawnCapRight = 11; // Capture right
 
-        public static Dictionary<int, List<int>> PieceDirections = new Dictionary<int, List<int>>() {
-            [Piece.Empty] = new List<int> {},
-            [Piece.WhitePawn] = new List<int> {},
-            [Piece.WhiteKnight] = new List<int> {21, 12, -8, -19, -21, -12, 8, 19},
-            [Piece.WhiteBishop] = new List<int> {11, -9, -11, 9},
-            [Piece.WhiteRook] = new List<int> {10, 1, -10, -1},
-            [Piece.WhiteQueen] = new List<int> {10, 1, -10, -1, 11, -9, -11, 9},
-            [Piece.WhiteKing] = new List<int> {10, 1, -10, -1, 11, -9, -11, 9},
-            [Piece.BlackPawn] = new List<int> {},
-            [Piece.BlackKnight] = new List<int> {21, 12, -8, -19, -21, -12, 8, 19},
-            [Piece.BlackBishop] = new List<int> {11, -9, -11, 9},
-            [Piece.BlackRook] = new List<int> {10, 1, -10, -1},
-            [Piece.BlackQueen] = new List<int> {10, 1, -10, -1, 11, -9, -11, 9},
-            [Piece.BlackKing] = new List<int> {10, 1, -10, -1, 11, -9, -11, 9},
+        public static readonly Dictionary<int, int[]> PieceDirections = new Dictionary<int, int[]>() {
+            [Piece.Empty] = new int[] {},
+            [Piece.WhitePawn] = new int[] {},
+            [Piece.WhiteKnight] = new int[] {21, 12, -8, -19, -21, -12, 8, 19},
+            [Piece.WhiteBishop] = new int[] {11, -9, -11, 9},
+            [Piece.WhiteRook] = new int[] {10, 1, -10, -1},
+            [Piece.WhiteQueen] = new int[] {10, 1, -10, -1, 11, -9, -11, 9},
+            [Piece.WhiteKing] = new int[] {10, 1, -10, -1, 11, -9, -11, 9},
+            [Piece.BlackPawn] = new int[] {},
+            [Piece.BlackKnight] = new int[] {21, 12, -8, -19, -21, -12, 8, 19},
+            [Piece.BlackBishop] = new int[] {11, -9, -11, 9},
+            [Piece.BlackRook] = new int[] {10, 1, -10, -1},
+            [Piece.BlackQueen] = new int[] {10, 1, -10, -1, 11, -9, -11, 9},
+            [Piece.BlackKing] = new int[] {10, 1, -10, -1, 11, -9, -11, 9},
         };
         
         // DELETE IF UNNECESSARY

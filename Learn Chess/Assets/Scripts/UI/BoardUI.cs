@@ -104,7 +104,7 @@ namespace UI {
             return file >= 0 && file < 8 && rank >= 0 && rank < 8;
         }
 
-        public void HighlightLegalMoves(List<Move> legalMovesForSquare) {
+        public void HighlightLegalMoves(Move[] legalMovesForSquare) {
             foreach (Move move in legalMovesForSquare) {
                 Coordinates coordinates = BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
                 SetSquareColor(coordinates, boardColors.lightColors.legal, boardColors.darkColors.legal);

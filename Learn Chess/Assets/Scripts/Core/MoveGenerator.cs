@@ -191,7 +191,7 @@ namespace Core {
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
-                    List<int> directionsList = Directions.PieceDirections[piece];
+                    int[] directionsList = Directions.PieceDirections[piece];
                     foreach (int direction in directionsList) {
                         int targetSquare = square + direction;
                         while (Validations.IsSquareOnBoard(targetSquare)) { // Keep sliding until we reach the end of the board
@@ -218,7 +218,7 @@ namespace Core {
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
                     Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
-                    List<int> directionsList = Directions.PieceDirections[piece];
+                    int[] directionsList = Directions.PieceDirections[piece];
                     foreach (int direction in directionsList) {
                         int targetSquare = square + direction;
                         if (!Validations.IsSquareOnBoard(targetSquare)) continue; // If square is offboard, we ignore the move
