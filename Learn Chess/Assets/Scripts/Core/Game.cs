@@ -97,10 +97,10 @@ namespace Core {
             //mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
             boardUi.UpdateBoard(mainBoard);
             boardUi.ResetSquareColors();
-            Stopwatch watch = Stopwatch.StartNew();
+            /*Stopwatch watch = Stopwatch.StartNew();
             PerftTesting.PerftTest(mainBoard, 7);
             watch.Stop();
-            Debug.Log("Elapsed time: " + watch.Elapsed);
+            Debug.Log("Elapsed time: " + watch.Elapsed);*/
             /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             StartCoroutine(TestMoveGenerator(moveList));*/
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
