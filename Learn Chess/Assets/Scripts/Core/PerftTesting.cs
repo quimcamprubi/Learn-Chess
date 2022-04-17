@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using UnityEngine;
 using UnityEngine.Assertions;
+using Debug = UnityEngine.Debug;
 
 namespace Core {
     public static class PerftTesting {
@@ -27,6 +28,7 @@ namespace Core {
             Assert.IsTrue(board.CheckBoard());
             LeafNodes = 0;
             Debug.Log("Starting Perft test to depth = " + depth);
+            Stopwatch watch = Stopwatch.StartNew();
             Move[] moveList = MoveGenerator.GenerateAllMoves(board).ToArray();
             for (int i = 0; i < moveList.Length; i++) {
                 Move move = moveList[i];
@@ -39,7 +41,9 @@ namespace Core {
                 long oldNodes = LeafNodes - cumulativeNodes;
                 Debug.Log("Move " + (i + 1) + " : " + BoardSquares.GetAlgebraicMove(move.move) +  " : " + oldNodes);
             }
+            watch.Stop();
             Debug.Log("Perft test complete: " + LeafNodes + " visited.");
+            Debug.Log("Elapsed time: " + watch.Elapsed);
             return nodes;
         }
     }
