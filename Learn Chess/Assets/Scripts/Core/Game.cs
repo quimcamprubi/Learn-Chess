@@ -97,10 +97,7 @@ namespace Core {
             //mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
             boardUi.UpdateBoard(mainBoard);
             boardUi.ResetSquareColors();
-            /*Stopwatch watch = Stopwatch.StartNew();
-            PerftTesting.PerftTest(mainBoard, 7);
-            watch.Stop();
-            Debug.Log("Elapsed time: " + watch.Elapsed);*/
+            //PerftTesting.PerftTest(mainBoard, 4);
             /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             StartCoroutine(TestMoveGenerator(moveList));*/
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
@@ -233,6 +230,7 @@ namespace Core {
         public void ChangeTurn() {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
             CheckEnding();
+            //if (Search.IsRepeated(mainBoard)) Debug.Log("Position repeated");
         }
 
         private string GetSideToPlayString(int sideToPlay) {

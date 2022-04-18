@@ -29,7 +29,7 @@ namespace Core {
         public int ply;                                                        // Total half-moves played in current search
         public int histPly;                                                    // Total half-moves played in the game (and used to index gameHist)
         public int castlingRights;                                             // 4 bits for castling rights: WKCA WQCA BKCA BQCA
-        private UndoMove[] gameHist = new UndoMove[Constants.MAX_GAME_MOVES].Populate(() => new UndoMove());
+        public UndoMove[] gameHist = new UndoMove[Constants.MAX_GAME_MOVES].Populate(() => new UndoMove());
 
         // Hash key
         public ulong positionKey;

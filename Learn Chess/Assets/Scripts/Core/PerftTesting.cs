@@ -43,7 +43,7 @@ namespace Core {
             }
             watch.Stop();
             Debug.Log("Perft test complete: " + LeafNodes + " visited.");
-            Debug.Log("Elapsed time: " + watch.Elapsed);
+            Debug.Log("Elapsed time: " + watch.ElapsedMilliseconds);
             return nodes;
         }
     }
