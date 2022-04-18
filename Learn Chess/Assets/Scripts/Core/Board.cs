@@ -50,6 +50,9 @@ namespace Core {
         private ulong[] setMask = new ulong[Constants.NUM_SQUARES];
         private ulong[] clearMask = new ulong[Constants.NUM_SQUARES];
         
+        // Principal Variation table
+        private PVTable pvTable;
+
         public static int None = 0; // 0 constant
         public static int OFFBOARD = 100;
         
@@ -167,6 +170,7 @@ namespace Core {
             histPly = 0;
             castlingRights = 0;
             positionKey = 0UL;
+            pvTable = new PVTable(Search.pvTableSize);
         }
 
         private void InitBitBoards() {
