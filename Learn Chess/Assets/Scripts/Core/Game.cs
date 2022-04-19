@@ -152,6 +152,15 @@ namespace Core {
                 } else {
                     CheckSquareSelected(mousePosition);
                 }
+            } else if (Input.GetKeyDown(KeyCode.P)) {
+                int max = mainBoard.pvTable.GetPvLineCount(4, mainBoard);
+                Debug.Log("PV line of " + max + " moves.");
+                for (int pvNum = 0; pvNum < max; pvNum++) {
+                    Move move = mainBoard.pvArray[pvNum];
+                    Debug.Log("PV move " + pvNum + ": " + Move.GetMoveString(move));
+                }
+            } else if (Input.GetKeyDown(KeyCode.B)) {
+                UnmakeMove();
             }
         }
 
@@ -165,6 +174,7 @@ namespace Core {
                         int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
                         if (moveIndex >= 0) {
                             Move moveToMake = currentAvailableMoves[moveIndex];
+                            //mainBoard.pvTable.StorePvMove(mainBoard.positionKey, moveToMake); Only for PV testing purposes
                             if (!Move.IsMovePromotion(moveToMake.move)) {
                                 mainBoard.MakeMove(moveToMake);
                                 Coordinates fromCoordinates =
@@ -225,6 +235,28 @@ namespace Core {
             currentState = InputState.None;
             lastPlayedMove = move;
             ChangeTurn();
+        }
+
+        public void UnmakeMove() {
+            if (mainBoard.histPly > 0) {
+                mainBoard.UnmakeMove();
+                boardUi.ResetSquareColors();
+                if (mainBoard.histPly != 0) {
+                    Move previousMove = new Move(mainBoard.gameHist[mainBoard.histPly - 1].move, 0);
+                    Coordinates fromCoordinates =
+                        BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(previousMove.move)));
+                    Coordinates toCoordinates =
+                        BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(previousMove.move)));
+                    boardUi.SetHighlightColor(fromCoordinates);
+                    boardUi.SetHighlightColor(toCoordinates);
+                    lastPlayedMove = previousMove;
+                } else {
+                    lastPlayedMove = null;
+                }
+                boardUi.UpdateBoard(mainBoard);
+                currentState = InputState.None;
+                ChangeTurn();
+            }
         }
 
         public void ChangeTurn() {

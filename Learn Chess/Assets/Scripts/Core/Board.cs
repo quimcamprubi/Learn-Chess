@@ -51,7 +51,8 @@ namespace Core {
         private ulong[] clearMask = new ulong[Constants.NUM_SQUARES];
         
         // Principal Variation table
-        private PVTable pvTable;
+        public PVTable pvTable; // Table containing multiple principle variations. Accessed with positionKey.
+        public Move[] pvArray = new Move[Search.MaxDepth];   // Array containing the single best principle variation of moves.
 
         public static int None = 0; // 0 constant
         public static int OFFBOARD = 100;
@@ -170,7 +171,7 @@ namespace Core {
             histPly = 0;
             castlingRights = 0;
             positionKey = 0UL;
-            pvTable = new PVTable(Search.pvTableSize);
+            pvTable = new PVTable(Search.PvTableSize);
         }
 
         private void InitBitBoards() {
@@ -602,6 +603,7 @@ namespace Core {
 
         public void UnmakeMove() { // This function reverts the last played move stored in our game history.
             Assert.IsTrue(CheckBoard());
+            Assert.IsTrue(histPly > 0, "No moves unmake.");
             histPly--;
             ply--;
             int move = gameHist[histPly].move; // We retrieve the last move that was played.

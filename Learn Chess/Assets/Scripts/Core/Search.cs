@@ -2,8 +2,8 @@
 
 namespace Core {
     public static class Search {
-        public static int pvTableSize = 130000;
-        
+        public static int PvTableSize = 130000;
+        public static int MaxDepth = 64;
         public static void SearchPosition(Board board) {
             //TODO
         }

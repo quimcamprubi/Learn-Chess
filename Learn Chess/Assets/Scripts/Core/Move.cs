@@ -63,7 +63,14 @@ namespace Core {
                    IsEnPassantCapture(move.move) + " - Pawn start: " + IsPawnStartMove(move.move) + " - Castling move: " 
                    + IsCastlingMove(move.move) + " - Score: " + move.score;
         }
-        
+
+        public override bool Equals(object obj) {
+            var item = obj as Move;
+            if (item == null) {
+                return false;
+            }
+            return this.move == item.move && this.score == item.score;
+        }
     }
     
     /* ----- move variable -----

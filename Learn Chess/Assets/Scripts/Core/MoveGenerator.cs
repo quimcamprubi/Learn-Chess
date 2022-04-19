@@ -249,5 +249,15 @@ namespace Core {
             }
             Debug.Log(sb.ToString());
         }
+
+        public static bool MoveExists(Board board, Move move) { // Validates if there is any legal move that matches the parameter
+            Move[] movesList = GenerateAllMoves(board).ToArray();
+            foreach (Move move1 in movesList) {
+                if (!board.MakeMove(move1)) continue;
+                board.UnmakeMove();
+                if (move1.Equals(move)) return true;
+            }
+            return false;
+        }
     }
 }
