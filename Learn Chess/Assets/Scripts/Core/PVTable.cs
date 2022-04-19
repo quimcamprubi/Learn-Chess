@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine.Assertions;
+using Utils;
 
 namespace Core {
     public class PVTable {
         public Entry[] entries;
         public readonly ulong size;
+        private Board board;
 
         public struct Entry {
             public readonly ulong positionKey;
@@ -16,9 +18,10 @@ namespace Core {
             }
         }
 
-        public PVTable (int size) {
+        public PVTable (Board board, int size) {
             this.size = (ulong) size;
             entries = new Entry[size];
+            this.board = board;
         }
         
         public void Clear () {
@@ -27,22 +30,22 @@ namespace Core {
             }
         }
 
-        public void StorePvMove(ulong positionKey, Move move) {
-            ulong index = positionKey % size;
+        public void StorePvMove(Move move) {
+            ulong index = board.positionKey % size;
             Assert.IsTrue(index <= size - 1, "StorePvMove index is too large.");
-            entries[index] = new Entry(positionKey, move);
+            entries[index] = new Entry(board.positionKey, move);
         }
 
 
-        public Move ProbePvTable(ulong positionKey) {
-            ulong index = positionKey % size;
+        public Move ProbePvTable() {
+            ulong index = board.positionKey % size;
             Assert.IsTrue(index <= size - 1, "ProbePVTable index is too large.");
             return entries[index].move;
         }
 
-        public int GetPvLineCount(int depth, Board board) {
-            Assert.IsTrue(depth < Search.MaxDepth, "PV Depth is too large.");
-            Move move = ProbePvTable(board.positionKey);
+        public int GetPvLineCount(int depth) {
+            Assert.IsTrue(depth < Constants.MAX_DEPTH, "PV Depth is too large.");
+            Move move = ProbePvTable();
             int count = 0;
             while (move != null && count < depth) {
                 if (MoveGenerator.MoveExists(board, move)) {
@@ -51,7 +54,7 @@ namespace Core {
                 } else {
                     break;
                 }
-                move = ProbePvTable(board.positionKey);
+                move = ProbePvTable();
             }
             while (board.ply > 0) {
                 board.UnmakeMove();

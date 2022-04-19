@@ -153,7 +153,7 @@ namespace Core {
                     CheckSquareSelected(mousePosition);
                 }
             } else if (Input.GetKeyDown(KeyCode.P)) {
-                int max = mainBoard.pvTable.GetPvLineCount(4, mainBoard);
+                int max = mainBoard.pvTable.GetPvLineCount(4);
                 Debug.Log("PV line of " + max + " moves.");
                 for (int pvNum = 0; pvNum < max; pvNum++) {
                     Move move = mainBoard.pvArray[pvNum];
@@ -174,7 +174,7 @@ namespace Core {
                         int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
                         if (moveIndex >= 0) {
                             Move moveToMake = currentAvailableMoves[moveIndex];
-                            //mainBoard.pvTable.StorePvMove(mainBoard.positionKey, moveToMake); Only for PV testing purposes
+                            //mainBoard.pvTable.StorePvMove(moveToMake);
                             if (!Move.IsMovePromotion(moveToMake.move)) {
                                 mainBoard.MakeMove(moveToMake);
                                 Coordinates fromCoordinates =

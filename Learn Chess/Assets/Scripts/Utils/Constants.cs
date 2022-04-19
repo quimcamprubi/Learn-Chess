@@ -14,6 +14,8 @@ namespace Utils {
         public static readonly int MAX_GAME_MOVES = 2048;
         public static readonly int MAX_PIECES_OF_SAME_TYPE = 10;
         public static readonly int NUM_PLAYERS = 2;
+        public static int PV_TABLE_SIZE = 130000;
+        public static int MAX_DEPTH = 64;
         
         public static readonly string startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         public static readonly string fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";

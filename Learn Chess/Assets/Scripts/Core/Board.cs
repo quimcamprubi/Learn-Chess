@@ -14,11 +14,11 @@ namespace Core {
     public class Board {
         // Game board
         public int[] squares = new int[Constants.NUM_SQUARES_EXT];
+        public int[] kingSquares = new int[Constants.NUM_KINGS];
         
         // Indices
         public static int[] sq64ToSq120 = new int[Constants.NUM_SQUARES];       // 64 indices to 120 indices
         public static int[] sq120ToSq64 = new int[Constants.NUM_SQUARES_EXT];   // 120 indices to 64 indices
-        private int[] kingSquares = new int[Constants.NUM_KINGS];
         public static int[] squareFile = new int[Constants.NUM_SQUARES_EXT];
         public static int[] squareRank = new int[Constants.NUM_SQUARES_EXT];
 
@@ -52,8 +52,12 @@ namespace Core {
         
         // Principal Variation table
         public PVTable pvTable; // Table containing multiple principle variations. Accessed with positionKey.
-        public Move[] pvArray = new Move[Search.MaxDepth];   // Array containing the single best principle variation of moves.
-
+        public Move[] pvArray = new Move[Constants.MAX_DEPTH];   // Array containing the single best principle variation of moves.
+        
+        // Search data for move ordering
+        private int[,] searchHistory = new int[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
+        private int[,] searchKillers = new int[Constants.NUM_PLAYERS, Constants.MAX_DEPTH]; // Two most recent moves that have caused a Beta cutoff
+        
         public static int None = 0; // 0 constant
         public static int OFFBOARD = 100;
         
@@ -153,16 +157,14 @@ namespace Core {
             for (int i = 0; i < Constants.NUM_SQUARES; i++) {
                 squares[Sq120(i)] = Piece.Empty;
             }
-            for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
-                bigPieces[i] = 0;
-                majorPieces[i] = 0;
-                minorPieces[i] = 0;
-                material[i] = 0;
-            }
+
+            bigPieces = new int[Constants.NUM_PLAYERS];
+            majorPieces = new int[Constants.NUM_PLAYERS];
+            minorPieces = new int[Constants.NUM_PLAYERS];
+            material = new int[Constants.NUM_PLAYERS];
+            pieceNumbers = new int[Constants.TOTAL_DIFF_PIECES];
             pawns = new ulong[3] { 0UL, 0UL, 0UL } ;
-            for (int i = 0; i < Constants.TOTAL_DIFF_PIECES; i++) {
-                pieceNumbers[i] = None;
-            }
+            
             kingSquares[White] = kingSquares[Black] = (int) Squares120Enum.NO_SQ;
             sideToPlay = Both;
             enPassantSquare = NoEnPassant;
@@ -171,7 +173,7 @@ namespace Core {
             histPly = 0;
             castlingRights = 0;
             positionKey = 0UL;
-            pvTable = new PVTable(Search.PvTableSize);
+            pvTable = new PVTable(this, Constants.PV_TABLE_SIZE);
         }
 
         private void InitBitBoards() {
@@ -787,6 +789,13 @@ namespace Core {
                 return true;
             }
             return false;
+        }
+
+        public void ClearSearchData() {
+            searchHistory = new int[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
+            searchKillers = new int[Constants.NUM_PLAYERS, Constants.MAX_DEPTH];
+            pvTable.Clear();
+            ply = 0;
         }
     }
 }
