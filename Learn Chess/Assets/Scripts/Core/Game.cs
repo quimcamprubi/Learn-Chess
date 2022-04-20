@@ -37,6 +37,7 @@ namespace Core {
         private GameObject rank6Text;
         private GameObject rank7Text;
         private GameObject rank8Text;
+        private GameObject gameStatusText;
         
         private Camera cam;
         private int selectedRank;
@@ -82,6 +83,7 @@ namespace Core {
             rank6Text = GameObject.Find("Rank6");
             rank7Text = GameObject.Find("Rank7");
             rank8Text = GameObject.Find("Rank8");
+            gameStatusText = GameObject.Find("GameStatusText");
             boardUi = FindObjectOfType<BoardUI>();
             mainBoard = new Board();
             promotionMenu = FindObjectOfType<PromotionMenu>();
@@ -211,6 +213,8 @@ namespace Core {
         }
 
         private void MakeMove(Move move) {
+            gameStatusText.GetComponent<ShowText>().textValue = "";
+            boardUi.ResetSquareColors();
             mainBoard.MakeMove(move);
             Coordinates fromCoordinates =
                 BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
@@ -256,7 +260,8 @@ namespace Core {
         }
 
         public void UnmakeMove() {
-            if (mainBoard.histPly > 0) {
+            if (mainBoard.histPly > 1) {
+                mainBoard.UnmakeMove();
                 mainBoard.UnmakeMove();
                 boardUi.ResetSquareColors();
                 if (mainBoard.histPly != 0) {
@@ -273,14 +278,14 @@ namespace Core {
                 }
                 boardUi.UpdateBoard(mainBoard);
                 currentState = InputState.None;
-                ChangeTurn();
+                ChangeTurn(changePlayer: false);
             }
         }
 
-        public void ChangeTurn() {
+        public void ChangeTurn(bool changePlayer = true) {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
             CheckEnding();
-            currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
+            if (changePlayer) currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
             Debug.Log("Turn changed.");
             //if (Search.IsRepeated(mainBoard)) Debug.Log("Position repeated");
         }
@@ -307,23 +312,31 @@ namespace Core {
 
         private void CheckEnding() {
             List<Move> currentLegalMoves = mainBoard.GetLegalMovesInPosition(currentPseudoLegalMoves);
+            bool isKingIncheck = mainBoard.IsKingInCheck();
             if (currentLegalMoves.Count == 0) {
-                if (mainBoard.IsKingInCheck()) {
+                if (isKingIncheck) {
                     Checkmate();
                 } else {
                     Stalemate();
                 } 
+            } else if (isKingIncheck) {
+                Check();
             }
         }
 
         private void Checkmate() {
             Debug.Log("Checkmate");
-            // TODO END GAME MESSAGE
+            gameStatusText.GetComponent<ShowText>().textValue = "Checkmate!";
         }
 
         private void Stalemate() {
             Debug.Log("Stalemate");
-            // TODO STALEMATE MESSAGE
+            gameStatusText.GetComponent<ShowText>().textValue = "Stalemate!";
+        }
+
+        private void Check() {
+            Debug.Log("Check");
+            gameStatusText.GetComponent<ShowText>().textValue = "Check!";
         }
         
         private void SetFilesRanksText() {
