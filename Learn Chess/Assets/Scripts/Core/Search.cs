@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine.Assertions;
 using Utils;
 using Debug = UnityEngine.Debug;
@@ -18,6 +17,10 @@ namespace Core {
         public bool stopped;
         public bool infinite;
 
+        public SearchInfo(int depth) {
+            this.depth = depth;
+        }
+        
         public void ClearSearchData() {
             startTime = (int) Stopwatch.GetTimestamp();
             stopped = false;
@@ -51,7 +54,7 @@ namespace Core {
         }
         
         public static int RecursiveAlphaBeta(int alpha, int beta, int depth, Board board, SearchInfo searchInfo, bool nullMove = false) {
-            Assert.IsTrue(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
+            //Assert.IsTrue(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
             if (depth == 0) {
                 searchInfo.nodes++;
                 return Evaluate.EvaluatePosition(board);
@@ -107,13 +110,11 @@ namespace Core {
                 int pvMoves = board.pvTable.GetPvLineCount(currentDepth);
                 Move bestMove = board.pvArray[0];
                 Debug.Log("Depth: " + currentDepth + " - move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + " - nodes: " + searchInfo.nodes);
-                for (int pvNum = 0; pvNum < pvMoves; pvNum++) {
+                /*for (int pvNum = 0; pvNum < pvMoves; pvNum++) {
                     Move move = board.pvArray[pvNum];
                     Debug.Log("PV move " + pvNum + ": " + Move.GetMoveString(move));
-                }
+                }*/
             }
-
-
         }
     }
 }

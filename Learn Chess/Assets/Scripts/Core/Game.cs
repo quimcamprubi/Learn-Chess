@@ -44,10 +44,17 @@ namespace Core {
         private int lastSelectedIndex = -1;
         private int playerSide = Board.White;
         private Move lastPlayedMove = null;
+        private PlayerType currentPlayer = PlayerType.Human;
 
         public enum InputState {
             None,
             PieceSelected
+        }
+
+        public enum PlayerType
+        {
+            Human,
+            AI
         }
 
         private Board mainBoard;
@@ -104,13 +111,16 @@ namespace Core {
         }
 
         public void SwitchSides() {
-            if (playerSide == Board.White) {
+            if (playerSide == Board.White)
+            {
                 boardUi.SetPerspective(false);
                 playerSide = Board.Black;
+                currentPlayer = PlayerType.AI;
                 boardUi.isBottomWhite = false;
             } else {
                 boardUi.SetPerspective(true);
                 playerSide = Board.White;
+                currentPlayer = PlayerType.Human;
                 boardUi.isBottomWhite = true;
             }
             SetFilesRanksText();
@@ -134,14 +144,18 @@ namespace Core {
         }
 
         private void Update() {
-            string lastPlayedMoveString =
-                lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);
-            sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
-            enPassantText.GetComponent<ShowText>().textValue =
-                "En Passant square: " + BoardSquares.SquareNameDictionary[mainBoard.enPassantSquare];
-            castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
-            lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
-            if (currentPseudoLegalMoves != null && !GameIsPaused) HandleInput();
+            if (!GameIsPaused)
+            {
+                string lastPlayedMoveString =
+                    lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);
+                sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
+                enPassantText.GetComponent<ShowText>().textValue =
+                    "En Passant square: " + BoardSquares.SquareNameDictionary[mainBoard.enPassantSquare];
+                castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
+                lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
+                if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.Human) HandleInput();
+                else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI) AISearchAndMakeMove();
+            }
         }
 
         private void HandleInput() {
@@ -176,17 +190,7 @@ namespace Core {
                             Move moveToMake = currentAvailableMoves[moveIndex];
                             //mainBoard.pvTable.StorePvMove(moveToMake);
                             if (!Move.IsMovePromotion(moveToMake.move)) {
-                                mainBoard.MakeMove(moveToMake);
-                                Coordinates fromCoordinates =
-                                    BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(moveToMake.move)));
-                                Coordinates toCoordinates =
-                                    BoardSquares.CoordFromIndex(Board.Sq64(index));
-                                boardUi.SetHighlightColor(fromCoordinates);
-                                boardUi.SetHighlightColor(toCoordinates);
-                                boardUi.UpdateBoard(mainBoard);
-                                currentState = InputState.None;
-                                lastPlayedMove = moveToMake;
-                                ChangeTurn();
+                                MakeMove(moveToMake);
                             } else {
                                 promotionMenu.SelectPromotionMove(moveToMake, mainBoard.sideToPlay,this);
                             }
@@ -204,6 +208,20 @@ namespace Core {
                     lastSelectedIndex = -1;
                 }
             }
+        }
+
+        private void MakeMove(Move move) {
+            mainBoard.MakeMove(move);
+            Coordinates fromCoordinates =
+                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
+            Coordinates toCoordinates =
+                BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
+            boardUi.SetHighlightColor(fromCoordinates);
+            boardUi.SetHighlightColor(toCoordinates);
+            boardUi.UpdateBoard(mainBoard);
+            currentState = InputState.None;
+            lastPlayedMove = move;
+            ChangeTurn();
         }
 
         private void AttemptSelectPiece(Vector2 mousePosition) {
@@ -262,7 +280,16 @@ namespace Core {
         public void ChangeTurn() {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
             CheckEnding();
+            currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
+            Debug.Log("Turn changed.");
             //if (Search.IsRepeated(mainBoard)) Debug.Log("Position repeated");
+        }
+
+        private void AISearchAndMakeMove() {
+            SearchInfo searchParameters = new SearchInfo(depth: 6);
+            Search.SearchPosition(mainBoard, searchParameters);
+            Move bestMove = mainBoard.pvArray[0];
+            MakeMove(bestMove);
         }
 
         private string GetSideToPlayString(int sideToPlay) {

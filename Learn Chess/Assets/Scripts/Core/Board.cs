@@ -244,7 +244,7 @@ namespace Core {
         public bool CheckBoard() {
             // This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
             // Board class variables in order to check that they are correct at all times.
-            //Debug.Log("In checkboard");
+            Debug.Log("In checkboard");
             int[] tPieceNumbers = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             int[] tBigPieces = new int[2] { 0, 0};
             int[] tMajorPieces = new int[2] { 0, 0};
