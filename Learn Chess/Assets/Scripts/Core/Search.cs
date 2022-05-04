@@ -109,7 +109,7 @@ namespace Core {
                 // if (OutOfTime()) // previousBestMove
                 int pvMoves = board.pvTable.GetPvLineCount(currentDepth);
                 Move bestMove = board.pvArray[0];
-                Debug.Log("Depth: " + currentDepth + " - move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + " - nodes: " + searchInfo.nodes);
+                Debug.Log("Depth: " + currentDepth + " - best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + " - nodes: " + searchInfo.nodes);
                 /*for (int pvNum = 0; pvNum < pvMoves; pvNum++) {
                     Move move = board.pvArray[pvNum];
                     Debug.Log("PV move " + pvNum + ": " + Move.GetMoveString(move));
