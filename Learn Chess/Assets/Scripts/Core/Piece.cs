@@ -98,5 +98,6 @@ namespace Core {
         public static readonly bool[] IsPieceRookQueen = { false, false, false, false, true, true, false, false, false, false, true, true, false };
         public static readonly bool[] IsPieceBishopQueen = { false, false, false, true, false, true, false, false, false, true, false, true, false };
         public static readonly bool[] IsPieceSliding = { false, false, false, true, true, true, false, false, false, true, true, true, false };
+        public static readonly int[] VictimScores = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
     }
 }

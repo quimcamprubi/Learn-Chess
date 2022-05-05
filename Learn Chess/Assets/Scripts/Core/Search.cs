@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using UnityEngine.Assertions;
 using Utils;
 using Debug = UnityEngine.Debug;
@@ -16,6 +17,8 @@ namespace Core {
         public bool quit;
         public bool stopped;
         public bool infinite;
+        public float failHigh;
+        public float failHighFirst;
 
         public SearchInfo(int depth) {
             this.depth = depth;
@@ -25,12 +28,28 @@ namespace Core {
             startTime = (int) Stopwatch.GetTimestamp();
             stopped = false;
             nodes = 0;
+            failHigh = 0;
+            failHighFirst = 0;
         }
     }
     
     public static class Search {
         public static int Infinite = 30000;
         public static int Mate = 29000;
+        public static int[,] MvvLvaScores = new int[13, 13];
+
+        public static void InitMvvLva() {
+            for (int atk = Piece.WhitePawn; atk <= Piece.BlackKing; atk++) {
+                for (int vic = Piece.WhitePawn; vic <= Piece.BlackKing; vic++) {
+                    MvvLvaScores[vic, atk] = Piece.VictimScores[vic] + 6 - (Piece.VictimScores[atk] / 100);
+                }
+            }
+            for (int vic = Piece.WhitePawn; vic <= Piece.BlackKing; vic++) {
+                for (int atk = Piece.WhitePawn; atk <= Piece.BlackKing; atk++) {
+                    Debug.Log(Piece.PieceStrings[atk] + " x " + Piece.PieceStrings[vic] + " = " + MvvLvaScores[vic, atk]);
+                }
+            }
+        }
         
         public static void CheckFinish() {
             // Check if Search has been running for too long
@@ -80,6 +99,8 @@ namespace Core {
                 board.UnmakeMove();
                 if (score > alpha) {
                     if (score >= beta) {
+                        if (legalMoves == 1) searchInfo.failHighFirst++;
+                        searchInfo.failHigh++;
                         return beta;
                     }
                     alpha = score;
@@ -109,11 +130,9 @@ namespace Core {
                 // if (OutOfTime()) // previousBestMove
                 int pvMoves = board.pvTable.GetPvLineCount(currentDepth);
                 Move bestMove = board.pvArray[0];
-                Debug.Log("Depth: " + currentDepth + " - best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + " - nodes: " + searchInfo.nodes);
-                /*for (int pvNum = 0; pvNum < pvMoves; pvNum++) {
-                    Move move = board.pvArray[pvNum];
-                    Debug.Log("PV move " + pvNum + ": " + Move.GetMoveString(move));
-                }*/
+                Debug.Log("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes);
+                float ordering = searchInfo.failHighFirst == 0 && searchInfo.failHigh == 0 ? 0 : searchInfo.failHighFirst / searchInfo.failHigh;
+                Debug.Log("Ordering: " + ordering);
             }
         }
     }

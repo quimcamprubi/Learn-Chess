@@ -148,6 +148,7 @@ namespace Core {
             InitHashKeys();
             positionKey = GeneratePositionKey();
             UpdateListsMaterial();
+            Search.InitMvvLva();
         }
 
         private void ResetBoard() {
@@ -242,7 +243,7 @@ namespace Core {
         }
         
         public bool CheckBoard() {
-            // This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
+            /*// This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
             // Board class variables in order to check that they are correct at all times.
             Debug.Log("In checkboard");
             int[] tPieceNumbers = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -310,7 +311,7 @@ namespace Core {
             Assert.IsTrue(enPassantSquare == NoEnPassant || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
                                             || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black, "checkBoard() failed: Incorrect enPassant rank.");
             Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing, "checkBoard() failed: White King not found in expected square.");
-            Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing, "checkBoard() failed: Black King not found in expected square.");
+            Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing, "checkBoard() failed: Black King not found in expected square.");*/
             
             return true;
         }

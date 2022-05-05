@@ -156,7 +156,7 @@ namespace Core {
                 castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
                 lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
                 if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.Human) HandleInput();
-                else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI) AISearchAndMakeMove();
+                //else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI) AISearchAndMakeMove();
             }
         }
 
@@ -169,7 +169,7 @@ namespace Core {
                     CheckSquareSelected(mousePosition);
                 }
             } else if (Input.GetKeyDown(KeyCode.P)) {
-                int max = mainBoard.pvTable.GetPvLineCount(4);
+                int max = mainBoard.pvTable.GetPvLineCount(6);
                 Debug.Log("PV line of " + max + " moves.");
                 for (int pvNum = 0; pvNum < max; pvNum++) {
                     Move move = mainBoard.pvArray[pvNum];

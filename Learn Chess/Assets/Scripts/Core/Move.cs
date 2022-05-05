@@ -7,10 +7,10 @@ namespace Core {
         public int score;
 
         public Move(int fromSquare, int toSquare, int capturedPiece, int promotedPiece, bool enPassantCapture = false,
-            bool pawnStart = false, bool castlingMove = false) {
+            bool pawnStart = false, bool castlingMove = false, int score = 0) {
             move = CreateMoveInteger(fromSquare, toSquare, capturedPiece, promotedPiece, enPassantCapture, pawnStart,
                 castlingMove);
-            score = 0;
+            this.score = score;
         }
         public Move(int move) {
             this.move = move;
