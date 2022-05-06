@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
-using UnityEngine.Assertions;
+﻿
+using System.Diagnostics;
+using System.Text;
 using Utils;
 using Debug = UnityEngine.Debug;
 
@@ -44,11 +43,11 @@ namespace Core {
                     MvvLvaScores[vic, atk] = Piece.VictimScores[vic] + 6 - (Piece.VictimScores[atk] / 100);
                 }
             }
-            for (int vic = Piece.WhitePawn; vic <= Piece.BlackKing; vic++) {
+            /*for (int vic = Piece.WhitePawn; vic <= Piece.BlackKing; vic++) {
                 for (int atk = Piece.WhitePawn; atk <= Piece.BlackKing; atk++) {
                     Debug.Log(Piece.PieceStrings[atk] + " x " + Piece.PieceStrings[vic] + " = " + MvvLvaScores[vic, atk]);
                 }
-            }
+            }*/
         }
         
         public static void CheckFinish() {
@@ -56,7 +55,7 @@ namespace Core {
         }
         
         public static bool IsRepeated(Board board) {
-            for (int i = board.histPly - board.fiftyMoveCounter; i < board.histPly; i++) {
+            for (int i = board.histPly - board.fiftyMoveCounter; i < board.histPly - 1; i++) {
                 if (board.gameHist[i].positionKey == board.positionKey) return true;
             }
             return false;
@@ -73,7 +72,7 @@ namespace Core {
         }
         
         public static int RecursiveAlphaBeta(int alpha, int beta, int depth, Board board, SearchInfo searchInfo, bool nullMove = false) {
-            //Assert.IsTrue(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
+            //Debug.Assert(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
             if (depth == 0) {
                 searchInfo.nodes++;
                 return Evaluate.EvaluatePosition(board);
@@ -92,7 +91,18 @@ namespace Core {
             int oldAlpha = alpha;
             Move bestMove = new Move(0, -Infinite);
             Move[] movesList = MoveGenerator.GenerateAllMoves(board).ToArray();
-            foreach (Move move in movesList) {
+            Move pvMove = board.pvTable.ProbePvTable();
+            if (pvMove != null) {
+                // Main line, PV move
+                foreach (Move move in movesList) {
+                    if (move.move == pvMove.move) {
+                        move.score = 2000000;
+                        break;
+                    }
+                }
+            }
+            for (int moveNumber = 0; moveNumber < movesList.Length; moveNumber++) {
+                Move move = NextMove(moveNumber, movesList); // We choose the best move first, implementing move ordering, improving Alpha Beta cutoffs.
                 if (!board.MakeMove(move)) continue;
                 legalMoves++;
                 int score = -RecursiveAlphaBeta(-beta, -alpha, depth - 1, board, searchInfo, true); // Negative because it is a Negamax implementation
@@ -101,13 +111,20 @@ namespace Core {
                     if (score >= beta) {
                         if (legalMoves == 1) searchInfo.failHighFirst++;
                         searchInfo.failHigh++;
+                        if (!Move.IsMoveCapture(move.move)) {
+                            board.searchKillers[1, board.ply] = board.searchKillers[0, board.ply];
+                            board.searchKillers[0, board.ply] = move.move;
+                        }
                         return beta;
                     }
                     alpha = score;
                     bestMove = move;
+                    if (!Move.IsMoveCapture(move.move)) {
+                        board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]] += depth;
+                    }
                 }
             }
-
+            
             if (legalMoves == 0) {
                 if (board.IsSquareAttacked(board.kingSquares[board.sideToPlay], board.sideToPlay ^ 1)) {
                     return -Mate + board.ply; // Checkmate, taking into account how far it is
@@ -125,15 +142,30 @@ namespace Core {
         public static void SearchPosition(Board board, SearchInfo searchInfo) { // Iterative deepening function
             //Move bestMove = new Move(Board.None, -Infinite);
             ClearForSearch(board, searchInfo);
-            for (int currentDepth = 1; currentDepth < searchInfo.depth; currentDepth++) {
+            StringBuilder sb = new StringBuilder();
+            for (int currentDepth = 1; currentDepth < searchInfo.depth + 1; currentDepth++) {
                 int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, true);
                 // if (OutOfTime()) // previousBestMove
-                int pvMoves = board.pvTable.GetPvLineCount(currentDepth);
+                board.pvTable.GetPvLineCount(currentDepth);
                 Move bestMove = board.pvArray[0];
-                Debug.Log("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes);
+                sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
                 float ordering = searchInfo.failHighFirst == 0 && searchInfo.failHigh == 0 ? 0 : searchInfo.failHighFirst / searchInfo.failHigh;
-                Debug.Log("Ordering: " + ordering);
+                sb.Append("Ordering: " + ordering + "\n");
+                sb.AppendLine();
             }
+            Debug.Log(sb.ToString());
+        }
+
+        public static Move NextMove(int moveNumber, Move[] movesList) {
+            int bestScore = -Infinite;
+            Move bestMove = null;
+            for (int i = moveNumber; i < movesList.Length; i++) {
+                if (movesList[i].score > bestScore) {
+                    bestScore = movesList[i].score;
+                    bestMove = movesList[i];
+                }
+            }
+            return bestMove;
         }
     }
 }

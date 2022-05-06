@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Linq;
 using UI;
@@ -38,6 +39,7 @@ namespace Core {
         private GameObject rank7Text;
         private GameObject rank8Text;
         private GameObject gameStatusText;
+        private bool gameEnded = false;
         
         private Camera cam;
         private int selectedRank;
@@ -102,11 +104,11 @@ namespace Core {
             List<Move> moveList =  MoveGenerator.GenerateAllMoves(mainBoard);
             MoveGenerator.PrintMoveList(moveList);*/
             
-            mainBoard.LoadStartingPosition();
-            //mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
+            //mainBoard.LoadStartingPosition();
+            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.wac1Fen));
             boardUi.UpdateBoard(mainBoard);
             boardUi.ResetSquareColors();
-            //PerftTesting.PerftTest(mainBoard, 4);
+            //PerftTesting.PerftTest(mainBoard, 5);
             /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             StartCoroutine(TestMoveGenerator(moveList));*/
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
@@ -127,6 +129,7 @@ namespace Core {
             }
             SetFilesRanksText();
             InitializeGame();
+            gameEnded = false;
         }
 
         IEnumerator TestMoveGenerator(List<Move> moveList) {
@@ -156,7 +159,7 @@ namespace Core {
                 castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
                 lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
                 if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.Human) HandleInput();
-                //else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI) AISearchAndMakeMove();
+                else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI && !gameEnded) AISearchAndMakeMove();
             }
         }
 
@@ -286,7 +289,6 @@ namespace Core {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
             CheckEnding();
             if (changePlayer) currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
-            Debug.Log("Turn changed.");
             //if (Search.IsRepeated(mainBoard)) Debug.Log("Position repeated");
         }
 
@@ -316,6 +318,7 @@ namespace Core {
             if (currentLegalMoves.Count == 0) {
                 if (isKingIncheck) {
                     Checkmate();
+                    gameEnded = true;
                 } else {
                     Stalemate();
                 } 

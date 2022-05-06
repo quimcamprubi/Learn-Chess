@@ -20,14 +20,25 @@ namespace Core {
         }
 
         public static void AddCaptureMove(int fromSquare, int toSquare, int capture, List<Move> moveList, int attacker) {
-            moveList.Add(new Move(fromSquare, toSquare, capture, Piece.Empty, score: Search.MvvLvaScores[capture, attacker]));
+            moveList.Add(new Move(fromSquare, toSquare, capture, Piece.Empty, score: Search.MvvLvaScores[capture, attacker] + 1000000));
+        }
+
+        public static void AddQuietMove(Move move, List<Move> moveList, Board board) {
+            if (move.move == board.searchKillers[0, board.ply]) {
+                move.score = 900000; // First killer. First Beta cutoff but worse than a capture.
+            } else if (move.move == board.searchKillers[1, board.ply]) {
+                move.score = 800000; // Second killer. Beta cutoff but worse than a capture.
+            } else {
+                move.score = board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]];
+            }
+            moveList.Add(move);
         }
         
         // White pieces
         public static void AddWhitePawnCaptureMove(int fromSquare, int toSquare, int capture, List<Move> moveList, int score) {
-            Assert.IsTrue(Validations.IsPieceValidOrEmpty(capture), "Piece to capture is invalid.");
-            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in White Pawn capture move.");
-            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in White Pawn capture move.");
+            Debug.Assert(Validations.IsPieceValidOrEmpty(capture), "Piece to capture is invalid.");
+            Debug.Assert(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in White Pawn capture move.");
+            Debug.Assert(Validations.IsSquareOnBoard(toSquare), "To Square invalid in White Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_7) { // Promotion
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.WhiteQueen, score: score));
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.WhiteRook, score: score));
@@ -37,24 +48,24 @@ namespace Core {
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.Empty, score: score));
             }
         }
-        public static void AddWhitePawnMove(int fromSquare, int toSquare, List<Move> moveList) {
-            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in White Pawn capture move.");
-            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in White Pawn capture move.");
+        public static void AddWhitePawnMove(int fromSquare, int toSquare, List<Move> moveList, Board board) {
+            Debug.Assert(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in White Pawn capture move.");
+            Debug.Assert(Validations.IsSquareOnBoard(toSquare), "To Square invalid in White Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_7) { // Promotion
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteQueen));
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteRook));
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteBishop));
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteKnight));
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteQueen), moveList, board);
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteRook), moveList, board);
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteBishop), moveList, board);
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.WhiteKnight), moveList, board);
             } else {
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.Empty));
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.Empty), moveList, board);
             }
         }
         
         // Black pieces
         public static void AddBlackPawnCaptureMove(int fromSquare, int toSquare, int capture, List<Move> moveList, int score) {
-            Assert.IsTrue(Validations.IsPieceValidOrEmpty(capture), "Piece to capture is invalid.");
-            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in Black Pawn capture move.");
-            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in Black Pawn capture move.");
+            Debug.Assert(Validations.IsPieceValidOrEmpty(capture), "Piece to capture is invalid.");
+            Debug.Assert(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in Black Pawn capture move.");
+            Debug.Assert(Validations.IsSquareOnBoard(toSquare), "To Square invalid in Black Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_2) { // Promotion
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.BlackQueen, score: score));
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.BlackRook, score: score));
@@ -64,33 +75,33 @@ namespace Core {
                 moveList.Add(new Move(fromSquare, toSquare, capture, Piece.Empty, score: score));
             }
         }
-        public static void AddBlackPawnMove(int fromSquare, int toSquare, List<Move> moveList) {
-            Assert.IsTrue(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in Black Pawn capture move.");
-            Assert.IsTrue(Validations.IsSquareOnBoard(toSquare), "To Square invalid in Black Pawn capture move.");
+        public static void AddBlackPawnMove(int fromSquare, int toSquare, List<Move> moveList, Board board) {
+            Debug.Assert(Validations.IsSquareOnBoard(fromSquare), "From Square invalid in Black Pawn capture move.");
+            Debug.Assert(Validations.IsSquareOnBoard(toSquare), "To Square invalid in Black Pawn capture move.");
             if (Board.squareRank[fromSquare] == (int) Constants.RanksEnum.RANK_2) { // Promotion
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackQueen));
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackRook));
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackBishop));
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackKnight));
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackQueen), moveList, board);
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackRook), moveList, board);
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackBishop), moveList, board);
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.BlackKnight), moveList, board);
             } else {
-                moveList.Add(new Move(fromSquare, toSquare, Piece.Empty, Piece.Empty));
+                AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.Empty), moveList, board);
             }
         }
         
         // Generate all moves in a given position
         public static List<Move> GenerateAllMoves(Board board) {
             List<Move> moveList = new List<Move>();
-            Assert.IsTrue(board.CheckBoard());
+            Debug.Assert(board.CheckBoard());
             if (board.sideToPlay == Board.White) { // White pawns (and castling moves)
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.WhitePawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.WhitePawn, pieceNumber];
-                    Assert.IsTrue(Validations.IsSquareOnBoard(square));
+                    Validations.IsSquareOnBoard(square);
                     if (board.squares[square + Directions.PawnForward] == Piece.Empty) { // Forward move and double forward move
-                        AddWhitePawnMove(square, square + Directions.PawnForward, moveList);
+                        AddWhitePawnMove(square, square + Directions.PawnForward, moveList, board);
                         if (Board.squareRank[square] == (int) Constants.RanksEnum.RANK_2 &&
                             board.squares[square + Directions.PawnDoubleForward] == Piece.Empty) {
-                            moveList.Add(new Move(square, square + Directions.PawnDoubleForward, 
-                                Piece.Empty, Piece.Empty, pawnStart: true));
+                            AddQuietMove(new Move(square, square + Directions.PawnDoubleForward, 
+                                Piece.Empty, Piece.Empty, pawnStart: true), moveList, board);
                         }
                     }
                     int squareAttackLeft = square + Directions.PawnCapLeft;
@@ -104,12 +115,12 @@ namespace Core {
                         AddWhitePawnCaptureMove(square, squareAttackRight, board.squares[squareAttackRight], moveList, score);
                     }
                     if (squareAttackLeft == board.enPassantSquare) {
-                        Assert.IsTrue(board.squares[squareAttackLeft - Directions.PawnForward] == Piece.BlackPawn, "Attempt to make an En Passant capture on a piece that isn't a Black Pawn.");
-                        moveList.Add(new Move(square, squareAttackLeft, Piece.BlackPawn,Piece.Empty, true, score: 105));
+                        Debug.Assert(board.squares[squareAttackLeft - Directions.PawnForward] == Piece.BlackPawn, "Attempt to make an En Passant capture on a piece that isn't a Black Pawn.");
+                        moveList.Add(new Move(square, squareAttackLeft, Piece.BlackPawn,Piece.Empty, true, score: 105 + 1000000));
                     }
                     if (squareAttackRight == board.enPassantSquare) {
-                        Assert.IsTrue(board.squares[squareAttackRight - Directions.PawnForward] == Piece.BlackPawn, "Attempt to make an En Passant capture on a piece that isn't a Black Pawn.");
-                        moveList.Add(new Move(square, squareAttackRight, Piece.BlackPawn, Piece.Empty, true, score: 105));
+                        Debug.Assert(board.squares[squareAttackRight - Directions.PawnForward] == Piece.BlackPawn, "Attempt to make an En Passant capture on a piece that isn't a Black Pawn.");
+                        moveList.Add(new Move(square, squareAttackRight, Piece.BlackPawn, Piece.Empty, true, score: 105 + 1000000));
                     }
                 }
                 // Castling moves
@@ -119,7 +130,8 @@ namespace Core {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.E1, Board.Black) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.F1, Board.Black) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.G1, Board.Black)) {
-                            moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.G1, Piece.Empty, Piece.Empty, castlingMove: true));
+                            AddQuietMove(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.G1, Piece.Empty, Piece.Empty, castlingMove: true), moveList, board);
+                            //moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.G1, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
                 } 
@@ -130,7 +142,8 @@ namespace Core {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.E1, Board.Black) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.D1, Board.Black) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.C1, Board.Black)) {
-                            moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.C1, Piece.Empty, Piece.Empty, castlingMove: true));
+                            AddQuietMove(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.C1, Piece.Empty, Piece.Empty, castlingMove: true), moveList, board);
+                            //moveList.Add(new Move((int) Board.Squares120Enum.E1, (int) Board.Squares120Enum.C1, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
                 } 
@@ -138,13 +151,13 @@ namespace Core {
             else { // Black pawns (and castling moves)
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.BlackPawn]; pieceNumber++) {
                     int square = board.pieceList[Piece.BlackPawn, pieceNumber];
-                    Assert.IsTrue(Validations.IsSquareOnBoard(square));
+                    Debug.Assert(Validations.IsSquareOnBoard(square));
                     if (board.squares[square - Directions.PawnForward] == Piece.Empty) { // Forward move and double forward move
-                        AddBlackPawnMove(square, square - Directions.PawnForward, moveList);
+                        AddBlackPawnMove(square, square - Directions.PawnForward, moveList, board);
                         if (Board.squareRank[square] == (int) Constants.RanksEnum.RANK_7 &&
                             board.squares[square - Directions.PawnDoubleForward] == Piece.Empty) {
-                            moveList.Add(new Move(square, square - Directions.PawnDoubleForward, 
-                                Piece.Empty, Piece.Empty, pawnStart: true));
+                            AddQuietMove(new Move(square, square - Directions.PawnDoubleForward, 
+                                Piece.Empty, Piece.Empty, pawnStart: true), moveList, board);
                         }
                     }
                     int squareAttackLeft = square - Directions.PawnCapLeft;
@@ -158,11 +171,11 @@ namespace Core {
                         AddBlackPawnCaptureMove(square, squareAttackRight, board.squares[squareAttackRight], moveList, score);
                     }
                     if (squareAttackLeft == board.enPassantSquare) {
-                        Assert.IsTrue(board.squares[squareAttackLeft + Directions.PawnForward] == Piece.WhitePawn, "Attempt to make an En Passant capture on a piece that isn't a White Pawn.");
-                        moveList.Add(new Move(square, squareAttackLeft, Piece.WhitePawn,Piece.Empty, true, score: 105));
+                        Debug.Assert(board.squares[squareAttackLeft + Directions.PawnForward] == Piece.WhitePawn, "Attempt to make an En Passant capture on a piece that isn't a White Pawn.");
+                        moveList.Add(new Move(square, squareAttackLeft, Piece.WhitePawn,Piece.Empty, true, score: 105 + 1000000));
                     } else if (squareAttackRight == board.enPassantSquare) {
-                        Assert.IsTrue(board.squares[squareAttackRight + Directions.PawnForward] == Piece.WhitePawn, "Attempt to make an En Passant capture on a piece that isn't a White Pawn.");
-                        moveList.Add(new Move(square, squareAttackRight, Piece.WhitePawn, Piece.Empty, true, score: 105));
+                        Debug.Assert(board.squares[squareAttackRight + Directions.PawnForward] == Piece.WhitePawn, "Attempt to make an En Passant capture on a piece that isn't a White Pawn.");
+                        moveList.Add(new Move(square, squareAttackRight, Piece.WhitePawn, Piece.Empty, true, score: 105 + 1000000));
                     }
                 }
                 // Castling moves
@@ -172,7 +185,8 @@ namespace Core {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.E8, Board.White) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.F8, Board.White) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.G8, Board.White)) {
-                            moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true));
+                            AddQuietMove(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true), moveList, board);
+                            //moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.G8, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
                 } 
@@ -183,7 +197,8 @@ namespace Core {
                         if (!board.IsSquareAttacked((int) Board.Squares120Enum.E8, Board.White) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.D8, Board.White) &&
                             !board.IsSquareAttacked((int) Board.Squares120Enum.C8, Board.White)) {
-                            moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.C8, Piece.Empty, Piece.Empty, castlingMove: true));
+                            AddQuietMove(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.C8, Piece.Empty, Piece.Empty, castlingMove: true), moveList, board);
+                            //moveList.Add(new Move((int) Board.Squares120Enum.E8, (int) Board.Squares120Enum.C8, Piece.Empty, Piece.Empty, castlingMove: true));
                         }
                     }
                 }
@@ -194,11 +209,11 @@ namespace Core {
             int pieceIndex = LoopSlideIndex[side];
             int piece = LoopSlidePieces[pieceIndex];
             while (piece != 0) {
-                Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
+                Debug.Assert(Validations.IsPieceValid(piece), "Invalid sliding piece");
                 //Debug.Log("Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
-                    Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
+                    Debug.Assert(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
                     int[] directionsList = Directions.PieceDirections[piece];
                     foreach (int direction in directionsList) {
                         int targetSquare = square + direction;
@@ -210,7 +225,8 @@ namespace Core {
                                 }
                                 break; // A piece of the same side is blocking the path, we can not slide any longer
                             }
-                            moveList.Add(new Move(square, targetSquare, Piece.Empty, Piece.Empty));
+                            AddQuietMove(new Move(square, targetSquare, Piece.Empty, Piece.Empty), moveList, board);
+                            //moveList.Add(new Move(square, targetSquare, Piece.Empty, Piece.Empty));
                             targetSquare += direction;
                         }
                     }
@@ -222,11 +238,11 @@ namespace Core {
             pieceIndex = LoopNonSlideIndex[side];
             piece = LoopNonSlidePieces[pieceIndex];
             while (piece != 0) {
-                Assert.IsTrue(Validations.IsPieceValid(piece), "Invalid sliding piece");
+                Debug.Assert(Validations.IsPieceValid(piece), "Invalid sliding piece");
                 //Debug.Log("Non Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
                 for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                     int square = board.pieceList[piece, pieceNumber];
-                    Assert.IsTrue(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
+                    Debug.Assert(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
                     int[] directionsList = Directions.PieceDirections[piece];
                     foreach (int direction in directionsList) {
                         int targetSquare = square + direction;
@@ -238,7 +254,8 @@ namespace Core {
                             }
                             continue;
                         }
-                        moveList.Add(new Move(square, targetSquare, Piece.Empty, Piece.Empty));
+                        AddQuietMove(new Move(square, targetSquare, Piece.Empty, Piece.Empty), moveList, board);
+                        //moveList.Add(new Move(square, targetSquare, Piece.Empty, Piece.Empty));
                     }
                 }
                 piece = LoopNonSlidePieces[++pieceIndex];
@@ -265,7 +282,7 @@ namespace Core {
             foreach (Move move1 in movesList) {
                 if (!board.MakeMove(move1)) continue;
                 board.UnmakeMove();
-                if (move1.Equals(move)) return true;
+                if (move1.move == move.move) return true;
             }
             return false;
         }

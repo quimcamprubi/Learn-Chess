@@ -55,8 +55,8 @@ namespace Core {
         public Move[] pvArray = new Move[Constants.MAX_DEPTH];   // Array containing the single best principle variation of moves.
         
         // Search data for move ordering
-        private int[,] searchHistory = new int[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
-        private int[,] searchKillers = new int[Constants.NUM_PLAYERS, Constants.MAX_DEPTH]; // Two most recent moves that have caused a Beta cutoff
+        public int[,] searchHistory = new int[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
+        public int[,] searchKillers = new int[Constants.NUM_PLAYERS, Constants.MAX_DEPTH]; // Two most recent moves that have caused a Beta cutoff
         
         public static int None = 0; // 0 constant
         public static int OFFBOARD = 100;

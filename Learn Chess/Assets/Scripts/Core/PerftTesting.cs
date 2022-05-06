@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿/*
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
@@ -8,7 +6,7 @@ namespace Core {
     public static class PerftTesting {
         public static long LeafNodes = 0;
         public static void RecursivePerft(Board board, int depth) {
-            Assert.IsTrue(board.CheckBoard());
+            Debug.Assert(board.CheckBoard());
             if (depth == 0) {
                 LeafNodes++;
                 return;
@@ -25,7 +23,7 @@ namespace Core {
         
         public static int PerftTest(Board board, int depth) {
             int nodes = 0;
-            Assert.IsTrue(board.CheckBoard());
+            Debug.Assert(board.CheckBoard());
             LeafNodes = 0;
             Debug.Log("Starting Perft test to depth = " + depth);
             Stopwatch watch = Stopwatch.StartNew();
@@ -47,4 +45,4 @@ namespace Core {
             return nodes;
         }
     }
-}
+}*/

@@ -1,6 +1,7 @@
 ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
+    - ConsoleToGUI
     - Core.Game
     - ShowText
     - UI.BoardColors
@@ -11,6 +12,7 @@ ScriptsOnlyBuild:
     - UnityEditor.U2D.Animation.BoneGizmo
     Unity.2D.IK.Editor.dll:
     - UnityEditor.U2D.IK.IKEditorManager
+    - UnityEditor.U2D.IK.IKGizmos
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
     - UnityEditor.Tilemaps.GridPaletteBrushes
@@ -22,6 +24,8 @@ ScriptsOnlyBuild:
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.RiderScriptEditorData
     - Packages.Rider.Editor.UnitTesting.CallbackData
+    Unity.Timeline.Editor.dll:
+    - TimelineProjectSettings
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
@@ -60,33 +64,35 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 1454}
+      Script: {instanceID: 1460}
     - Class: 114
-      Script: {instanceID: 1520}
+      Script: {instanceID: 1526}
     - Class: 114
-      Script: {instanceID: 1760}
+      Script: {instanceID: 1766}
     - Class: 114
-      Script: {instanceID: 2686}
+      Script: {instanceID: 2696}
     - Class: 114
-      Script: {instanceID: 2860}
+      Script: {instanceID: 2870}
     - Class: 114
-      Script: {instanceID: 2934}
+      Script: {instanceID: 2902}
     - Class: 114
-      Script: {instanceID: 3104}
+      Script: {instanceID: 2946}
     - Class: 114
-      Script: {instanceID: 3352}
+      Script: {instanceID: 3116}
     - Class: 114
-      Script: {instanceID: 3474}
+      Script: {instanceID: 3364}
     - Class: 114
-      Script: {instanceID: 3496}
+      Script: {instanceID: 3486}
     - Class: 114
-      Script: {instanceID: 5346}
+      Script: {instanceID: 3508}
     - Class: 114
-      Script: {instanceID: 5384}
+      Script: {instanceID: 5360}
     - Class: 114
-      Script: {instanceID: 5520}
+      Script: {instanceID: 5398}
     - Class: 114
-      Script: {instanceID: 5786}
+      Script: {instanceID: 5534}
+    - Class: 114
+      Script: {instanceID: 5800}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -262,6 +268,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: TimelineAsset
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: ConsoleToGUI
   - hash:
       serializedVersion: 2
       Hash: 760787567e1b60d64a3e421ab83ee14a
@@ -655,4 +667,4 @@ ScriptsOnlyBuild:
   platform: 21
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/Quim/Desktop/Easy Chess
+  playerPath: C:/Users/Quim/Desktop/Easy Chess/MonoBleedingEdge

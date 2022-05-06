@@ -1,4 +1,5 @@
-﻿using Utils;
+﻿using UnityEngine;
+using Utils;
 
 namespace Core {
     public static class Validations {

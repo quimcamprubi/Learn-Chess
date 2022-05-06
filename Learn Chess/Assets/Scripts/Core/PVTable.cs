@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Utils;
 
@@ -32,19 +33,19 @@ namespace Core {
 
         public void StorePvMove(Move move) {
             ulong index = board.positionKey % size;
-            Assert.IsTrue(index <= size - 1, "StorePvMove index is too large.");
+            Debug.Assert(index <= size - 1, "StorePvMove index is too large.");
             entries[index] = new Entry(board.positionKey, move);
         }
 
 
         public Move ProbePvTable() {
             ulong index = board.positionKey % size;
-            Assert.IsTrue(index <= size - 1, "ProbePVTable index is too large.");
+            Debug.Assert(index <= size - 1, "ProbePVTable index is too large.");
             return entries[index].move;
         }
 
         public int GetPvLineCount(int depth) {
-            Assert.IsTrue(depth < Constants.MAX_DEPTH, "PV Depth is too large.");
+            Debug.Assert(depth < Constants.MAX_DEPTH, "PV Depth is too large.");
             Move move = ProbePvTable();
             int count = 0;
             while (move != null && count < depth) {
