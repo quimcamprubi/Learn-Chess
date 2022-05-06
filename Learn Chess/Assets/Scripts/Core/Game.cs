@@ -104,11 +104,11 @@ namespace Core {
             List<Move> moveList =  MoveGenerator.GenerateAllMoves(mainBoard);
             MoveGenerator.PrintMoveList(moveList);*/
             
-            //mainBoard.LoadStartingPosition();
-            mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.wac1Fen));
+            mainBoard.LoadStartingPosition();
+            //mainBoard.LoadPosition(FenDecoder.DecodePositionFromFen(Constants.perftTestingFen));
             boardUi.UpdateBoard(mainBoard);
             boardUi.ResetSquareColors();
-            //PerftTesting.PerftTest(mainBoard, 5);
+            //PerftTesting.PerftTest(mainBoard, 6);
             /*List<Move> moveList = MoveGenerator.GenerateAllMoves(mainBoard);
             StartCoroutine(TestMoveGenerator(moveList));*/
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);

@@ -31,6 +31,7 @@ namespace Core {
             } else {
                 move.score = board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]];
             }
+            if (Move.IsCastlingMove(move.move)) move.score++; 
             moveList.Add(move);
         }
         
@@ -261,6 +262,111 @@ namespace Core {
                 piece = LoopNonSlidePieces[++pieceIndex];
             }
             
+            return moveList;
+        }
+        
+        // Generate all capture moves in a given position
+        public static List<Move> GenerateAllCaptures(Board board) {
+            List<Move> moveList = new List<Move>();
+            Debug.Assert(board.CheckBoard());
+            if (board.sideToPlay == Board.White) { // White pawns
+                for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.WhitePawn]; pieceNumber++) {
+                    int square = board.pieceList[Piece.WhitePawn, pieceNumber];
+                    Validations.IsSquareOnBoard(square);
+                    int squareAttackLeft = square + Directions.PawnCapLeft;
+                    int squareAttackRight = square + Directions.PawnCapRight;
+                    if (Validations.IsSquareOnBoard(squareAttackLeft) && Piece.PieceColor[board.squares[squareAttackLeft]] == Piece.Black) { // Capture left
+                        int score = Search.MvvLvaScores[board.squares[squareAttackLeft], board.squares[square]];
+                        AddWhitePawnCaptureMove(square, squareAttackLeft, board.squares[squareAttackLeft], moveList, score);
+                    }
+                    if (Validations.IsSquareOnBoard(squareAttackRight) && Piece.PieceColor[board.squares[squareAttackRight]] == Piece.Black) { // Capture right
+                        int score = Search.MvvLvaScores[board.squares[squareAttackRight], board.squares[square]];
+                        AddWhitePawnCaptureMove(square, squareAttackRight, board.squares[squareAttackRight], moveList, score);
+                    }
+                    if (squareAttackLeft == board.enPassantSquare) {
+                        Debug.Assert(board.squares[squareAttackLeft - Directions.PawnForward] == Piece.BlackPawn, "Attempt to make an En Passant capture on a piece that isn't a Black Pawn.");
+                        moveList.Add(new Move(square, squareAttackLeft, Piece.BlackPawn,Piece.Empty, true, score: 105 + 1000000));
+                    }
+                    if (squareAttackRight == board.enPassantSquare) {
+                        Debug.Assert(board.squares[squareAttackRight - Directions.PawnForward] == Piece.BlackPawn, "Attempt to make an En Passant capture on a piece that isn't a Black Pawn.");
+                        moveList.Add(new Move(square, squareAttackRight, Piece.BlackPawn, Piece.Empty, true, score: 105 + 1000000));
+                    }
+                }
+            }
+            else { // Black pawns
+                for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[Piece.BlackPawn]; pieceNumber++) {
+                    int square = board.pieceList[Piece.BlackPawn, pieceNumber];
+                    Debug.Assert(Validations.IsSquareOnBoard(square));
+                    int squareAttackLeft = square - Directions.PawnCapLeft;
+                    int squareAttackRight = square - Directions.PawnCapRight;
+                    if (Validations.IsSquareOnBoard(squareAttackLeft) && Piece.PieceColor[board.squares[squareAttackLeft]] == Piece.White) { // Capture left
+                        int score = Search.MvvLvaScores[board.squares[squareAttackLeft], board.squares[square]];
+                        AddBlackPawnCaptureMove(square, squareAttackLeft, board.squares[squareAttackLeft], moveList, score);
+                    }
+                    if (Validations.IsSquareOnBoard(squareAttackRight) && Piece.PieceColor[board.squares[squareAttackRight]] == Piece.White) { // Capture right
+                        int score = Search.MvvLvaScores[board.squares[squareAttackRight], board.squares[square]];
+                        AddBlackPawnCaptureMove(square, squareAttackRight, board.squares[squareAttackRight], moveList, score);
+                    }
+                    if (squareAttackLeft == board.enPassantSquare) {
+                        Debug.Assert(board.squares[squareAttackLeft + Directions.PawnForward] == Piece.WhitePawn, "Attempt to make an En Passant capture on a piece that isn't a White Pawn.");
+                        moveList.Add(new Move(square, squareAttackLeft, Piece.WhitePawn,Piece.Empty, true, score: 105 + 1000000));
+                    } else if (squareAttackRight == board.enPassantSquare) {
+                        Debug.Assert(board.squares[squareAttackRight + Directions.PawnForward] == Piece.WhitePawn, "Attempt to make an En Passant capture on a piece that isn't a White Pawn.");
+                        moveList.Add(new Move(square, squareAttackRight, Piece.WhitePawn, Piece.Empty, true, score: 105 + 1000000));
+                    }
+                }
+            }
+            
+            // Sliding pieces
+            int side = board.sideToPlay;
+            int pieceIndex = LoopSlideIndex[side];
+            int piece = LoopSlidePieces[pieceIndex];
+            while (piece != 0) {
+                Debug.Assert(Validations.IsPieceValid(piece), "Invalid sliding piece");
+                //Debug.Log("Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
+                for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
+                    int square = board.pieceList[piece, pieceNumber];
+                    Debug.Assert(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
+                    int[] directionsList = Directions.PieceDirections[piece];
+                    foreach (int direction in directionsList) {
+                        int targetSquare = square + direction;
+                        while (Validations.IsSquareOnBoard(targetSquare)) { // Keep sliding until we reach the end of the board
+                            if (board.squares[targetSquare] != Piece.Empty) {
+                                if (Piece.PieceColor[board.squares[targetSquare]] == (side ^ 1)) { // If piece belongs to opposing side, we capture
+                                    AddCaptureMove(square, targetSquare, board.squares[targetSquare], moveList, board.squares[square]);
+                                }
+                                break; // A piece of the same side is blocking the path, we can not slide any longer
+                            }
+                            targetSquare += direction;
+                        }
+                    }
+                }
+                piece = LoopSlidePieces[++pieceIndex];
+            }
+            
+            // Non-sliding pieces
+            pieceIndex = LoopNonSlideIndex[side];
+            piece = LoopNonSlidePieces[pieceIndex];
+            while (piece != 0) {
+                Debug.Assert(Validations.IsPieceValid(piece), "Invalid sliding piece");
+                //Debug.Log("Non Sliders pieceIndex: " + pieceIndex + " - piece: " + piece);
+                for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
+                    int square = board.pieceList[piece, pieceNumber];
+                    Debug.Assert(Validations.IsSquareOnBoard(square), "Non-sliding piece offboard.");
+                    int[] directionsList = Directions.PieceDirections[piece];
+                    foreach (int direction in directionsList) {
+                        int targetSquare = square + direction;
+                        if (!Validations.IsSquareOnBoard(targetSquare)) continue; // If square is offboard, we ignore the move
+                        if (board.squares[targetSquare] != Piece.Empty) {
+                            if (Piece.PieceColor[board.squares[targetSquare]] == (side ^ 1)) { // If piece belongs to opposing side, we capture
+                                AddCaptureMove(square, targetSquare, board.squares[targetSquare], moveList, board.squares[square]);
+                                //moveList.Add(new Move(square, targetSquare, board.squares[targetSquare], Piece.Empty));
+                            }
+                        }
+                    }
+                }
+                piece = LoopNonSlidePieces[++pieceIndex];
+            }
             return moveList;
         }
 

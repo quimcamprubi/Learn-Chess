@@ -67,19 +67,60 @@ namespace Core {
         } 
         
         public static int QuiescenceSearch(int alpha, int beta, Board board, SearchInfo searchInfo) { // Same as AlphaBeta, but with additional search after capture
-            //TODO
-            return 0;
-        }
-        
-        public static int RecursiveAlphaBeta(int alpha, int beta, int depth, Board board, SearchInfo searchInfo, bool nullMove = false) {
-            //Debug.Assert(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
-            if (depth == 0) {
-                searchInfo.nodes++;
+            Debug.Assert(board.CheckBoard());
+            searchInfo.nodes++;
+            if (IsRepeated(board) || board.fiftyMoveCounter >= 100) {
+                return 0;
+            }
+            if (board.ply > Constants.MAX_DEPTH - 1) {
                 return Evaluate.EvaluatePosition(board);
             }
             
+            int score = Evaluate.EvaluatePosition(board);
+            if (score >= beta) {
+                return beta;
+            }
+            if (score > alpha) {
+                alpha = score; 
+            }
+            
+            int legalMoves = 0;
+            int oldAlpha = alpha;
+            Move bestMove = new Move(0, -Infinite);
+            Move[] movesList = MoveGenerator.GenerateAllCaptures(board).ToArray();
+            Move pvMove = board.pvTable.ProbePvTable();
+            for (int moveNumber = 0; moveNumber < movesList.Length; moveNumber++) {
+                NextMove(moveNumber, movesList); // We choose the best move first, implementing move ordering, improving Alpha Beta cutoffs.
+                Move move = movesList[moveNumber];
+                if (!board.MakeMove(move)) continue;
+                legalMoves++;
+                score = -QuiescenceSearch(-beta, -alpha, board, searchInfo); // Negative because it is a Negamax implementation
+                board.UnmakeMove();
+                if (score > alpha) {
+                    if (score >= beta) {
+                        if (legalMoves == 1) searchInfo.failHighFirst++;
+                        searchInfo.failHigh++;
+                        return beta;
+                    }
+                    alpha = score;
+                    bestMove = move;
+                }
+            }
+            if (alpha != oldAlpha) {
+                board.pvTable.StorePvMove(bestMove);
+            }
+            return alpha;
+        }
+        
+        public static int RecursiveAlphaBeta(int alpha, int beta, int depth, Board board, SearchInfo searchInfo, bool nullMove = false, bool quiescenceSearch = true) {
+            //Debug.Assert(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
+            if (depth == 0) {
+                if (quiescenceSearch) return QuiescenceSearch(alpha, beta, board, searchInfo);
+                return Evaluate.EvaluatePosition(board);
+            }
             searchInfo.nodes++;
-            if (IsRepeated(board) || board.fiftyMoveCounter >= 100) {
+            
+            if (IsRepeated(board) || board.fiftyMoveCounter >= 100 && board.ply != 0) {
                 return 0;
             }
             
@@ -102,7 +143,8 @@ namespace Core {
                 }
             }
             for (int moveNumber = 0; moveNumber < movesList.Length; moveNumber++) {
-                Move move = NextMove(moveNumber, movesList); // We choose the best move first, implementing move ordering, improving Alpha Beta cutoffs.
+                NextMove(moveNumber, movesList); // We choose the best move first, implementing move ordering, improving Alpha Beta cutoffs.
+                Move move = movesList[moveNumber];
                 if (!board.MakeMove(move)) continue;
                 legalMoves++;
                 int score = -RecursiveAlphaBeta(-beta, -alpha, depth - 1, board, searchInfo, true); // Negative because it is a Negamax implementation
@@ -156,16 +198,18 @@ namespace Core {
             Debug.Log(sb.ToString());
         }
 
-        public static Move NextMove(int moveNumber, Move[] movesList) {
-            int bestScore = -Infinite;
-            Move bestMove = null;
+        public static void NextMove(int moveNumber, Move[] movesList) {
+            int bestScore = 0;
+            int bestMove = moveNumber;
             for (int i = moveNumber; i < movesList.Length; i++) {
                 if (movesList[i].score > bestScore) {
                     bestScore = movesList[i].score;
-                    bestMove = movesList[i];
+                    bestMove = i;
                 }
             }
-            return bestMove;
+            Move temp = movesList[moveNumber];
+            movesList[moveNumber] = movesList[bestMove];
+            movesList[bestMove] = temp;
         }
     }
 }

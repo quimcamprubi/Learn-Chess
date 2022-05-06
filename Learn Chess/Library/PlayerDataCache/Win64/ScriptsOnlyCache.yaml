@@ -24,8 +24,6 @@ ScriptsOnlyBuild:
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.RiderScriptEditorData
     - Packages.Rider.Editor.UnitTesting.CallbackData
-    Unity.Timeline.Editor.dll:
-    - TimelineProjectSettings
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
@@ -66,33 +64,33 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1460}
     - Class: 114
-      Script: {instanceID: 1526}
+      Script: {instanceID: 1530}
     - Class: 114
-      Script: {instanceID: 1766}
+      Script: {instanceID: 1770}
     - Class: 114
-      Script: {instanceID: 2696}
+      Script: {instanceID: 2700}
     - Class: 114
-      Script: {instanceID: 2870}
+      Script: {instanceID: 2874}
     - Class: 114
-      Script: {instanceID: 2902}
+      Script: {instanceID: 2906}
     - Class: 114
-      Script: {instanceID: 2946}
+      Script: {instanceID: 2950}
     - Class: 114
-      Script: {instanceID: 3116}
+      Script: {instanceID: 3120}
     - Class: 114
-      Script: {instanceID: 3364}
+      Script: {instanceID: 3368}
     - Class: 114
-      Script: {instanceID: 3486}
+      Script: {instanceID: 3490}
     - Class: 114
-      Script: {instanceID: 3508}
+      Script: {instanceID: 3512}
     - Class: 114
-      Script: {instanceID: 5360}
+      Script: {instanceID: 5364}
     - Class: 114
-      Script: {instanceID: 5398}
+      Script: {instanceID: 5402}
     - Class: 114
-      Script: {instanceID: 5534}
+      Script: {instanceID: 5538}
     - Class: 114
-      Script: {instanceID: 5800}
+      Script: {instanceID: 5804}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -667,5 +665,4 @@ ScriptsOnlyBuild:
   platform: 19
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/Quim/Desktop/Easy Chess/MonoBleedingEdge/Il2CppOutputProject/MonoBleedingEdge/Easy
-    Chess.exe
+  playerPath: C:/Users/Quim/Desktop/Easy Chess/Easy Chess.exe
