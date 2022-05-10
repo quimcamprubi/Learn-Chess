@@ -180,6 +180,8 @@ namespace Core {
                 }
             } else if (Input.GetKeyDown(KeyCode.B)) {
                 UnmakeMove();
+            } else if (Input.GetKeyDown(KeyCode.M)) {
+                mainBoard.PrintMirrorBoardEvaluations();
             }
         }
 
@@ -290,10 +292,11 @@ namespace Core {
             CheckEnding();
             if (changePlayer) currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
             //if (Search.IsRepeated(mainBoard)) Debug.Log("Position repeated");
+            //mainBoard.PrintPawnAnalysis();
         }
 
         private void AISearchAndMakeMove() {
-            SearchInfo searchParameters = new SearchInfo(depth: 6);
+            SearchInfo searchParameters = new SearchInfo(depth: 5);
             Search.SearchPosition(mainBoard, searchParameters);
             Move bestMove = mainBoard.pvArray[0];
             MakeMove(bestMove);

@@ -46,10 +46,17 @@ namespace Core {
         public int[,] pieceList = new int[Constants.TOTAL_DIFF_PIECES, Constants.MAX_PIECES_OF_SAME_TYPE];
 
         // Bitboard
-        private ulong[] pawns = new ulong[Constants.NUM_PIECE_VARIANTS];
+        public ulong[] pawns = new ulong[Constants.NUM_PIECE_VARIANTS];
         private ulong[] setMask = new ulong[Constants.NUM_SQUARES];
         private ulong[] clearMask = new ulong[Constants.NUM_SQUARES];
         
+        // Pawns bitmasks
+        public ulong[] openFileMask = new ulong[Constants.NUM_FILES];
+        public ulong[] openRankMask = new ulong[Constants.NUM_RANKS];
+        public ulong[] whitePassedMask = new ulong[Constants.NUM_SQUARES];
+        public ulong[] blackPassedMask = new ulong[Constants.NUM_SQUARES];
+        public ulong[] isolatedMask = new ulong[Constants.NUM_SQUARES];
+
         // Principal Variation table
         public PVTable pvTable; // Table containing multiple principle variations. Accessed with positionKey.
         public Move[] pvArray = new Move[Constants.MAX_DEPTH];   // Array containing the single best principle variation of moves.
@@ -148,6 +155,7 @@ namespace Core {
             InitHashKeys();
             positionKey = GeneratePositionKey();
             UpdateListsMaterial();
+            InitBitMasks();
             Search.InitMvvLva();
         }
 
@@ -241,78 +249,152 @@ namespace Core {
                 }
             }
         }
+
+        private void InitBitMasks() {
+            for (int square = 0; square < 8; square++) {
+                openFileMask[square] = 0UL;
+                openRankMask[square] = 0UL;
+            }
+
+            for (int rank = (int) Constants.RanksEnum.RANK_8; rank >= (int) Constants.RanksEnum.RANK_1; rank--) {
+                for (int file = (int) Constants.FilesEnum.FILE_A; file <= (int) Constants.FilesEnum.FILE_H; file++) {
+                    int square = rank * 8 + file;
+                    openFileMask[file] |= (1UL << square);
+                    openRankMask[rank] |= (1UL << square);
+                }
+            }
+
+            for (int square = 0; square < Constants.NUM_SQUARES; square++) {
+                isolatedMask[square] = 0UL;
+                whitePassedMask[square] = 0UL;
+                blackPassedMask[square] = 0UL;
+            }
+
+            for(int sq = 0; sq < 64; ++sq) {
+                int tsq = sq + 8;
+		
+                while(tsq < 64) {
+                    whitePassedMask[sq] |= (1UL << tsq);
+                    tsq += 8;
+                }
+
+                tsq = sq - 8;
+                while(tsq >= 0) {
+                    blackPassedMask[sq] |= (1UL << tsq);
+                    tsq -= 8;
+                }
+
+                if(squareFile[Sq120(sq)] > (int) Constants.FilesEnum.FILE_A) {
+                    isolatedMask[sq] |= openFileMask[squareFile[Sq120(sq)] - 1];
+
+                    tsq = sq + 7;
+                    while(tsq < 64) {
+                        whitePassedMask[sq] |= (1UL << tsq);
+                        tsq += 8;
+                    }
+
+                    tsq = sq - 9;
+                    while(tsq >= 0) {
+                        blackPassedMask[sq] |= (1UL << tsq);
+                        tsq -= 8;
+                    }
+                }
+		
+                if(squareFile[Sq120(sq)] < (int) Constants.FilesEnum.FILE_H) {
+                    isolatedMask[sq] |= openFileMask[squareFile[Sq120(sq)] + 1];
+
+                    tsq = sq + 9;
+                    while(tsq < 64) {
+                        whitePassedMask[sq] |= (1UL << tsq);
+                        tsq += 8;
+                    }
+
+                    tsq = sq - 7;
+                    while(tsq >= 0) {
+                        blackPassedMask[sq] |= (1UL << tsq);
+                        tsq -= 8;
+                    }
+                }
+            }	
+
+             /*for (int square = 0; square < 64; square++) {
+                PrintBitBoard(isolatedMask[square], 3);
+            }*/
+            
+        }
         
-        public bool CheckBoard() {
-            /*// This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
+        public bool CheckBoard(bool doSomething = false) {
+            // This function is a class invariant (Design by Contract). It creates "false" variables mirroring the real
             // Board class variables in order to check that they are correct at all times.
-            Debug.Log("In checkboard");
-            int[] tPieceNumbers = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-            int[] tBigPieces = new int[2] { 0, 0};
-            int[] tMajorPieces = new int[2] { 0, 0};
-            int[] tMinorPieces = new int[2] { 0, 0};
-            int[] tMaterial = new int[2] { 0, 0};
-            int tPiece, color, sq64;
-            ulong[] tPawns = new ulong[3] {0UL, 0UL, 0UL};
-            tPawns[White] = pawns[White];
-            tPawns[Black] = pawns[Black];
-            tPawns[Both] = pawns[Both];
+            if (doSomething) {
+                Debug.Log("In checkboard");
+                int[] tPieceNumbers = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                int[] tBigPieces = new int[2] { 0, 0};
+                int[] tMajorPieces = new int[2] { 0, 0};
+                int[] tMinorPieces = new int[2] { 0, 0};
+                int[] tMaterial = new int[2] { 0, 0};
+                int tPiece, color, sq64;
+                ulong[] tPawns = new ulong[3] {0UL, 0UL, 0UL};
+                tPawns[White] = pawns[White];
+                tPawns[Black] = pawns[Black];
+                tPawns[Both] = pawns[Both];
 
-            // Check piece lists
-            for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++) {
-                for (int tPieceNumber = 0; tPieceNumber < pieceNumbers[tPiece]; tPieceNumber++) {
-                    int sq120 = pieceList[tPiece, tPieceNumber];
-                    Assert.IsTrue(squares[sq120] == tPiece, "checkBoard() failed: Piece found in Piece List was not found in the board.");
+                // Check piece lists
+                for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++) {
+                    for (int tPieceNumber = 0; tPieceNumber < pieceNumbers[tPiece]; tPieceNumber++) {
+                        int sq120 = pieceList[tPiece, tPieceNumber];
+                        Assert.IsTrue(squares[sq120] == tPiece, "checkBoard() failed: Piece found in Piece List was not found in the board.");
+                    }
                 }
-            }
-            for (sq64 = 0; sq64 < Constants.NUM_SQUARES; sq64++) {
-                int sq120 = Sq120(sq64);
-                tPiece = squares[sq120];
-                if (tPiece != Piece.Empty) {
-                    tPieceNumbers[tPiece]++;
-                    color = Piece.PieceColor[tPiece];
-                    if (Piece.PieceBig[tPiece]) tBigPieces[color]++;
-                    if (Piece.PieceMaj[tPiece]) tMajorPieces[color]++;
-                    if (Piece.PieceMin[tPiece]) tMinorPieces[color]++;
-                    tMaterial[color] += Piece.PieceVal[tPiece];
+                for (sq64 = 0; sq64 < Constants.NUM_SQUARES; sq64++) {
+                    int sq120 = Sq120(sq64);
+                    tPiece = squares[sq120];
+                    if (tPiece != Piece.Empty) {
+                        tPieceNumbers[tPiece]++;
+                        color = Piece.PieceColor[tPiece];
+                        if (Piece.PieceBig[tPiece]) tBigPieces[color]++;
+                        if (Piece.PieceMaj[tPiece]) tMajorPieces[color]++;
+                        if (Piece.PieceMin[tPiece]) tMinorPieces[color]++;
+                        tMaterial[color] += Piece.PieceVal[tPiece];
+                    }
                 }
-            }
 
-            // Check piece numbers
-            for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++) {
-                Assert.IsTrue(tPieceNumbers[tPiece] == pieceNumbers[tPiece],"checkBoard() failed: pieceNumbers list set incorrectly.");
-            }
-            
-            // Check BitBoards
-            Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn], "checkBoard() failed: White pawns set incorrectly in BitBoard.");
-            Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Black pawns set incorrectly in BitBoard.");
-            Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Both pawns set incorrectly in BitBoard.");
+                // Check piece numbers
+                for (tPiece = Piece.WhitePawn; tPiece <= Piece.BlackKing; tPiece++) {
+                    Assert.IsTrue(tPieceNumbers[tPiece] == pieceNumbers[tPiece],"checkBoard() failed: pieceNumbers list set incorrectly.");
+                }
+                
+                // Check BitBoards
+                Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[White]) == pieceNumbers[Piece.WhitePawn], "checkBoard() failed: White pawns set incorrectly in BitBoard.");
+                Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[Black]) == pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Black pawns set incorrectly in BitBoard.");
+                Assert.IsTrue(BitBoardUtils.CountBitBoard(tPawns[Both]) == pieceNumbers[Piece.WhitePawn] + pieceNumbers[Piece.BlackPawn], "checkBoard() failed: Both pawns set incorrectly in BitBoard.");
 
-            // Check BitBoards squares
-            while (tPawns[White] != 0) {
-                sq64 = BitBoardUtils.PopBit(ref tPawns[White]);
-                Assert.IsTrue(squares[Sq120(sq64)] == Piece.WhitePawn, "checkBoard() failed: White pawn not found in BitBoard.");
+                // Check BitBoards squares
+                while (tPawns[White] != 0) {
+                    sq64 = BitBoardUtils.PopBit(ref tPawns[White]);
+                    Assert.IsTrue(squares[Sq120(sq64)] == Piece.WhitePawn, "checkBoard() failed: White pawn not found in BitBoard.");
+                }
+                while (tPawns[Black] != 0) {
+                    sq64 = BitBoardUtils.PopBit(ref tPawns[Black]);
+                    Assert.IsTrue(squares[Sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Black pawn not found in BitBoard.");
+                }
+                while (tPawns[Both] != 0) {
+                    sq64 = BitBoardUtils.PopBit(ref tPawns[Both]);
+                    Assert.IsTrue(squares[Sq120(sq64)] == Piece.WhitePawn || squares[Sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Both pawn not found in BitBoard.");
+                }
+                
+                // Various checks
+                Assert.IsTrue(tMaterial[White] == material[White] && tMaterial[Black] == material[Black], "checkBoard() failed: Material count not equal.");
+                Assert.IsTrue(tMinorPieces[White] == minorPieces[White] && tMinorPieces[Black] == minorPieces[Black], "checkBoard() failed: Minor pieces count not equal.");
+                Assert.IsTrue(tMajorPieces[White] == majorPieces[White] && tMajorPieces[Black]== majorPieces[Black], "checkBoard() failed: Major pieces count not equal.");
+                Assert.IsTrue(tBigPieces[White] == bigPieces[White] && tBigPieces[Black] == bigPieces[Black], "checkBoard() failed: Big pieces pieces count not equal.");
+                Assert.IsTrue(sideToPlay == White || sideToPlay == Black, "checkBoard() failed: Side to play not set to White or Black.");
+                Assert.IsTrue(GeneratePositionKey() == positionKey, "checkBoard() failed: Incorrect Position Key.");
+                Assert.IsTrue(enPassantSquare == NoEnPassant || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
+                                                || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black, "checkBoard() failed: Incorrect enPassant rank.");
+                Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing, "checkBoard() failed: White King not found in expected square.");
+                Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing, "checkBoard() failed: Black King not found in expected square.");
             }
-            while (tPawns[Black] != 0) {
-                sq64 = BitBoardUtils.PopBit(ref tPawns[Black]);
-                Assert.IsTrue(squares[Sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Black pawn not found in BitBoard.");
-            }
-            while (tPawns[Both] != 0) {
-                sq64 = BitBoardUtils.PopBit(ref tPawns[Both]);
-                Assert.IsTrue(squares[Sq120(sq64)] == Piece.WhitePawn || squares[Sq120(sq64)] == Piece.BlackPawn, "checkBoard() failed: Both pawn not found in BitBoard.");
-            }
-            
-            // Various checks
-            Assert.IsTrue(tMaterial[White] == material[White] && tMaterial[Black] == material[Black], "checkBoard() failed: Material count not equal.");
-            Assert.IsTrue(tMinorPieces[White] == minorPieces[White] && tMinorPieces[Black] == minorPieces[Black], "checkBoard() failed: Minor pieces count not equal.");
-            Assert.IsTrue(tMajorPieces[White] == majorPieces[White] && tMajorPieces[Black]== majorPieces[Black], "checkBoard() failed: Major pieces count not equal.");
-            Assert.IsTrue(tBigPieces[White] == bigPieces[White] && tBigPieces[Black] == bigPieces[Black], "checkBoard() failed: Big pieces pieces count not equal.");
-            Assert.IsTrue(sideToPlay == White || sideToPlay == Black, "checkBoard() failed: Side to play not set to White or Black.");
-            Assert.IsTrue(GeneratePositionKey() == positionKey, "checkBoard() failed: Incorrect Position Key.");
-            Assert.IsTrue(enPassantSquare == NoEnPassant || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_6 && sideToPlay == White
-                                            || squareRank[enPassantSquare] == (int) Constants.RanksEnum.RANK_3 && sideToPlay == Black, "checkBoard() failed: Incorrect enPassant rank.");
-            Assert.IsTrue(squares[kingSquares[White]] == Piece.WhiteKing, "checkBoard() failed: White King not found in expected square.");
-            Assert.IsTrue(squares[kingSquares[Black]] == Piece.BlackKing, "checkBoard() failed: Black King not found in expected square.");*/
-            
             return true;
         }
 
@@ -797,6 +879,83 @@ namespace Core {
             searchKillers = new int[Constants.NUM_PLAYERS, Constants.MAX_DEPTH];
             pvTable.Clear();
             ply = 0;
+        }
+
+        public void PrintPawnAnalysis() {
+            int piece = Piece.WhitePawn;
+            for (int pieceNumber = 0; pieceNumber < pieceNumbers[piece]; pieceNumber++) {
+                int square = pieceList[piece, pieceNumber];
+                Assert.IsTrue(Validations.IsSquareOnBoard(square));
+                if ((isolatedMask[Sq64(square)] & pawns[White]) == 0) { // If the pawn is isolated, it's worth less
+                    Debug.Log("Isolated white pawn on " + BoardSquares.SquareNameDictionary[square]);
+                }
+                if ((whitePassedMask[Sq64(square)] & pawns[Black]) == 0) { // If the pawn has passed enemy pawns, it's more valuable
+                    Debug.Log("Passed white pawn on " + BoardSquares.SquareNameDictionary[square]);
+                }
+                
+            }
+            piece = Piece.BlackPawn;
+            for (int pieceNumber = 0; pieceNumber < pieceNumbers[piece]; pieceNumber++) {
+                int square = pieceList[piece, pieceNumber];
+                Assert.IsTrue(Validations.IsSquareOnBoard(square));
+                if ((isolatedMask[Board.Sq64(square)] & pawns[Board.Black]) == 0) { // If the pawn is isolated, it's worth less
+                    Debug.Log("Isolated black pawn on " + BoardSquares.SquareNameDictionary[square]);
+                }
+                if ((blackPassedMask[Board.Sq64(square)] & pawns[Board.White]) == 0) { // If the pawn has passed enemy pawns, it's more valuable
+                    Debug.Log("Passed black pawn on " + BoardSquares.SquareNameDictionary[square]);
+                }
+            }
+        }
+        
+        void MirrorBoard() {
+            int[] tempPiecesArray = new int[64];
+            int tempSide = sideToPlay^1;
+            int[] SwapPiece = new int[13] { Piece.Empty, Piece.BlackPawn, Piece.BlackKnight, Piece.BlackBishop, Piece.BlackRook, Piece.BlackQueen, Piece.BlackKing,
+                Piece.WhitePawn, Piece.WhiteKnight, Piece.WhiteBishop, Piece.WhiteRook, Piece.WhiteQueen, Piece.WhiteKing };
+            int tempCastlePerm = 0;
+            int tempEnPas = NoEnPassant;
+	
+            int sq;
+            int tp;
+	
+            if ((castlingRights & (int) CastlingRightsEnum.WKCA) != 0) tempCastlePerm |= (int) CastlingRightsEnum.BKCA;
+            if ((castlingRights & (int) CastlingRightsEnum.WQCA) != 0) tempCastlePerm |= (int) CastlingRightsEnum.BQCA;
+
+            if ((castlingRights & (int) CastlingRightsEnum.BKCA) != 0) tempCastlePerm |= (int) CastlingRightsEnum.WKCA;
+            if ((castlingRights & (int) CastlingRightsEnum.BQCA) != 0) tempCastlePerm |= (int) CastlingRightsEnum.WQCA;
+	
+            if (enPassantSquare != NoEnPassant)  {
+                tempEnPas = Sq120(BoardSquares.Mirror64[Sq64(enPassantSquare)]);
+            }
+
+            for (sq = 0; sq < 64; sq++) {
+                tempPiecesArray[sq] = squares[Sq120(BoardSquares.Mirror64[sq])];
+            }
+
+            ResetBoard();
+	
+            for (sq = 0; sq < 64; sq++) {
+                tp = SwapPiece[tempPiecesArray[sq]];
+                squares[Sq120(sq)] = tp;
+            }
+	
+            sideToPlay = tempSide;
+            castlingRights = tempCastlePerm;
+            enPassantSquare = tempEnPas;
+            positionKey = GeneratePositionKey();
+            UpdateListsMaterial();
+            Debug.Assert(CheckBoard(false));
+        }
+
+        public void PrintMirrorBoardEvaluations() {
+            int score = Evaluate.EvaluatePosition(this);
+            PrintGameBoard();
+            Debug.Log("Original score: " + score);
+            MirrorBoard();
+            Debug.Log("MIRROR");
+            score = Evaluate.EvaluatePosition(this);
+            PrintGameBoard();
+            Debug.Log("Mirrored score: " + score);
         }
     }
 }

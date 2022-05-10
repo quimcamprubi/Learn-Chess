@@ -1,10 +1,18 @@
-﻿using UnityEngine.Assertions;
+﻿using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Core {
     public static class Evaluate {
         // Evaluation tables. These tables indicate where the engine should intend to put its pieces by giving them more
         // value to said pieces if placed on the squares with higher scores. These tables generally try to move pieces to the
         // center of the board, developing the advanced pieces and valuing central pawns higher than otherwise.
+
+        public static readonly int IsolatedPawn = -10;  // Isolated pawns (undefended by other pawns) are less valuable.
+        public static readonly int[] AdvancedPawn = new int[8] {0, 5, 10, 20, 35, 60, 100, 200}; // the more the pawn advances, the higher its value.
+        public static readonly int RookOpenFile = 10;    // Rooks controlling open files are valuable.
+        public static readonly int RookSemiOpenFile = 5;
+        public static readonly int QueenOpenFile = 5;
+        public static readonly int QueenSemiOpenFile = 3;
         
         public static readonly int[] PawnTable = {
             0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
@@ -69,12 +77,24 @@ namespace Core {
                 int square = board.pieceList[piece, pieceNumber];
                 Assert.IsTrue(Validations.IsSquareOnBoard(square));
                 score += PawnTable[Board.Sq64(square)];
+                if ((board.isolatedMask[Board.Sq64(square)] & board.pawns[Board.White]) == 0) { // If the pawn is isolated, it's worth less
+                    score += IsolatedPawn;
+                }
+                if ((board.whitePassedMask[Board.Sq64(square)] & board.pawns[Board.Black]) == 0) { // If the pawn has passed enemy pawns, it's more valuable
+                    score += AdvancedPawn[Board.squareRank[square]];
+                }
             }
             piece = Piece.BlackPawn;
             for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                 int square = board.pieceList[piece, pieceNumber];
                 Assert.IsTrue(Validations.IsSquareOnBoard(square));
                 score -= PawnTable[Mirror64[Board.Sq64(square)]];
+                if ((board.isolatedMask[Board.Sq64(square)] & board.pawns[Board.Black]) == 0) { // If the pawn is isolated, it's worth less
+                    score -= IsolatedPawn;
+                }
+                if ((board.blackPassedMask[Board.Sq64(square)] & board.pawns[Board.White]) == 0) { // If the pawn has passed enemy pawns, it's more valuable
+                    score -= AdvancedPawn[7 - Board.squareRank[square]];
+                }
             }
             
             // Knights
@@ -111,12 +131,44 @@ namespace Core {
                 int square = board.pieceList[piece, pieceNumber];
                 Assert.IsTrue(Validations.IsSquareOnBoard(square));
                 score += RookTable[Board.Sq64(square)];
+                if ((board.pawns[Board.Both] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score += RookOpenFile;
+                } else if ((board.pawns[Board.White] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score += RookSemiOpenFile;
+                }
             }
             piece = Piece.BlackRook;
             for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
                 int square = board.pieceList[piece, pieceNumber];
                 Assert.IsTrue(Validations.IsSquareOnBoard(square));
                 score -= RookTable[Mirror64[Board.Sq64(square)]];
+                if ((board.pawns[Board.Both] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score -= RookOpenFile;
+                } else if ((board.pawns[Board.Black] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score -= RookSemiOpenFile;
+                }
+            }
+            
+            // Queens
+            piece = Piece.WhiteQueen;
+            for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
+                int square = board.pieceList[piece, pieceNumber];
+                Assert.IsTrue(Validations.IsSquareOnBoard(square));
+                if ((board.pawns[Board.Both] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score += QueenOpenFile;
+                } else if ((board.pawns[Board.White] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score += QueenSemiOpenFile;
+                }
+            }
+            piece = Piece.BlackQueen;
+            for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
+                int square = board.pieceList[piece, pieceNumber];
+                Assert.IsTrue(Validations.IsSquareOnBoard(square));
+                if ((board.pawns[Board.Both] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score -= QueenOpenFile;
+                } else if ((board.pawns[Board.Black] & board.openFileMask[Board.squareFile[square]]) == 0) {
+                    score -= QueenSemiOpenFile;
+                }
             }
 
             return board.sideToPlay == Board.White ? score : -score;

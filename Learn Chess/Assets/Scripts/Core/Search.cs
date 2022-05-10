@@ -127,6 +127,11 @@ namespace Core {
             if (board.ply > Constants.MAX_DEPTH - 1) {
                 return Evaluate.EvaluatePosition(board);
             }
+
+            bool inCheck = board.IsKingInCheck();
+            if (inCheck) {
+                depth++;
+            }
             
             int legalMoves = 0;
             int oldAlpha = alpha;
@@ -168,7 +173,7 @@ namespace Core {
             }
             
             if (legalMoves == 0) {
-                if (board.IsSquareAttacked(board.kingSquares[board.sideToPlay], board.sideToPlay ^ 1)) {
+                if (inCheck) {
                     return -Mate + board.ply; // Checkmate, taking into account how far it is
                 }
                 return 0; // Stalemate
@@ -185,6 +190,7 @@ namespace Core {
             //Move bestMove = new Move(Board.None, -Infinite);
             ClearForSearch(board, searchInfo);
             StringBuilder sb = new StringBuilder();
+            
             for (int currentDepth = 1; currentDepth < searchInfo.depth + 1; currentDepth++) {
                 int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, true);
                 // if (OutOfTime()) // previousBestMove
