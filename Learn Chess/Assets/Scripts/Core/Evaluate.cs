@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Net.Mail;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Core {
@@ -69,8 +70,33 @@ namespace Core {
             0	,	1	,	2	,	3	,	4	,	5	,	6	,	7
         };
         
+        // In the endgame, we encourage the King to be active and to help support its pieces, instead of staying in the corners.
+        public static readonly int[] KingEndgame = new int[64] {	
+            -50	,	-20	,	0	,	0	,	0	,	0	,	-20	,	-50	,
+            -20,	0	,	20	,	20	,	20	,	20	,	0	,	-20	,
+            0	,	20	,	40	,	40	,	40	,	40	,	20	,	0	,
+            0	,	20	,	40	,	50	,	50	,	40	,	20	,	0	,
+            0	,	20	,	40	,	50	,	50	,	40	,	20	,	0	,
+            0	,	20	,	40	,	40	,	40	,	40	,	20	,	0	,
+            -20	,	0	,	20	,	20	,	20	,	20	,	0	,	-20	,
+            -50	,	-20	,	0	,	0	,	0	,	0	,	-20	,	-50	
+        };
+
+        // In openings, we encourage the King to castle and moving to the corners. We also don't want the king to go forward.
+        public static readonly int[] KingOpening = new int [64] {	
+            0	,	5	,	5	,	-10	,	-10	,	0	,	10	,	5	,
+            -10	,	-10	,	-10	,	-10	,	-10	,	-10	,	-10	,	-10	,
+            -30	,	-30	,	-30	,	-30	,	-30	,	-30	,	-30	,	-30	,
+            -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
+            -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
+            -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
+            -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
+            -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70		
+        };
+        
         public static int EvaluatePosition(Board board) { // Evaluation from White's POV
             int score = board.material[Board.White] - board.material[Board.Black];
+            if (MaterialDraw(board)) return 0; // Draw
             // Pawns
             int piece = Piece.WhitePawn;
             for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
@@ -171,7 +197,58 @@ namespace Core {
                 }
             }
 
+            piece = Piece.WhiteKing;
+            int kingSquare = board.pieceList[piece, 0];
+            if (board.pieceNumbers[Piece.BlackQueen] == 0 || board.material[Board.Black] <= EndgameMaterial()) { // We are in the endgame
+                score += KingEndgame[Board.Sq64(kingSquare)];
+            } else {
+                score += KingOpening[Board.Sq64(kingSquare)];
+            }
+            
+            piece = Piece.BlackKing;
+            kingSquare = board.pieceList[piece, 0];
+            if (board.pieceNumbers[Piece.WhiteQueen] == 0 || board.material[Board.White] <= EndgameMaterial()) { // We are in the endgame
+                score -= KingEndgame[Board.Sq64(kingSquare)];
+            } else {
+                score -= KingOpening[Board.Sq64(kingSquare)];
+            }
+
             return board.sideToPlay == Board.White ? score : -score;
+        }
+
+        public static bool MaterialDraw(Board board) {
+            if (board.pieceNumbers[Piece.WhiteRook] == 0 && board.pieceNumbers[Piece.BlackRook] == 0 &&
+                board.pieceNumbers[Piece.WhiteQueen] == 0 && board.pieceNumbers[Piece.BlackQueen] == 0) {
+                if (board.pieceNumbers[Piece.WhiteBishop] == 0 && board.pieceNumbers[Piece.BlackBishop] == 0) {
+                    if (board.pieceNumbers[Piece.WhiteKnight] < 3 && board.pieceNumbers[Piece.BlackKnight] < 3) { return true; }
+                } else if (board.pieceNumbers[Piece.WhiteKnight] == 0 && board.pieceNumbers[Piece.BlackKnight] == 0) {
+                    if (Mathf.Abs(board.pieceNumbers[Piece.WhiteBishop] - board.pieceNumbers[Piece.BlackBishop]) < 2) { return true; }
+                } else if (board.pieceNumbers[Piece.WhiteKnight] < 3 && board.pieceNumbers[Piece.WhiteBishop] == 0 ||
+                           board.pieceNumbers[Piece.WhiteBishop] == 1 && board.pieceNumbers[Piece.WhiteKnight] == 0) {
+                    if (board.pieceNumbers[Piece.BlackKnight] < 3 && board.pieceNumbers[Piece.BlackBishop] == 0 ||
+                        board.pieceNumbers[Piece.BlackBishop] == 1 && board.pieceNumbers[Piece.BlackKnight] == 0)  { return true; }
+                }
+            } else if (board.pieceNumbers[Piece.WhiteQueen] == 0 && board.pieceNumbers[Piece.BlackQueen] == 0) {
+                if (board.pieceNumbers[Piece.WhiteRook] == 1 && board.pieceNumbers[Piece.BlackRook] == 1) {
+                    if (board.pieceNumbers[Piece.WhiteKnight] + board.pieceNumbers[Piece.WhiteBishop] < 2 && 
+                        board.pieceNumbers[Piece.BlackKnight] + board.pieceNumbers[Piece.BlackBishop] < 2)	{ return true; }
+                } else if (board.pieceNumbers[Piece.WhiteRook] == 1 && board.pieceNumbers[Piece.BlackRook] == 0) {
+                    if (board.pieceNumbers[Piece.WhiteKnight] + board.pieceNumbers[Piece.WhiteBishop] == 0 && 
+                        (board.pieceNumbers[Piece.BlackKnight] + board.pieceNumbers[Piece.BlackBishop] == 1 
+                        || board.pieceNumbers[Piece.BlackKnight] + board.pieceNumbers[Piece.BlackBishop] == 2)) { return true; }
+                } else if (board.pieceNumbers[Piece.BlackRook] == 1 && board.pieceNumbers[Piece.WhiteRook] == 0) {
+                    if (board.pieceNumbers[Piece.BlackKnight] + board.pieceNumbers[Piece.BlackBishop] == 0 && 
+                        (board.pieceNumbers[Piece.WhiteKnight] + board.pieceNumbers[Piece.WhiteBishop] == 1 || 
+                        board.pieceNumbers[Piece.WhiteKnight] + board.pieceNumbers[Piece.WhiteBishop] == 2)) { return true; }
+                }
+            }
+            return false;
+        }
+
+        // If there are no queens on the board, and there is less material than 2 rooks, 4 knights and 8 pawns, we consider
+        // this an endgame, and we encourage the King to become more active towards the middle of the board.
+        public static int EndgameMaterial() {
+            return 2 * Piece.getPieceValue(Piece.WhiteRook) + 4 * Piece.getPieceValue(Piece.WhiteKnight) + 8 * Piece.getPieceValue(Piece.WhitePawn);
         }
     }
 }

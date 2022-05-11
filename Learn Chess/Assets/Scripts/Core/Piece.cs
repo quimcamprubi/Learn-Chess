@@ -62,10 +62,8 @@ namespace Core {
             return piece;
         }
 
-        public static int getPieceValue(int piece)
-        {
-            switch (AbsolutePieceType(piece))
-            {
+        public static int getPieceValue(int piece) {
+            switch (AbsolutePieceType(piece)) {
                 case Pawn:
                     return 100;
                 case Knight:
