@@ -195,7 +195,6 @@ namespace Core {
                         int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
                         if (moveIndex >= 0) {
                             Move moveToMake = currentAvailableMoves[moveIndex];
-                            //mainBoard.pvTable.StorePvMove(moveToMake);
                             if (!Move.IsMovePromotion(moveToMake.move)) {
                                 MakeMove(moveToMake);
                             } else {
@@ -296,8 +295,8 @@ namespace Core {
         }
 
         private void AISearchAndMakeMove() {
-            SearchInfo searchParameters = new SearchInfo(depth: 5);
-            Search.SearchPosition(mainBoard, searchParameters);
+            SearchInfo searchParameters = new SearchInfo(depth: 7);
+            Search.SearchPosition(mainBoard, searchParameters, nullMove: false);
             Move bestMove = mainBoard.pvArray[0];
             MakeMove(bestMove);
         }

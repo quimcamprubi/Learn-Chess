@@ -132,6 +132,18 @@ namespace Core {
             if (inCheck) {
                 depth++;
             }
+
+            if (nullMove && !inCheck && board.ply != 0 && board.bigPieces[board.sideToPlay] > 1 && depth >= 4) {
+                board.MakeNullMove();
+                int score = -RecursiveAlphaBeta(-beta, -beta + 1, depth - 4, board, searchInfo, nullMove: false);
+                board.UnmakeNullMove();
+                if (searchInfo.stopped) {
+                    return 0;
+                }
+                if (score >= beta) {
+                    return beta;
+                }
+            }
             
             int legalMoves = 0;
             int oldAlpha = alpha;
@@ -147,6 +159,7 @@ namespace Core {
                     }
                 }
             }
+            
             for (int moveNumber = 0; moveNumber < movesList.Length; moveNumber++) {
                 NextMove(moveNumber, movesList); // We choose the best move first, implementing move ordering, improving Alpha Beta cutoffs.
                 Move move = movesList[moveNumber];
@@ -186,13 +199,13 @@ namespace Core {
             return alpha;
         }
         
-        public static void SearchPosition(Board board, SearchInfo searchInfo) { // Iterative deepening function
+        public static void SearchPosition(Board board, SearchInfo searchInfo, bool nullMove = true) { // Iterative deepening function
             //Move bestMove = new Move(Board.None, -Infinite);
             ClearForSearch(board, searchInfo);
             StringBuilder sb = new StringBuilder();
             
             for (int currentDepth = 1; currentDepth < searchInfo.depth + 1; currentDepth++) {
-                int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, true);
+                int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove);
                 // if (OutOfTime()) // previousBestMove
                 board.pvTable.GetPvLineCount(currentDepth);
                 Move bestMove = board.pvArray[0];

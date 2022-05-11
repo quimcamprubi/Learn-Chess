@@ -749,6 +749,42 @@ namespace Core {
             Assert.IsTrue(CheckBoard());
         }
         
+        public void MakeNullMove() {
+            Debug.Assert(CheckBoard());
+            Debug.Assert(!IsSquareAttacked(kingSquares[sideToPlay], sideToPlay ^ 1));
+            
+            ply++;
+            gameHist[histPly].positionKey = positionKey;
+            if(enPassantSquare != NoEnPassant) HashEnPassant();
+            gameHist[histPly].move = 0;
+            gameHist[histPly].fiftyMove = fiftyMoveCounter;
+            gameHist[histPly].enPassant = enPassantSquare;
+            gameHist[histPly].castlingRights = castlingRights;
+            enPassantSquare = NoEnPassant;
+            sideToPlay ^= 1;
+            histPly++;
+            HashSide();
+            
+            Debug.Assert(CheckBoard());
+        }
+
+        public void UnmakeNullMove() {
+            Debug.Assert(CheckBoard());
+
+            histPly--;
+            ply--;
+            if(enPassantSquare != NoEnPassant) HashEnPassant();
+            castlingRights = gameHist[histPly].castlingRights;
+            fiftyMoveCounter = gameHist[histPly].fiftyMove;
+            enPassantSquare = gameHist[histPly].enPassant;
+            if(enPassantSquare != NoEnPassant) HashEnPassant();
+            sideToPlay ^= 1;
+            HashSide();
+  
+            Debug.Assert(CheckBoard());
+        }
+        
+        
         // MakeMove sub-functions
         public void ClearPiece(int square) {
             Assert.IsTrue(Validations.IsSquareOnBoard(square), "Square to clear is not on board");

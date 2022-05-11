@@ -14,6 +14,7 @@ namespace Core {
         public static readonly int RookSemiOpenFile = 5;
         public static readonly int QueenOpenFile = 5;
         public static readonly int QueenSemiOpenFile = 3;
+        public static readonly int BishopPair;
         
         public static readonly int[] PawnTable = {
             0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
@@ -71,22 +72,21 @@ namespace Core {
         };
         
         // In the endgame, we encourage the King to be active and to help support its pieces, instead of staying in the corners.
-        public static readonly int[] KingEndgame = new int[64] {	
-            -50	,	-20	,	0	,	0	,	0	,	0	,	-20	,	-50	,
-            -20,	0	,	20	,	20	,	20	,	20	,	0	,	-20	,
-            0	,	20	,	40	,	40	,	40	,	40	,	20	,	0	,
-            0	,	20	,	40	,	50	,	50	,	40	,	20	,	0	,
-            0	,	20	,	40	,	50	,	50	,	40	,	20	,	0	,
-            0	,	20	,	40	,	40	,	40	,	40	,	20	,	0	,
-            -20	,	0	,	20	,	20	,	20	,	20	,	0	,	-20	,
-            -50	,	-20	,	0	,	0	,	0	,	0	,	-20	,	-50	
+        public static readonly int[] KingEndgame = {	
+            -50	,	-10	,	0	,	0	,	0	,	0	,	-10	,	-50	,
+            -10,	0	,	10	,	10	,	10	,	10	,	0	,	-10	,
+            0	,	10	,	15	,	15	,	15	,	15	,	10	,	0	,
+            0	,	10	,	15	,	20	,	20	,	15	,	10	,	0	,
+            0	,	10	,	15	,	20	,	20	,	15	,	10	,	0	,
+            0	,	10	,	15	,	15	,	15	,	15	,	10	,	0	,
+            -10,	0	,	10	,	10	,	10	,	10	,	0	,	-10	,
+            -50	,	-10	,	0	,	0	,	0	,	0	,	-10	,	-50	
         };
 
-        // In openings, we encourage the King to castle and moving to the corners. We also don't want the king to go forward.
-        public static readonly int[] KingOpening = new int [64] {	
+        public static readonly int[] KingOpening = {	
             0	,	5	,	5	,	-10	,	-10	,	0	,	10	,	5	,
-            -10	,	-10	,	-10	,	-10	,	-10	,	-10	,	-10	,	-10	,
             -30	,	-30	,	-30	,	-30	,	-30	,	-30	,	-30	,	-30	,
+            -50	,	-50	,	-50	,	-50	,	-50	,	-50	,	-50	,	-50	,
             -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
             -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
             -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,
@@ -96,7 +96,7 @@ namespace Core {
         
         public static int EvaluatePosition(Board board) { // Evaluation from White's POV
             int score = board.material[Board.White] - board.material[Board.Black];
-            if (MaterialDraw(board)) return 0; // Draw
+            if (board.pieceNumbers[Piece.WhitePawn] == 0 && board.pieceNumbers[Piece.BlackPawn] == 0 && MaterialDraw(board)) return 0; // Draw
             // Pawns
             int piece = Piece.WhitePawn;
             for (int pieceNumber = 0; pieceNumber < board.pieceNumbers[piece]; pieceNumber++) {
@@ -199,7 +199,7 @@ namespace Core {
 
             piece = Piece.WhiteKing;
             int kingSquare = board.pieceList[piece, 0];
-            if (board.pieceNumbers[Piece.BlackQueen] == 0 || board.material[Board.Black] <= EndgameMaterial()) { // We are in the endgame
+            if (board.material[Board.Black] <= EndgameMaterial()) { // We are in the endgame
                 score += KingEndgame[Board.Sq64(kingSquare)];
             } else {
                 score += KingOpening[Board.Sq64(kingSquare)];
@@ -207,11 +207,14 @@ namespace Core {
             
             piece = Piece.BlackKing;
             kingSquare = board.pieceList[piece, 0];
-            if (board.pieceNumbers[Piece.WhiteQueen] == 0 || board.material[Board.White] <= EndgameMaterial()) { // We are in the endgame
+            if (board.material[Board.White] <= EndgameMaterial()) { // We are in the endgame
                 score -= KingEndgame[Board.Sq64(kingSquare)];
             } else {
                 score -= KingOpening[Board.Sq64(kingSquare)];
             }
+
+            if (board.pieceNumbers[Piece.WhiteBishop] >= 2) score += BishopPair;
+            if (board.pieceNumbers[Piece.BlackBishop] >= 2) score -= BishopPair;
 
             return board.sideToPlay == Board.White ? score : -score;
         }
@@ -248,7 +251,7 @@ namespace Core {
         // If there are no queens on the board, and there is less material than 2 rooks, 4 knights and 8 pawns, we consider
         // this an endgame, and we encourage the King to become more active towards the middle of the board.
         public static int EndgameMaterial() {
-            return 2 * Piece.getPieceValue(Piece.WhiteRook) + 4 * Piece.getPieceValue(Piece.WhiteKnight) + 8 * Piece.getPieceValue(Piece.WhitePawn);
+            return Piece.getPieceValue(Piece.WhiteRook) + 2 * Piece.getPieceValue(Piece.WhiteKnight) + 2 * Piece.getPieceValue(Piece.WhitePawn);
         }
     }
 }
