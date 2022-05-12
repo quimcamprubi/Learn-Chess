@@ -1,16 +1,20 @@
 ﻿
+using System;
 using System.Diagnostics;
 using System.Text;
+using UnityEngine;
+using UnityEngine.UIElements;
 using Utils;
 using Debug = UnityEngine.Debug;
 
 namespace Core {
     public class SearchInfo {
-        public int startTime;
-        public int stopTime;
+        public DateTime startTime;
+        public DateTime stopTime;
+        public int durationSet;
         public int depth;
-        public int depthSet;
-        public int timeSet;
+        public bool depthSet;
+        public bool timeSet;
         public int movesToGo;
         public long nodes;
         public bool quit;
@@ -21,10 +25,19 @@ namespace Core {
 
         public SearchInfo(int depth) {
             this.depth = depth;
+            timeSet = true;
+            stopped = false;
+            durationSet = 10;
+        }
+
+        public SearchInfo(int depth, bool timeSet = true, int durationSet = 10) {
+            this.depth = depth;
+            this.timeSet = timeSet;
+            this.durationSet = durationSet;
+            stopped = false;
         }
         
         public void ClearSearchData() {
-            startTime = (int) Stopwatch.GetTimestamp();
             stopped = false;
             nodes = 0;
             failHigh = 0;
@@ -50,8 +63,12 @@ namespace Core {
             }*/
         }
         
-        public static void CheckFinish() {
-            // Check if Search has been running for too long
+        public static void CheckFinish(SearchInfo searchInfo) {
+            DateTime now = DateTime.Now;
+            if (searchInfo.timeSet && (now - searchInfo.startTime).TotalSeconds > searchInfo.durationSet) {
+                searchInfo.stopped = true;
+                searchInfo.stopTime = now;
+            }
         }
         
         public static bool IsRepeated(Board board) {
@@ -68,6 +85,11 @@ namespace Core {
         
         public static int QuiescenceSearch(int alpha, int beta, Board board, SearchInfo searchInfo) { // Same as AlphaBeta, but with additional search after capture
             Debug.Assert(board.CheckBoard());
+
+            if (searchInfo.nodes > 0 && (searchInfo.nodes & 2047) == 0) { // Every 2048 nodes, we check whether we've run out of time or not
+                CheckFinish(searchInfo);
+            }
+            
             searchInfo.nodes++;
             if (IsRepeated(board) || board.fiftyMoveCounter >= 100) {
                 return 0;
@@ -96,6 +118,9 @@ namespace Core {
                 legalMoves++;
                 score = -QuiescenceSearch(-beta, -alpha, board, searchInfo); // Negative because it is a Negamax implementation
                 board.UnmakeMove();
+
+                if (searchInfo.stopped) return 0;
+                
                 if (score > alpha) {
                     if (score >= beta) {
                         if (legalMoves == 1) searchInfo.failHighFirst++;
@@ -118,6 +143,11 @@ namespace Core {
                 if (quiescenceSearch) return QuiescenceSearch(alpha, beta, board, searchInfo);
                 return Evaluate.EvaluatePosition(board);
             }
+            
+            if (searchInfo.nodes > 0 && (searchInfo.nodes & 2047) == 0) { // Every 2048 nodes, we check whether we've run out of time or not
+                CheckFinish(searchInfo);
+            }
+            
             searchInfo.nodes++;
             
             if (IsRepeated(board) || board.fiftyMoveCounter >= 100 && board.ply != 0) {
@@ -167,6 +197,8 @@ namespace Core {
                 legalMoves++;
                 int score = -RecursiveAlphaBeta(-beta, -alpha, depth - 1, board, searchInfo, true); // Negative because it is a Negamax implementation
                 board.UnmakeMove();
+                if (searchInfo.stopped) return 0; // Iterative deepening time limit
+                
                 if (score > alpha) {
                     if (score >= beta) {
                         if (legalMoves == 1) searchInfo.failHighFirst++;
@@ -199,22 +231,23 @@ namespace Core {
             return alpha;
         }
         
-        public static void SearchPosition(Board board, SearchInfo searchInfo, bool nullMove = true) { // Iterative deepening function
-            //Move bestMove = new Move(Board.None, -Infinite);
+        public static void SearchPosition(Board board, SearchInfo searchInfo, bool nullMove = true, bool printAllData = true) { // Iterative deepening function
+            Move bestMove = new Move(Board.None, -Infinite);
             ClearForSearch(board, searchInfo);
             StringBuilder sb = new StringBuilder();
-            
+            searchInfo.startTime = DateTime.Now;
             for (int currentDepth = 1; currentDepth < searchInfo.depth + 1; currentDepth++) {
                 int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove);
-                // if (OutOfTime()) // previousBestMove
+                if (searchInfo.stopped) break; // If out of time, break out of the loop
                 board.pvTable.GetPvLineCount(currentDepth);
-                Move bestMove = board.pvArray[0];
+                bestMove = board.pvArray[0];
                 sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
                 float ordering = searchInfo.failHighFirst == 0 && searchInfo.failHigh == 0 ? 0 : searchInfo.failHighFirst / searchInfo.failHigh;
                 sb.Append("Ordering: " + ordering + "\n");
                 sb.AppendLine();
             }
-            Debug.Log(sb.ToString());
+            if (printAllData) Debug.Log(sb.ToString());
+            Debug.Log("Best move found: " + Move.GetMoveString(bestMove) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");
         }
 
         public static void NextMove(int moveNumber, Move[] movesList) {
