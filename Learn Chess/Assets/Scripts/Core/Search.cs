@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UIElements;
 using Utils;
 using Debug = UnityEngine.Debug;
@@ -20,6 +21,7 @@ namespace Core {
         public bool quit;
         public bool stopped;
         public bool infinite;
+        public bool transposition;
         public float failHigh;
         public float failHighFirst;
 
@@ -28,13 +30,16 @@ namespace Core {
             timeSet = true;
             stopped = false;
             durationSet = 10;
+            transposition = true;
         }
 
-        public SearchInfo(int depth, bool timeSet = true, int durationSet = 10) {
+        public SearchInfo(int depth, bool timeSet = true, int durationSet = 10, bool transposition = true) {
             this.depth = depth;
             this.timeSet = timeSet;
             this.durationSet = durationSet;
             stopped = false;
+            this.transposition = transposition;
+
         }
         
         public void ClearSearchData() {
@@ -79,7 +84,7 @@ namespace Core {
         }
 
         public static void ClearForSearch(Board board, SearchInfo searchInfo) {
-            board.ClearSearchData();
+            board.ClearSearchData(searchInfo.transposition);
             searchInfo.ClearSearchData();
         } 
         
@@ -162,10 +167,21 @@ namespace Core {
             if (inCheck) {
                 depth++;
             }
+            
+            int score = -Infinite;
+            Move hashMove = new Move();
+            if (searchInfo.transposition) {
+                bool hasHit =  board.hashTable.ProbeHashTable(hashMove, ref score, alpha, beta, depth);
+                if (hasHit && score != -Infinite) {
+                    board.hashTable.cut++;
+                    return score;
+                }
+            }
+            
 
             if (nullMove && !inCheck && board.ply != 0 && board.bigPieces[board.sideToPlay] > 1 && depth >= 4) {
                 board.MakeNullMove();
-                int score = -RecursiveAlphaBeta(-beta, -beta + 1, depth - 4, board, searchInfo, nullMove: false);
+                score = -RecursiveAlphaBeta(-beta, -beta + 1, depth - 4, board, searchInfo, nullMove: false);
                 board.UnmakeNullMove();
                 if (searchInfo.stopped) {
                     return 0;
@@ -180,6 +196,7 @@ namespace Core {
             Move bestMove = new Move(0, -Infinite);
             Move[] movesList = MoveGenerator.GenerateAllMoves(board).ToArray();
             Move pvMove = board.pvTable.ProbePvTable();
+            int bestScore = -Infinite;
             if (pvMove != null) {
                 // Main line, PV move
                 foreach (Move move in movesList) {
@@ -195,27 +212,32 @@ namespace Core {
                 Move move = movesList[moveNumber];
                 if (!board.MakeMove(move)) continue;
                 legalMoves++;
-                int score = -RecursiveAlphaBeta(-beta, -alpha, depth - 1, board, searchInfo, true); // Negative because it is a Negamax implementation
+                score = -RecursiveAlphaBeta(-beta, -alpha, depth - 1, board, searchInfo, true); // Negative because it is a Negamax implementation
                 board.UnmakeMove();
                 if (searchInfo.stopped) return 0; // Iterative deepening time limit
-                
-                if (score > alpha) {
-                    if (score >= beta) {
-                        if (legalMoves == 1) searchInfo.failHighFirst++;
-                        searchInfo.failHigh++;
-                        if (!Move.IsMoveCapture(move.move)) {
-                            board.searchKillers[1, board.ply] = board.searchKillers[0, board.ply];
-                            board.searchKillers[0, board.ply] = move.move;
-                        }
-                        return beta;
-                    }
-                    alpha = score;
+                if (score > bestScore) {
+                    bestScore = score;
                     bestMove = move;
-                    if (!Move.IsMoveCapture(move.move)) {
-                        board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]] += depth;
+                    if (score > alpha) {
+                        if (score >= beta) {
+                            if (legalMoves == 1) searchInfo.failHighFirst++;
+                            searchInfo.failHigh++;
+                            if (!Move.IsMoveCapture(move.move)) {
+                                board.searchKillers[1, board.ply] = board.searchKillers[0, board.ply];
+                                board.searchKillers[0, board.ply] = move.move;
+                            }
+                            if (searchInfo.transposition) return board.hashTable.StoreHashEntry(bestMove, beta, (int) HashTable.FlagsEnum.HFBETA, depth);
+                            return beta;
+                        }
+                        alpha = score;
+                        bestMove = move;
+                        if (!Move.IsMoveCapture(move.move)) {
+                            board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]] += depth;
+                        }
                     }
                 }
             }
+                
             
             if (legalMoves == 0) {
                 if (inCheck) {
@@ -225,7 +247,10 @@ namespace Core {
             }
             
             if (alpha != oldAlpha) {
-                board.pvTable.StorePvMove(bestMove);
+                if (searchInfo.transposition) board.hashTable.StoreHashEntry(bestMove, bestScore, (int) HashTable.FlagsEnum.HFEXACT, depth);
+                else board.pvTable.StorePvMove(bestMove);
+            } else {
+                if (searchInfo.transposition) alpha = board.hashTable.StoreHashEntry(bestMove, alpha, (int) HashTable.FlagsEnum.HFALPHA, depth);
             }
             
             return alpha;
@@ -239,12 +264,15 @@ namespace Core {
             for (int currentDepth = 1; currentDepth < searchInfo.depth + 1; currentDepth++) {
                 int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove);
                 if (searchInfo.stopped) break; // If out of time, break out of the loop
-                board.pvTable.GetPvLineCount(currentDepth);
+                if (searchInfo.transposition) board.hashTable.GetPvLineCount(currentDepth);
+                else board.pvTable.GetPvLineCount(currentDepth);
                 bestMove = board.pvArray[0];
-                sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
-                float ordering = searchInfo.failHighFirst == 0 && searchInfo.failHigh == 0 ? 0 : searchInfo.failHighFirst / searchInfo.failHigh;
-                sb.Append("Ordering: " + ordering + "\n");
-                sb.AppendLine();
+                if (bestMove != null) {
+                    sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
+                    float ordering = searchInfo.failHighFirst == 0 && searchInfo.failHigh == 0 ? 0 : searchInfo.failHighFirst / searchInfo.failHigh;
+                    sb.Append("Ordering: " + ordering + "\n");
+                    sb.AppendLine();
+                }
             }
             if (printAllData) Debug.Log(sb.ToString());
             Debug.Log("Best move found: " + Move.GetMoveString(bestMove) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");

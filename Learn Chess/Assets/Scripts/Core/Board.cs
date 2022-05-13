@@ -59,6 +59,7 @@ namespace Core {
 
         // Principal Variation table
         public PVTable pvTable; // Table containing multiple principle variations. Accessed with positionKey.
+        public HashTable hashTable;
         public Move[] pvArray = new Move[Constants.MAX_DEPTH];   // Array containing the single best principle variation of moves.
         
         // Search data for move ordering
@@ -183,6 +184,7 @@ namespace Core {
             castlingRights = 0;
             positionKey = 0UL;
             pvTable = new PVTable(this, Constants.PV_TABLE_SIZE);
+            hashTable = new HashTable(this, Constants.HASH_TABLE_SIZE);
         }
 
         private void InitBitBoards() {
@@ -910,10 +912,11 @@ namespace Core {
             return false;
         }
 
-        public void ClearSearchData() {
+        public void ClearSearchData(bool transpositionTable = true) {
             searchHistory = new int[Constants.TOTAL_DIFF_PIECES, Constants.NUM_SQUARES_EXT];
             searchKillers = new int[Constants.NUM_PLAYERS, Constants.MAX_DEPTH];
-            pvTable.Clear();
+            if (transpositionTable) hashTable.Clear();
+            else pvTable.Clear();
             ply = 0;
         }
 
