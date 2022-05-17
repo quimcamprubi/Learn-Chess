@@ -14,7 +14,7 @@ namespace Core {
         public static readonly int RookSemiOpenFile = 5;
         public static readonly int QueenOpenFile = 5;
         public static readonly int QueenSemiOpenFile = 3;
-        public static readonly int BishopPair;
+        public static readonly int BishopPair = 30;
         
         public static readonly int[] PawnTable = {
             0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
