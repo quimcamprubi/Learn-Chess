@@ -22,6 +22,7 @@ namespace Core {
         public bool stopped;
         public bool infinite;
         public bool transposition;
+        public bool quiescence;
         public float failHigh;
         public float failHighFirst;
 
@@ -31,15 +32,16 @@ namespace Core {
             stopped = false;
             durationSet = 10;
             transposition = true;
+            quiescence = true;
         }
 
-        public SearchInfo(int depth, bool timeSet = true, int durationSet = 10, bool transposition = true) {
+        public SearchInfo(int depth, bool timeSet = true, int durationSet = 10, bool transposition = true, bool quiescence = true) {
             this.depth = depth;
             this.timeSet = timeSet;
             this.durationSet = durationSet;
             stopped = false;
             this.transposition = transposition;
-
+            this.quiescence = quiescence;
         }
         
         public void ClearSearchData() {
@@ -90,12 +92,11 @@ namespace Core {
         
         public static int QuiescenceSearch(int alpha, int beta, Board board, SearchInfo searchInfo) { // Same as AlphaBeta, but with additional search after capture
             Debug.Assert(board.CheckBoard());
-
             if (searchInfo.nodes > 0 && (searchInfo.nodes & 2047) == 0) { // Every 2048 nodes, we check whether we've run out of time or not
                 CheckFinish(searchInfo);
             }
-            
             searchInfo.nodes++;
+            
             if (IsRepeated(board) || board.fiftyMoveCounter >= 100) {
                 return 0;
             }
@@ -144,7 +145,7 @@ namespace Core {
         
         public static int RecursiveAlphaBeta(int alpha, int beta, int depth, Board board, SearchInfo searchInfo, bool nullMove = false, bool quiescenceSearch = true) {
             //Debug.Assert(board.CheckBoard(), "Checkboard failed at RecursiveAlphaBeta");
-            if (depth == 0) {
+            if (depth <= 0) {
                 if (quiescenceSearch) return QuiescenceSearch(alpha, beta, board, searchInfo);
                 return Evaluate.EvaluatePosition(board);
             }
@@ -169,16 +170,15 @@ namespace Core {
             }
             
             int score = -Infinite;
-            Move hashMove = new Move();
+            Move pvMove = new Move();
             if (searchInfo.transposition) {
-                bool hasHit =  board.hashTable.ProbeHashTable(hashMove, ref score, alpha, beta, depth);
-                if (hasHit && score != -Infinite) {
+                bool hasHit =  board.hashTable.ProbeHashTable(pvMove, ref score, alpha, beta, depth);
+                if (hasHit) {
                     board.hashTable.cut++;
                     return score;
                 }
             }
             
-
             if (nullMove && !inCheck && board.ply != 0 && board.bigPieces[board.sideToPlay] > 1 && depth >= 4) {
                 board.MakeNullMove();
                 score = -RecursiveAlphaBeta(-beta, -beta + 1, depth - 4, board, searchInfo, nullMove: false);
@@ -195,7 +195,7 @@ namespace Core {
             int oldAlpha = alpha;
             Move bestMove = new Move(0, -Infinite);
             Move[] movesList = MoveGenerator.GenerateAllMoves(board).ToArray();
-            Move pvMove = board.pvTable.ProbePvTable();
+            if (!searchInfo.transposition) pvMove = board.pvTable.ProbePvTable();
             int bestScore = -Infinite;
             if (pvMove != null) {
                 // Main line, PV move
@@ -226,11 +226,11 @@ namespace Core {
                                 board.searchKillers[1, board.ply] = board.searchKillers[0, board.ply];
                                 board.searchKillers[0, board.ply] = move.move;
                             }
-                            if (searchInfo.transposition) return board.hashTable.StoreHashEntry(bestMove, beta, (int) HashTable.FlagsEnum.HFBETA, depth);
+                            if (searchInfo.transposition) board.hashTable.StoreHashEntry(bestMove, beta, (int) HashTable.FlagsEnum.HFBETA, depth);
                             return beta;
                         }
                         alpha = score;
-                        bestMove = move;
+                        //bestMove = move;
                         if (!Move.IsMoveCapture(move.move)) {
                             board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]] += depth;
                         }
@@ -241,18 +241,19 @@ namespace Core {
             
             if (legalMoves == 0) {
                 if (inCheck) {
-                    return -Mate + board.ply; // Checkmate, taking into account how far it is
+                    return -Infinite + board.ply; // Checkmate, taking into account how far it is
                 }
                 return 0; // Stalemate
             }
             
             if (alpha != oldAlpha) {
-                if (searchInfo.transposition) board.hashTable.StoreHashEntry(bestMove, bestScore, (int) HashTable.FlagsEnum.HFEXACT, depth);
+                if (searchInfo.transposition) {
+                    board.hashTable.StoreHashEntry(bestMove, bestScore, (int) HashTable.FlagsEnum.HFEXACT, depth);
+                }
                 else board.pvTable.StorePvMove(bestMove);
             } else {
-                if (searchInfo.transposition) alpha = board.hashTable.StoreHashEntry(bestMove, alpha, (int) HashTable.FlagsEnum.HFALPHA, depth);
+                if (searchInfo.transposition) board.hashTable.StoreHashEntry(bestMove, alpha, (int) HashTable.FlagsEnum.HFALPHA, depth);
             }
-            
             return alpha;
         }
         
@@ -261,8 +262,8 @@ namespace Core {
             ClearForSearch(board, searchInfo);
             StringBuilder sb = new StringBuilder();
             searchInfo.startTime = DateTime.Now;
-            for (int currentDepth = 1; currentDepth < searchInfo.depth + 1; currentDepth++) {
-                int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove);
+            for (int currentDepth = 1; currentDepth <= searchInfo.depth; currentDepth++) {
+                int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove, searchInfo.quiescence);
                 if (searchInfo.stopped) break; // If out of time, break out of the loop
                 if (searchInfo.transposition) board.hashTable.GetPvLineCount(currentDepth);
                 else board.pvTable.GetPvLineCount(currentDepth);

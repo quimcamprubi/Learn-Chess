@@ -295,8 +295,8 @@ namespace Core {
         }
 
         private void AISearchAndMakeMove() {
-            SearchInfo searchParameters = new SearchInfo(depth: 20, timeSet: true, durationSet: 10);
-            Search.SearchPosition(mainBoard, searchParameters, nullMove: true);
+            SearchInfo searchParameters = new SearchInfo(depth: 6, timeSet: false, durationSet: 10, quiescence: true, transposition: true);
+            Search.SearchPosition(mainBoard, searchParameters, nullMove: false);
             Move bestMove = mainBoard.pvArray[0];
             MakeMove(bestMove);
         }

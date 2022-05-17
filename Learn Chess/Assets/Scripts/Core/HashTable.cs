@@ -42,25 +42,26 @@ namespace Core {
             cut = 0;
         }
 
-        public int StoreHashEntry(Move move, int score, int flags, int depth) {
+        public void StoreHashEntry(Move move, int score, int flags, int depth) {
             ulong index = board.positionKey % size;
             Debug.Assert(index <= size - 1, "HashTable index is too large.");
             Debug.Assert(depth >= 1 && depth <= Constants.MAX_DEPTH);
             Debug.Assert(board.ply >= 0 && board.ply < Constants.MAX_DEPTH);
             Debug.Assert(flags >= (int) HashTable.FlagsEnum.HFNONE && flags <= (int) HashTable.FlagsEnum.HFEXACT);
-            int returnScore = score;
             if (hashEntries[index].positionKey == 0) {
                 newWrite++;
             } else {
                 overWrite++;
             }
-            if (score > IsMate()) returnScore += board.ply;
-            else if (score < -IsMate()) returnScore -= board.ply;
+            if (score > IsMate()) score += board.ply;
+            else if (score < -IsMate()) score -= board.ply;
+            /*if (score == Search.Infinite || score == -Search.Infinite) {
+                Debug.Log("trouble");
+            }*/
             hashEntries[index] = new HashEntry(board.positionKey, move, score, depth, flags);
-            return returnScore;
         }
 
-        public bool ProbeHashTable(Move move, ref int score, int alpha, int beta, int depth) {
+        public bool ProbeHashTable(Move pvMove, ref int score, int alpha, int beta, int depth) {
             ulong index = board.positionKey % size;
             Debug.Assert(index <= size - 1, "HashTable index is too large.");
             Debug.Assert(depth >= 1 && depth <= Constants.MAX_DEPTH);
@@ -68,22 +69,29 @@ namespace Core {
             Debug.Assert(alpha < beta);
             HashEntry entry = hashEntries[index];
             if (entry.positionKey == board.positionKey) {
-                move.move = entry.move.move;
+                pvMove.move = entry.move.move;
                 if (entry.depth >= depth) {
                     hit++;
                     Debug.Assert(entry.depth >= 1 && entry.depth <= Constants.MAX_DEPTH);
                     Debug.Assert(entry.flags >= (int) HashTable.FlagsEnum.HFNONE && entry.flags <= (int) HashTable.FlagsEnum.HFEXACT);
                     Debug.Assert(entry.score >= -Search.Infinite && entry.score <= Search.Infinite);
-                    move.score = entry.score;
-                    if (move.score > IsMate()) move.score -= board.ply;
-                    else if (move.score < -IsMate()) move.score += board.ply;
+                    score = entry.score;
+                    if (score > IsMate()) score -= board.ply;
+                    else if (score < -IsMate()) score += board.ply;
                     switch (entry.flags) {
                         case (int) FlagsEnum.HFALPHA:
-                            score = alpha;
-                            return true;
+                            if (score <= alpha) {
+                                score = alpha;
+                                return true;
+                            }
+                            break;
+                            
                         case (int) FlagsEnum.HFBETA:
-                            score = beta;
-                            return true;
+                            if (score >= beta) {
+                                score = beta;
+                                return true;
+                            }
+                            break;
                         case (int) FlagsEnum.HFEXACT:
                             return true;
                     }
@@ -92,15 +100,17 @@ namespace Core {
             return false;
         }
         
-        public Move ProbeHashEntry() {
+        public Move ProbeHashMove() {
             ulong index = board.positionKey % size;
+            if (hashEntries[index].positionKey == board.positionKey)
+                return hashEntries[index].move;
+            return null;
             Debug.Assert(index <= size - 1, "ProbePVTable index is too large.");
-            return hashEntries[index].move;
         }
         
         public int GetPvLineCount(int depth) {
             Debug.Assert(depth < Constants.MAX_DEPTH, "PV Depth is too large.");
-            Move move = ProbeHashEntry();
+            Move move = ProbeHashMove();
             int count = 0;
             while (move != null && count < depth) {
                 if (MoveGenerator.MoveExists(board, move)) {
@@ -109,7 +119,7 @@ namespace Core {
                 } else {
                     break;
                 }
-                move = ProbeHashEntry();
+                move = ProbeHashMove();
             }
             while (board.ply > 0) {
                 board.UnmakeMove();
