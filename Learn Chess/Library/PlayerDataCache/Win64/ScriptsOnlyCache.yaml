@@ -665,4 +665,4 @@ ScriptsOnlyBuild:
   platform: 19
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/Quim/Desktop/Easy Chess/Easy Chess.exe
+  playerPath: C:/Users/Quim/Documents/GitHub/Learn-Chess/Easy Chess v1.0/Easy Chess.exe
