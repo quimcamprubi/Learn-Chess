@@ -74,7 +74,7 @@ namespace Core {
             DateTime now = DateTime.Now;
             if (searchInfo.timeSet && (now - searchInfo.startTime).TotalSeconds > searchInfo.durationSet) {
                 searchInfo.stopped = true;
-                searchInfo.stopTime = now;
+                //searchInfo.stopTime = now;
             }
         }
         
@@ -257,26 +257,46 @@ namespace Core {
             return alpha;
         }
         
-        public static void SearchPosition(Board board, SearchInfo searchInfo, bool nullMove = true, bool printAllData = true) { // Iterative deepening function
+        public static void SearchPosition(Board board, SearchInfo searchInfo, Game game, bool nullMove = true, bool printAllData = false) { // Iterative deepening function
             Move bestMove = new Move(Board.None, -Infinite);
             ClearForSearch(board, searchInfo);
             StringBuilder sb = new StringBuilder();
             searchInfo.startTime = DateTime.Now;
+            int bestScore = -Infinite;
             for (int currentDepth = 1; currentDepth <= searchInfo.depth; currentDepth++) {
-                int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove, searchInfo.quiescence);
+                bestScore = RecursiveAlphaBeta(-Infinite, Infinite, currentDepth, board, searchInfo, nullMove, searchInfo.quiescence);
                 if (searchInfo.stopped) break; // If out of time, break out of the loop
                 if (searchInfo.transposition) board.hashTable.GetPvLineCount(currentDepth);
                 else board.pvTable.GetPvLineCount(currentDepth);
                 bestMove = board.pvArray[0];
+                game.currentPlayerEvaluation = board.sideToPlay == Board.Black ? -bestScore/100f : bestScore/100f;
                 if (bestMove != null) {
                     sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
-                    float ordering = searchInfo.failHighFirst == 0 && searchInfo.failHigh == 0 ? 0 : searchInfo.failHighFirst / searchInfo.failHigh;
-                    sb.Append("Ordering: " + ordering + "\n");
                     sb.AppendLine();
+                    game.suggestedMove = bestMove;
                 }
             }
             if (printAllData) Debug.Log(sb.ToString());
-            Debug.Log("Best move found: " + Move.GetMoveString(bestMove) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");
+            searchInfo.stopTime = DateTime.Now;
+            if (printAllData) Debug.Log("Best move found: " + Move.GetMoveString(bestMove) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");
+        }
+        
+        public static void QuickSearch(Board board, SearchInfo searchInfo, Game game, bool nullMove = true, bool printAllData = false) { // Iterative deepening function
+            Move bestMove = new Move(Board.None, -Infinite);
+            ClearForSearch(board, searchInfo);
+            searchInfo.startTime = DateTime.Now;
+            int bestScore = RecursiveAlphaBeta(-Infinite, Infinite, searchInfo.depth, board, searchInfo, nullMove, searchInfo.quiescence);
+            if (searchInfo.stopped) return; // If out of time, break out of the loop
+            if (searchInfo.transposition) board.hashTable.GetPvLineCount(searchInfo.depth);
+            else board.pvTable.GetPvLineCount(searchInfo.depth);
+            bestMove = board.pvArray[0];
+            game.currentPlayerEvaluation = board.sideToPlay == Board.Black ? -bestScore/100f : bestScore/100f;
+            if (bestMove != null) {
+                if (printAllData) Debug.Log("Depth: " + searchInfo.depth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
+                game.suggestedMove = bestMove;
+                searchInfo.stopTime = DateTime.Now;
+                if (printAllData) Debug.Log("Best move found: " + BoardSquares.GetAlgebraicMove(bestMove.move) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");
+            }
         }
 
         public static void NextMove(int moveNumber, Move[] movesList) {

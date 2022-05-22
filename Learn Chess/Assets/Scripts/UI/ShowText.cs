@@ -7,7 +7,7 @@ public class ShowText : MonoBehaviour {
     public string textValue;
     public Text textElement;
     
-    void Update() {
+    public void Update() {
         textElement.text = textValue;
     }
 }
