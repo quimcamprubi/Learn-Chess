@@ -74,7 +74,6 @@ namespace Core {
                     hit++;
                     Debug.Assert(entry.depth >= 1 && entry.depth <= Constants.MAX_DEPTH);
                     Debug.Assert(entry.flags >= (int) HashTable.FlagsEnum.HFNONE && entry.flags <= (int) HashTable.FlagsEnum.HFEXACT);
-                    Debug.Assert(entry.score >= -Search.Infinite && entry.score <= Search.Infinite);
                     score = entry.score;
                     if (score > IsMate()) score -= board.ply;
                     else if (score < -IsMate()) score += board.ply;
@@ -105,7 +104,13 @@ namespace Core {
             if (hashEntries[index].positionKey == board.positionKey)
                 return hashEntries[index].move;
             return null;
-            Debug.Assert(index <= size - 1, "ProbePVTable index is too large.");
+        }
+        
+        public HashEntry GetEntry() {
+            ulong index = board.positionKey % size;
+            if (hashEntries[index].positionKey == board.positionKey)
+                return hashEntries[index];
+            return new HashEntry();
         }
         
         public int GetPvLineCount(int depth) {

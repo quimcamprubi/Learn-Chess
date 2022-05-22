@@ -94,7 +94,7 @@ namespace Core {
             -70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70		
         };
         
-        public static int EvaluatePosition(Board board) { // Evaluation from White's POV
+        public static int EvaluatePosition(Board board, bool playerPov = false, int playerSide = 0) { // Evaluation from White's POV
             int score = board.material[Board.White] - board.material[Board.Black];
             if (board.pieceNumbers[Piece.WhitePawn] == 0 && board.pieceNumbers[Piece.BlackPawn] == 0 && MaterialDraw(board)) return 0; // Draw
             // Pawns
@@ -216,7 +216,8 @@ namespace Core {
             if (board.pieceNumbers[Piece.WhiteBishop] >= 2) score += BishopPair;
             if (board.pieceNumbers[Piece.BlackBishop] >= 2) score -= BishopPair;
 
-            return board.sideToPlay == Board.White ? score : -score;
+            if (!playerPov) return board.sideToPlay == Board.White ? score : -score;
+            return playerSide == Board.White ? score : -score;
         }
 
         public static bool MaterialDraw(Board board) {

@@ -19,9 +19,8 @@ namespace Core {
         public static bool GameIsPaused = false;
         
         private GameObject sideToPlayText;
-        private GameObject enPassantText;
-        private GameObject castlingRightsText;
         private GameObject lastMoveText;
+        private GameObject evaluationText;
         private GameObject file1Text;
         private GameObject file2Text;
         private GameObject file3Text;
@@ -40,6 +39,7 @@ namespace Core {
         private GameObject rank8Text;
         private GameObject gameStatusText;
         private bool gameEnded = false;
+        private bool hasTurnChanged = false;
         
         private Camera cam;
         private int selectedRank;
@@ -48,14 +48,14 @@ namespace Core {
         private int playerSide = Board.White;
         private Move lastPlayedMove = null;
         private PlayerType currentPlayer = PlayerType.Human;
+        private float currentEvaluation;
 
         public enum InputState {
             None,
             PieceSelected
         }
 
-        public enum PlayerType
-        {
+        public enum PlayerType {
             Human,
             AI
         }
@@ -65,10 +65,10 @@ namespace Core {
         private PromotionMenu promotionMenu;
 
         private void Start() {
+            GameSettings.GameMode = GameSettings.GameModeEnum.LearningMode;
             sideToPlayText = GameObject.Find("SideToPlayText");
-            enPassantText = GameObject.Find("EnPassantText");
-            castlingRightsText = GameObject.Find("CastlingRightsText");
             lastMoveText = GameObject.Find("LastMoveText");
+            evaluationText = GameObject.Find("EvaluationText");
             file1Text = GameObject.Find("File1");
             file2Text = GameObject.Find("File2");
             file3Text = GameObject.Find("File3");
@@ -92,6 +92,13 @@ namespace Core {
             InitializeGame();
             cam = Camera.main;
             currentState = InputState.None;
+        }
+        
+        private void Update() {
+            if (!GameIsPaused) {
+                if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.Human) HandleInput();
+                else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI && !gameEnded && hasTurnChanged) AISearchAndMakeMove();
+            }
         }
         
         private void InitializeGame() {
@@ -131,6 +138,12 @@ namespace Core {
             InitializeGame();
             gameEnded = false;
         }
+        
+        IEnumerator ChangePlayer() {
+            yield return new WaitForSeconds (0.1f);
+            currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
+            hasTurnChanged = true;
+        }
 
         IEnumerator TestMoveGenerator(List<Move> moveList) {
             foreach (Move move in moveList) {
@@ -148,21 +161,6 @@ namespace Core {
             }
         }
 
-        private void Update() {
-            if (!GameIsPaused)
-            {
-                string lastPlayedMoveString =
-                    lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);
-                sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
-                enPassantText.GetComponent<ShowText>().textValue =
-                    "En Passant square: " + BoardSquares.SquareNameDictionary[mainBoard.enPassantSquare];
-                castlingRightsText.GetComponent<ShowText>().textValue = GetCastlingRightsString(mainBoard.castlingRights);
-                lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
-                if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.Human) HandleInput();
-                else if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.AI && !gameEnded) AISearchAndMakeMove();
-            }
-        }
-
         private void HandleInput() {
             Vector2 mousePosition = cam.ScreenToWorldPoint(Input.mousePosition);
             if (Input.GetMouseButtonDown(0)) {
@@ -171,18 +169,18 @@ namespace Core {
                 } else {
                     CheckSquareSelected(mousePosition);
                 }
-            } else if (Input.GetKeyDown(KeyCode.P)) {
+            } /*else if (Input.GetKeyDown(KeyCode.P)) {
                 int max = mainBoard.pvTable.GetPvLineCount(6);
                 Debug.Log("PV line of " + max + " moves.");
                 for (int pvNum = 0; pvNum < max; pvNum++) {
                     Move move = mainBoard.pvArray[pvNum];
                     Debug.Log("PV move " + pvNum + ": " + Move.GetMoveString(move));
                 }
-            } else if (Input.GetKeyDown(KeyCode.B)) {
+            }*/ else if (Input.GetKeyDown(KeyCode.B) && GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
                 UnmakeMove();
-            } else if (Input.GetKeyDown(KeyCode.M)) {
+            } /*else if (Input.GetKeyDown(KeyCode.M) ) {
                 mainBoard.PrintMirrorBoardEvaluations();
-            }
+            }*/
         }
 
         private void CheckSquareSelected(Vector2 mousePosition) {
@@ -220,6 +218,16 @@ namespace Core {
             gameStatusText.GetComponent<ShowText>().textValue = "";
             boardUi.ResetSquareColors();
             mainBoard.MakeMove(move);
+            HashTable.HashEntry bestEntry = mainBoard.hashTable.GetEntry();
+            if (bestEntry.move != null) {
+                int bestScore = bestEntry.score;
+                bestScore = mainBoard.sideToPlay == Board.Black ? -bestScore : bestScore;
+                currentEvaluation = bestScore / 100f;
+            }
+            else currentEvaluation = Evaluate.EvaluatePosition(mainBoard, playerPov: true, playerSide: playerSide) / 100f;
+            if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
+                evaluationText.GetComponent<ShowText>().textValue = String.Format(currentEvaluation % 1 == 0 ? "{0:0}" : "{0:0.00}", currentEvaluation);
+            }
             Coordinates fromCoordinates =
                 BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
             Coordinates toCoordinates =
@@ -251,6 +259,13 @@ namespace Core {
 
         public void MakePromotionMove(Move move) {
             mainBoard.MakeMove(move);
+            HashTable.HashEntry bestEntry = mainBoard.hashTable.GetEntry();
+            if (bestEntry.move.move != 0) {
+                int bestScore = bestEntry.score;
+                bestScore = mainBoard.sideToPlay == Board.Black ? -bestScore : bestScore;
+                currentEvaluation = bestScore / 100f;
+            }
+            else currentEvaluation = Evaluate.EvaluatePosition(mainBoard, playerPov: true, playerSide: playerSide) / 100f;
             Coordinates fromCoordinates =
                 BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
             Coordinates toCoordinates =
@@ -268,6 +283,13 @@ namespace Core {
                 mainBoard.UnmakeMove();
                 mainBoard.UnmakeMove();
                 boardUi.ResetSquareColors();
+                HashTable.HashEntry bestEntry = mainBoard.hashTable.GetEntry();
+                if (bestEntry.move.move != 0) {
+                    int bestScore = bestEntry.score;
+                    bestScore = mainBoard.sideToPlay == Board.Black ? -bestScore : bestScore;
+                    currentEvaluation = bestScore / 100f;
+                }
+                else currentEvaluation = Evaluate.EvaluatePosition(mainBoard, playerPov: true, playerSide: playerSide) / 100f;
                 if (mainBoard.histPly != 0) {
                     Move previousMove = new Move(mainBoard.gameHist[mainBoard.histPly - 1].move, 0);
                     Coordinates fromCoordinates =
@@ -289,12 +311,20 @@ namespace Core {
         public void ChangeTurn(bool changePlayer = true) {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
             CheckEnding();
-            if (changePlayer) currentPlayer = currentPlayer == PlayerType.Human ? PlayerType.AI : PlayerType.Human;
-            //if (Search.IsRepeated(mainBoard)) Debug.Log("Position repeated");
+            if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
+                string plusModifier = currentEvaluation >= 0f ? "+" : "";
+                evaluationText.GetComponent<ShowText>().textValue = plusModifier + String.Format(currentEvaluation % 1 == 0 ? "{0:0}" : "{0:0.00}", currentEvaluation);
+            }
+            string lastPlayedMoveString =
+                lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);
+            sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
+            lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
+            if (changePlayer) StartCoroutine(ChangePlayer());
             //mainBoard.PrintPawnAnalysis();
         }
 
         private void AISearchAndMakeMove() {
+            hasTurnChanged = false;
             SearchInfo searchParameters = new SearchInfo(depth: 20, timeSet: true, durationSet: 10, quiescence: true, transposition: true);
             Search.SearchPosition(mainBoard, searchParameters, nullMove: true);
             Move bestMove = mainBoard.pvArray[0];

@@ -15,7 +15,7 @@ namespace Utils {
         public static readonly int MAX_PIECES_OF_SAME_TYPE = 10;
         public static readonly int NUM_PLAYERS = 2;
         public static int PV_TABLE_SIZE = 130000;
-        public static int HASH_TABLE_SIZE = 0x100000 * 64;
+        public static int HASH_TABLE_SIZE = 0x100000 * 16;
         public static int MAX_DEPTH = 64;
         
         public static readonly string startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
