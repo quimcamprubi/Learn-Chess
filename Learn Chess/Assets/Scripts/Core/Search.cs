@@ -12,7 +12,7 @@ namespace Core {
     public class SearchInfo {
         public DateTime startTime;
         public DateTime stopTime;
-        public int durationSet;
+        public float durationSet;
         public int depth;
         public bool depthSet;
         public bool timeSet;
@@ -35,7 +35,7 @@ namespace Core {
             quiescence = true;
         }
 
-        public SearchInfo(int depth, bool timeSet = true, int durationSet = 10, bool transposition = true, bool quiescence = true) {
+        public SearchInfo(int depth, bool timeSet = true, float durationSet = 10, bool transposition = true, bool quiescence = true) {
             this.depth = depth;
             this.timeSet = timeSet;
             this.durationSet = durationSet;
@@ -72,7 +72,7 @@ namespace Core {
         
         public static void CheckFinish(SearchInfo searchInfo) {
             DateTime now = DateTime.Now;
-            if (searchInfo.timeSet && (now - searchInfo.startTime).TotalSeconds > searchInfo.durationSet) {
+            if (searchInfo.timeSet && (float) (now - searchInfo.startTime).TotalSeconds > searchInfo.durationSet) {
                 searchInfo.stopped = true;
                 //searchInfo.stopTime = now;
             }
@@ -257,7 +257,7 @@ namespace Core {
             return alpha;
         }
         
-        public static void SearchPosition(Board board, SearchInfo searchInfo, Game game, bool nullMove = true, bool printAllData = false) { // Iterative deepening function
+        public static Move SearchPosition(Board board, SearchInfo searchInfo, Game game, bool nullMove = true, bool printAllData = false) { // Iterative deepening function
             Move bestMove = new Move(Board.None, -Infinite);
             ClearForSearch(board, searchInfo);
             StringBuilder sb = new StringBuilder();
@@ -273,12 +273,12 @@ namespace Core {
                 if (bestMove != null) {
                     sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
                     sb.AppendLine();
-                    game.suggestedMove = bestMove;
                 }
             }
             if (printAllData) Debug.Log(sb.ToString());
             searchInfo.stopTime = DateTime.Now;
             if (printAllData) Debug.Log("Best move found: " + Move.GetMoveString(bestMove) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");
+            return bestMove;
         }
         
         public static void QuickSearch(Board board, SearchInfo searchInfo, Game game, bool nullMove = true, bool printAllData = false) { // Iterative deepening function

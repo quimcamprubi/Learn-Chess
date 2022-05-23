@@ -82,6 +82,16 @@ namespace UI {
                 square.IsLightSquare() ? boardColors.lightColors.highlightMove : boardColors.darkColors.highlightMove;
         }
 
+        public void SetSuggestedColor(Coordinates square) {
+            squareRenderers[square.fileIndex, square.rankIndex].material.color =
+                square.IsLightSquare() ? boardColors.lightColors.suggestedMove : boardColors.darkColors.suggestedMove;
+        }
+        
+        public void SetBlunderColor(Coordinates square) {
+            squareRenderers[square.fileIndex, square.rankIndex].material.color =
+                square.IsLightSquare() ? boardColors.lightColors.blunder : boardColors.darkColors.blunder;
+        }
+
         public void UpdateBoard(Board primaryBoard) {
             for (int rank = 0; rank < Constants.NUM_RANKS; rank++) {
                 for (int file = 0; file < Constants.NUM_FILES; file++) {

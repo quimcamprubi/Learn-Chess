@@ -11,6 +11,8 @@ namespace UI {
             public Color legal;
             public Color selected;
             public Color highlightMove;
+            public Color suggestedMove;
+            public Color blunder;
         }
     }
 }
