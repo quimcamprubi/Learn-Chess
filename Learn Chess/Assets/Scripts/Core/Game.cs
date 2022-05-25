@@ -48,6 +48,7 @@ namespace Core {
         private bool undoPromptEnabled = false;
         private int movesMade = 0;
         private float prevEvaluation = 0;
+        private SearchInfo searchInfo;
         
         private Camera cam;
         private int selectedRank;
@@ -75,37 +76,17 @@ namespace Core {
         private SearchInfo searchParameters;
 
         private void Start() {
-            GameSettings.GameMode = GameSettings.GameModeEnum.LearningMode;
-            /*sideToPlayText = GameObject.Find("SideToPlayText");
-            lastMoveText = GameObject.Find("LastMoveText");
-            evaluationText = GameObject.Find("EvaluationText");
-            gameSituationText = GameObject.Find("GameSituationText");
-            bToUndoText = GameObject.Find("BToUndoText");
-            bestMoveText = GameObject.Find("BestMoveText");
-            file1Text = GameObject.Find("File1");
-            file2Text = GameObject.Find("File2");
-            file3Text = GameObject.Find("File3");
-            file4Text = GameObject.Find("File4");
-            file5Text = GameObject.Find("File5");
-            file6Text = GameObject.Find("File6");
-            file7Text = GameObject.Find("File7");
-            file8Text = GameObject.Find("File8");
-            rank1Text = GameObject.Find("Rank1");
-            rank2Text = GameObject.Find("Rank2");
-            rank3Text = GameObject.Find("Rank3");
-            rank4Text = GameObject.Find("Rank4");
-            rank5Text = GameObject.Find("Rank5");
-            rank6Text = GameObject.Find("Rank6");
-            rank7Text = GameObject.Find("Rank7");
-            rank8Text = GameObject.Find("Rank8");
-            gameStatusText = GameObject.Find("GameStatusText");
-            moveReactionText = GameObject.Find("MoveReactionText");*/
             boardUi = FindObjectOfType<BoardUI>();
             mainBoard = new Board();
             promotionMenu = FindObjectOfType<PromotionMenu>();
             InitializeGame();
             cam = Camera.main;
             currentState = InputState.None;
+            // REMOVE LATER
+            GameSettings.Difficulty = GameSettings.DifficultyEnum.Hard;
+            GameSettings.GameMode = GameSettings.GameModeEnum.LearningMode;
+            // REMOVE LATER
+            InitSearchInfo();
         }
         
         private void Update() {
@@ -385,10 +366,38 @@ namespace Core {
 
         private void AISearchAndMakeMove() {
             hasTurnChanged = false;
-            searchParameters = new SearchInfo(depth: 20, timeSet: true, durationSet: 10, quiescence: true, transposition: true);
+            //searchParameters = new SearchInfo(depth: 20, timeSet: true, durationSet: 10, quiescence: true, transposition: true);
             Search.SearchPosition(mainBoard, searchParameters, this, nullMove: true, printAllData: true);
             Move bestMove = mainBoard.pvArray[0];
-            MakeMove(bestMove);
+            StartCoroutine(WaitAndMakeMove(bestMove));
+            //MakeMove(bestMove);
+        }
+
+        public IEnumerator WaitAndMakeMove(Move move) {
+            float timeToWait = searchParameters.durationSet - searchParameters.realDuration;
+            Debug.Log("Time to wait: " + timeToWait);
+            yield return new WaitForSeconds(timeToWait);
+            MakeMove(move);
+        }
+
+        private void InitSearchInfo() {
+            switch (GameSettings.Difficulty) {
+                case GameSettings.DifficultyEnum.Beginner:
+                    searchParameters = new SearchInfo(depth: 1, true, 5, quiescence: false, transposition: false);
+                    break;
+                case GameSettings.DifficultyEnum.Amateur:
+                    searchParameters = new SearchInfo(depth: 3, true, 5, quiescence: false, transposition: false);
+                    break;
+                case GameSettings.DifficultyEnum.Intermediate:
+                    searchParameters = new SearchInfo(depth: 5, true, 5, quiescence: true, transposition: true);
+                    break;
+                case GameSettings.DifficultyEnum.Hard:
+                    searchParameters = new SearchInfo(depth: 7, true, 10, quiescence: true, transposition: true);
+                    break;
+                case GameSettings.DifficultyEnum.Master:
+                    searchParameters = new SearchInfo(depth: 20, true, 10, quiescence: true, transposition: true);
+                    break;
+            }
         }
 
         private string GetSideToPlayString(int sideToPlay) {

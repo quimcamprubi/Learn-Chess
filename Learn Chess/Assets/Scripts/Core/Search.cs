@@ -13,6 +13,7 @@ namespace Core {
         public DateTime startTime;
         public DateTime stopTime;
         public float durationSet;
+        public float realDuration;
         public int depth;
         public bool depthSet;
         public bool timeSet;
@@ -275,6 +276,7 @@ namespace Core {
                     sb.AppendLine();
                 }
             }
+            searchInfo.realDuration = (float) (DateTime.Now - searchInfo.startTime).TotalSeconds;
             if (printAllData) Debug.Log(sb.ToString());
             searchInfo.stopTime = DateTime.Now;
             if (printAllData) Debug.Log("Best move found: " + Move.GetMoveString(bestMove) + " after " + (searchInfo.stopTime - searchInfo.startTime).TotalSeconds + " seconds.");
