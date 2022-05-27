@@ -7,6 +7,7 @@ using System.Linq;
 using UI;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Utils;
@@ -82,10 +83,6 @@ namespace Core {
             InitializeGame();
             cam = Camera.main;
             currentState = InputState.None;
-            // REMOVE LATER
-            GameSettings.Difficulty = GameSettings.DifficultyEnum.Hard;
-            GameSettings.GameMode = GameSettings.GameModeEnum.LearningMode;
-            // REMOVE LATER
             InitSearchInfo();
         }
         
@@ -276,9 +273,6 @@ namespace Core {
                     boardUi.SetHighlightColor(fromCoordinates);
                     boardUi.SetHighlightColor(toCoordinates);
                     lastPlayedMove = previousMove;
-                    if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
-                        LearningModeUI(previousMove);
-                    }
                 } else {
                     lastPlayedMove = null;
                 }
@@ -325,9 +319,6 @@ namespace Core {
                 GetQuickEvaluation();
                 if (movesMade > 4) PrintBestMove();
                 if (movesMade > 1) {
-                    /*Debug.Log("Current evaluation: " + currentPlayerEvaluation);
-                    Debug.Log("Previous evaluation: " + prevEvaluation);
-                    Debug.Log(-(prevEvaluation - currentPlayerEvaluation) + "\n");*/
                     if (prevEvaluation - currentPlayerEvaluation > 1.5f) PrintBlunderMove(move);
                     else if (prevEvaluation - currentPlayerEvaluation < -1.0f || move.move == suggestedMove.move) GreatMove();
                 }
@@ -392,7 +383,7 @@ namespace Core {
                     searchParameters = new SearchInfo(depth: 5, true, 5, quiescence: true, transposition: true);
                     break;
                 case GameSettings.DifficultyEnum.Hard:
-                    searchParameters = new SearchInfo(depth: 7, true, 10, quiescence: true, transposition: true);
+                    searchParameters = new SearchInfo(depth: 7, true, 5, quiescence: true, transposition: true);
                     break;
                 case GameSettings.DifficultyEnum.Master:
                     searchParameters = new SearchInfo(depth: 20, true, 10, quiescence: true, transposition: true);
@@ -441,6 +432,10 @@ namespace Core {
         private void Check() {
             Debug.Log("Check");
             gameStatusText.GetComponent<ShowText>().textValue = "Check!";
+        }
+
+        public void QuitToMainMenu() {
+            SceneManager.LoadScene("MainMenu");
         }
         
         private void SetFilesRanksText() {

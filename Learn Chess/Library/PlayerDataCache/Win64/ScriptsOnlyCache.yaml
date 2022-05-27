@@ -13,8 +13,11 @@ ScriptsOnlyBuild:
     - UnityEditor.U2D.Animation.BoneGizmo
     Unity.2D.IK.Editor.dll:
     - UnityEditor.U2D.IK.IKEditorManager
+    - UnityEditor.U2D.IK.IKGizmos
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
+    - UnityEditor.Tilemaps.GridPaletteBrushes
+    - UnityEditor.Tilemaps.GridPalettes
     - UnityEditor.Tilemaps.SceneViewGridManager
     - UnityEditor.Tilemaps.SceneViewOpenTilePaletteHelper
     - UnityEditor.Tilemaps.TileDragAndDropManager
@@ -46,6 +49,7 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.GraphicRaycaster
     - UnityEngine.UI.Image
+    - UnityEngine.UI.Outline
     - UnityEngine.UI.Shadow
     - UnityEngine.UI.Text
   sceneClasses:
@@ -71,31 +75,33 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1488}
     - Class: 114
-      Script: {instanceID: 1796}
+      Script: {instanceID: 1886}
     - Class: 114
-      Script: {instanceID: 2734}
+      Script: {instanceID: 2824}
     - Class: 114
-      Script: {instanceID: 2914}
+      Script: {instanceID: 3004}
     - Class: 114
-      Script: {instanceID: 2946}
+      Script: {instanceID: 3036}
     - Class: 114
-      Script: {instanceID: 2990}
+      Script: {instanceID: 3080}
     - Class: 114
-      Script: {instanceID: 3162}
+      Script: {instanceID: 3252}
     - Class: 114
-      Script: {instanceID: 3412}
+      Script: {instanceID: 3502}
     - Class: 114
-      Script: {instanceID: 3546}
+      Script: {instanceID: 3636}
     - Class: 114
-      Script: {instanceID: 3562}
+      Script: {instanceID: 3652}
     - Class: 114
-      Script: {instanceID: 5446}
+      Script: {instanceID: 3948}
     - Class: 114
-      Script: {instanceID: 5488}
+      Script: {instanceID: 5536}
     - Class: 114
-      Script: {instanceID: 5630}
+      Script: {instanceID: 5578}
     - Class: 114
-      Script: {instanceID: 5908}
+      Script: {instanceID: 5720}
+    - Class: 114
+      Script: {instanceID: 5998}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -136,29 +142,29 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1486}
     - Class: 114
-      Script: {instanceID: 1878}
+      Script: {instanceID: 1968}
     - Class: 114
-      Script: {instanceID: 2292}
+      Script: {instanceID: 2382}
     - Class: 114
-      Script: {instanceID: 2734}
+      Script: {instanceID: 2824}
     - Class: 114
-      Script: {instanceID: 2914}
+      Script: {instanceID: 3004}
     - Class: 114
-      Script: {instanceID: 2968}
+      Script: {instanceID: 3058}
     - Class: 114
-      Script: {instanceID: 3162}
+      Script: {instanceID: 3252}
     - Class: 114
-      Script: {instanceID: 3412}
+      Script: {instanceID: 3502}
     - Class: 114
-      Script: {instanceID: 3546}
+      Script: {instanceID: 3636}
     - Class: 114
-      Script: {instanceID: 3882}
+      Script: {instanceID: 3972}
     - Class: 114
-      Script: {instanceID: 4812}
+      Script: {instanceID: 4902}
     - Class: 114
-      Script: {instanceID: 4976}
+      Script: {instanceID: 5066}
     - Class: 114
-      Script: {instanceID: 5378}
+      Script: {instanceID: 5468}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -850,7 +856,7 @@ ScriptsOnlyBuild:
     className: TMP_ExampleScript_01
   - hash:
       serializedVersion: 2
-      Hash: c777faab4a524cece04522c4c7d9d73a
+      Hash: e5cfc3f24c7f2ef96cab204735775766
     assemblyName: Assembly-CSharp.dll
     namespaceName: UI
     className: BoardColors
@@ -922,7 +928,7 @@ ScriptsOnlyBuild:
     className: TouchInputModule
   - hash:
       serializedVersion: 2
-      Hash: bec6f8e907252bf5ab50356e3b963a7c
+      Hash: 7574e09a4031facc807831ae7a5d3c97
     assemblyName: Assembly-CSharp.dll
     namespaceName: Core
     className: Game
@@ -942,4 +948,4 @@ ScriptsOnlyBuild:
   scenePathNames:
   - Assets/Scenes/MainMenu.unity
   - Assets/Scenes/GameScene.unity
-  playerPath: C:/Users/Quim/Desktop/Easy Chess/Easy Chess.exe
+  playerPath: C:/Users/Quim/Desktop/Easy Chess/MonoBleedingEdge/Easy Chess.exe
