@@ -49,6 +49,7 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.GraphicRaycaster
     - UnityEngine.UI.Image
+    - UnityEngine.UI.Outline
     - UnityEngine.UI.Shadow
     - UnityEngine.UI.Text
   sceneClasses:
@@ -74,31 +75,33 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1488}
     - Class: 114
-      Script: {instanceID: 1800}
+      Script: {instanceID: 1796}
     - Class: 114
-      Script: {instanceID: 2738}
+      Script: {instanceID: 2734}
     - Class: 114
-      Script: {instanceID: 2918}
+      Script: {instanceID: 2914}
     - Class: 114
-      Script: {instanceID: 2950}
+      Script: {instanceID: 2946}
     - Class: 114
-      Script: {instanceID: 2994}
+      Script: {instanceID: 2990}
     - Class: 114
-      Script: {instanceID: 3166}
+      Script: {instanceID: 3162}
     - Class: 114
-      Script: {instanceID: 3416}
+      Script: {instanceID: 3412}
     - Class: 114
-      Script: {instanceID: 3550}
+      Script: {instanceID: 3546}
     - Class: 114
-      Script: {instanceID: 3566}
+      Script: {instanceID: 3562}
     - Class: 114
-      Script: {instanceID: 5450}
+      Script: {instanceID: 3858}
     - Class: 114
-      Script: {instanceID: 5492}
+      Script: {instanceID: 5446}
     - Class: 114
-      Script: {instanceID: 5634}
+      Script: {instanceID: 5488}
     - Class: 114
-      Script: {instanceID: 5912}
+      Script: {instanceID: 5630}
+    - Class: 114
+      Script: {instanceID: 5908}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -139,29 +142,29 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1486}
     - Class: 114
-      Script: {instanceID: 1882}
+      Script: {instanceID: 1878}
     - Class: 114
-      Script: {instanceID: 2296}
+      Script: {instanceID: 2292}
     - Class: 114
-      Script: {instanceID: 2738}
+      Script: {instanceID: 2734}
     - Class: 114
-      Script: {instanceID: 2918}
+      Script: {instanceID: 2914}
     - Class: 114
-      Script: {instanceID: 2972}
+      Script: {instanceID: 2968}
     - Class: 114
-      Script: {instanceID: 3166}
+      Script: {instanceID: 3162}
     - Class: 114
-      Script: {instanceID: 3416}
+      Script: {instanceID: 3412}
     - Class: 114
-      Script: {instanceID: 3550}
+      Script: {instanceID: 3546}
     - Class: 114
-      Script: {instanceID: 3886}
+      Script: {instanceID: 3882}
     - Class: 114
-      Script: {instanceID: 4816}
+      Script: {instanceID: 4812}
     - Class: 114
-      Script: {instanceID: 4980}
+      Script: {instanceID: 4976}
     - Class: 114
-      Script: {instanceID: 5382}
+      Script: {instanceID: 5378}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -945,4 +948,4 @@ ScriptsOnlyBuild:
   scenePathNames:
   - Assets/Scenes/MainMenu.unity
   - Assets/Scenes/GameScene.unity
-  playerPath: /Users/quim/Desktop/Easy Chess/Easy Chess.app
+  playerPath: /Users/quim/Documents/GitHub/Learn-Chess/Learn Chess/Easy Chess.app

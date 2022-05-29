@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core {
     public static class GameSettings {
         public static GameModeEnum GameMode;
-        public static DifficultyEnum Difficulty;
+        public static DifficultyEnum Difficulty = DifficultyEnum.Intermediate;
         
         public enum GameModeEnum {
             ChallengeMode,
