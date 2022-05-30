@@ -192,6 +192,7 @@ namespace Core {
                 } else {
                     boardUi.ResetSquareColors();
                     lastSelectedIndex = -1;
+                    currentState = InputState.None;
                 }
             }
         }
@@ -358,15 +359,13 @@ namespace Core {
         private void AISearchAndMakeMove() {
             hasTurnChanged = false;
             //searchParameters = new SearchInfo(depth: 20, timeSet: true, durationSet: 10, quiescence: true, transposition: true);
-            Search.SearchPosition(mainBoard, searchParameters, this, nullMove: true, printAllData: true);
+            Search.SearchPosition(mainBoard, searchParameters, this, nullMove: true, printAllData: false);
             Move bestMove = mainBoard.pvArray[0];
             StartCoroutine(WaitAndMakeMove(bestMove));
-            //MakeMove(bestMove);
         }
 
         public IEnumerator WaitAndMakeMove(Move move) {
             float timeToWait = searchParameters.durationSet - searchParameters.realDuration;
-            Debug.Log("Time to wait: " + timeToWait);
             yield return new WaitForSeconds(timeToWait);
             MakeMove(move);
         }

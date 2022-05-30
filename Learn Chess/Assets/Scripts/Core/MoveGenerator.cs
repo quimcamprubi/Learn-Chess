@@ -24,9 +24,9 @@ namespace Core {
         }
 
         public static void AddQuietMove(Move move, List<Move> moveList, Board board) {
-            if (move.move == board.searchKillers[0, board.ply]) {
+            if (board.ply >= 0 && move.move == board.searchKillers[0, board.ply]) {
                 move.score = 900000; // First killer. First Beta cutoff but worse than a capture.
-            } else if (move.move == board.searchKillers[1, board.ply]) {
+            } else if (board.ply >= 0 && move.move == board.searchKillers[1, board.ply]) {
                 move.score = 800000; // Second killer. Beta cutoff but worse than a capture.
             } else {
                 move.score = board.searchHistory[board.squares[Move.FromSquare(move.move)], board.squares[Move.ToSquare(move.move)]];
