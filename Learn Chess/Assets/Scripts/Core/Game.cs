@@ -19,6 +19,7 @@ namespace Core {
         public List<Move> currentPseudoLegalMoves;
         public List<Move> currentAvailableMoves;
         public static bool GameIsPaused = false;
+        public bool heatMapEnabled = false;
         
         public GameObject sideToPlayText;
         public GameObject lastMoveText;
@@ -44,13 +45,15 @@ namespace Core {
         public GameObject gameStatusText;
         public GameObject bestMoveText;
         public GameObject moveReactionText;
+        public GameObject heatMapButton;
+        public GameObject gameSnapshotButton;
+
         private bool gameEnded = false;
         private bool hasTurnChanged = false;
         private bool undoPromptEnabled = false;
         private int movesMade = 0;
         private float prevEvaluation = 0;
         private SearchInfo searchInfo;
-        
         private Camera cam;
         private int selectedRank;
         private int selectedFile;
@@ -60,6 +63,8 @@ namespace Core {
         private PlayerType currentPlayer = PlayerType.Human;
         public float currentPlayerEvaluation;
         public Move suggestedMove = null;
+        private int[] cumulativeHeatMap = new int[64];
+        private int[] currentHeatMap = new int[64];
 
         public enum InputState {
             None,
@@ -84,8 +89,11 @@ namespace Core {
             cam = Camera.main;
             currentState = InputState.None;
             InitSearchInfo();
+            if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
+                heatMapButton.SetActive(true);
+            }
         }
-        
+
         private void Update() {
             if (!GameIsPaused) {
                 if (currentPseudoLegalMoves != null && currentPlayer == PlayerType.Human) HandleInput();
@@ -118,6 +126,7 @@ namespace Core {
             SetFilesRanksText();
             InitializeGame();
             gameEnded = false;
+            hasTurnChanged = true;
         }
         
         IEnumerator ChangePlayer() {
@@ -169,7 +178,7 @@ namespace Core {
             if (boardUi.TryGetSquareUnderMouse(mousePosition, out selectedFile, out selectedRank)) {
                 int index = Board.FrTo120Sq(selectedFile, selectedRank);
                 if (index != lastSelectedIndex) {
-                    boardUi.ResetSquareColors();
+                    if (!heatMapEnabled) boardUi.ResetSquareColors();
                     int color = Piece.GetColor(mainBoard.squares[index]);
                     if (color != mainBoard.sideToPlay) {
                         int moveIndex = currentAvailableMoves.FindIndex(move => Move.ToSquare(move.move) == index);
@@ -190,7 +199,7 @@ namespace Core {
                         currentState = InputState.PieceSelected;
                     }
                 } else {
-                    boardUi.ResetSquareColors();
+                    if (!heatMapEnabled) boardUi.ResetSquareColors();
                     lastSelectedIndex = -1;
                     currentState = InputState.None;
                 }
@@ -258,6 +267,26 @@ namespace Core {
             currentState = InputState.None;
             lastPlayedMove = move;
             ChangeTurn();
+        }
+
+        private void StoreHeatMap() {
+            int maxHeat = 20;
+            for (int square = 0; square < 64; square++) {
+                int sqHeat = mainBoard.SquareHeat(Board.Sq120(square));
+                currentHeatMap[square] = sqHeat;
+                cumulativeHeatMap[square] += sqHeat;
+                //Coordinates coordinates = BoardSquares.CoordFromIndex(square);
+                //boardUi.SetHeatColor(coordinates, sqHeat, maxHeat);
+            }
+        }
+        
+        private void PaintHeatMap() {
+            int maxHeat = 20;
+            for (int square = 0; square < 64; square++) {
+                int sqHeat = currentHeatMap[square];
+                Coordinates coordinates = BoardSquares.CoordFromIndex(square);
+                boardUi.SetHeatColor(coordinates, sqHeat, maxHeat);
+            }
         }
 
         public void UnmakeMove() {
@@ -328,25 +357,34 @@ namespace Core {
                 bestMoveText.GetComponent<ShowText>().textValue = "";
                 moveReactionText.GetComponent<ShowText>().textValue = "";
             }
+
+            StoreHeatMap();
+            if (heatMapEnabled) {
+                PaintHeatMap();
+            }
         }
 
         private void PrintBestMove() {
-            Coordinates fromCoordinates =
-                BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(suggestedMove.move)));
-            Coordinates toCoordinates =
-                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(suggestedMove.move)));
-            boardUi.SetSuggestedColor(fromCoordinates);
-            boardUi.SetSuggestedColor(toCoordinates);
+            if (!heatMapEnabled) {
+                Coordinates fromCoordinates =
+                    BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(suggestedMove.move)));
+                Coordinates toCoordinates =
+                    BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(suggestedMove.move)));
+                boardUi.SetSuggestedColor(fromCoordinates);
+                boardUi.SetSuggestedColor(toCoordinates);
+            }
             bestMoveText.GetComponent<ShowText>().textValue = "Best move: " + BoardSquares.GetAlgebraicMove(suggestedMove.move);
         }
 
         private void PrintBlunderMove(Move move) {
-            Coordinates fromCoordinates =
-                BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
-            Coordinates toCoordinates =
-                BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
-            boardUi.SetBlunderColor(fromCoordinates);
-            boardUi.SetBlunderColor(toCoordinates);
+            if (!heatMapEnabled) {
+                Coordinates fromCoordinates =
+                    BoardSquares.CoordFromIndex(Board.Sq64(Move.ToSquare(move.move)));
+                Coordinates toCoordinates =
+                    BoardSquares.CoordFromIndex(Board.Sq64(Move.FromSquare(move.move)));
+                boardUi.SetBlunderColor(fromCoordinates);
+                boardUi.SetBlunderColor(toCoordinates);
+            }
             moveReactionText.GetComponent<Text>().color = Color.red;
             moveReactionText.GetComponent<ShowText>().textValue = "Blunder!";
         }
@@ -409,10 +447,12 @@ namespace Core {
             if (currentLegalMoves.Count == 0) {
                 if (isKingIncheck) {
                     Checkmate();
-                    gameEnded = true;
                 } else {
                     Stalemate();
-                } 
+                }
+                gameEnded = true;
+                heatMapButton.SetActive(false);
+                if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) gameSnapshotButton.SetActive(true);
             } else if (isKingIncheck) {
                 Check();
             }
@@ -435,6 +475,22 @@ namespace Core {
 
         public void QuitToMainMenu() {
             SceneManager.LoadScene("MainMenu");
+        }
+
+        public void EnableDisableHeatMap() {
+            heatMapEnabled = !heatMapEnabled;
+            if (heatMapEnabled) PaintHeatMap(); 
+            else boardUi.ResetSquareColors();
+        }
+
+        public void ShowGameSnapshot() {
+            boardUi.RemovePieces();
+            int maxHeat = cumulativeHeatMap.Max();
+            for (int square = 0; square < 64; square++) {
+                int sqHeat = cumulativeHeatMap[square];
+                Coordinates coordinates = BoardSquares.CoordFromIndex(square);
+                boardUi.SetHeatColor(coordinates, sqHeat, maxHeat);
+            }
         }
         
         private void SetFilesRanksText() {

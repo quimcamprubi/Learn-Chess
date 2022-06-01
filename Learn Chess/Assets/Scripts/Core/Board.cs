@@ -572,6 +572,126 @@ namespace Core {
             
             return false;
         }
+        
+        public int SquareHeat(int square) {
+            Assert.IsTrue(Validations.IsSquareOnBoard(square), "Invalid square attacked index.");
+            Assert.IsTrue(CheckBoard(), "CheckBoard validation incorrect at IsSquareAttacked()");
+            int numAttacked = 0;
+            int squareColor = Piece.GetColor(squares[square]);
+            bool isSquareAttacked = false;
+            
+            if (squares[square - 11] == Piece.WhitePawn) {
+                numAttacked++;
+                if (Piece.White != squareColor) {
+                    numAttacked ++;
+                    isSquareAttacked = true;
+                }
+            }
+            
+            if (squares[square - 9] == Piece.WhitePawn) {
+                numAttacked++;
+                if (Piece.White != squareColor) {
+                    numAttacked ++;
+                    isSquareAttacked = true;
+                }
+            }
+            
+            if (squares[square + 11] == Piece.BlackPawn) {
+                numAttacked++;
+                if (Piece.Black != squareColor) {
+                    numAttacked ++;
+                    isSquareAttacked = true;
+                }
+            }
+            
+            if (squares[square + 9] == Piece.BlackPawn) {
+                numAttacked++;
+                if (Piece.Black != squareColor ) {
+                    numAttacked ++;
+                    isSquareAttacked = true;
+                }
+            }
+
+            // Check if a Knight is attacking the square
+            for (int i = 0; i < 8; i++) {
+                int piece = squares[square + Directions.KnightDirections[i]];
+                if (piece != OFFBOARD) {
+                    if (IsPieceKnight(piece)) {
+                        numAttacked++;
+                        if (Piece.GetColor(piece) != squareColor && Piece.GetColor(piece) != 0) {
+                            isSquareAttacked = true;
+                            numAttacked ++;
+                        }
+                    }
+                }
+            }
+            
+            // Check if a Rook or a Queen is attacking the square
+            for (int i = 0; i < 4; i++) {
+                int direction = Directions.RookDirections[i];
+                int tSquare = square + direction;
+                int piece = squares[tSquare];
+                // Because Rooks and Queens are sliding pieces, we keep going until we run into the edge of the board, or into a piece.
+                while (piece != OFFBOARD) {
+                    if (piece != None) {
+                        if (IsPieceRookQueen(piece)) {
+                            numAttacked++;
+                            if (Piece.GetColor(piece) != squareColor && Piece.GetColor(piece) != 0) {
+                                isSquareAttacked = true;
+                                numAttacked ++;
+                            }
+                        }
+                        break;
+                    }
+                    tSquare += direction;
+                    piece = squares[tSquare];
+                }
+            }
+            
+            // Check if a Bishop or a Queen is attacking the square
+            for (int i = 0; i < 4; i++) {
+                int direction = Directions.BishopDirections[i];
+                int tSquare = square + direction;
+                int piece = squares[tSquare];
+                // Because Bishops and Queens are sliding pieces, we keep going until we run into the edge of the board, or into a piece.
+                while (piece != OFFBOARD) {
+                    if (piece != None) {
+                        if (IsPieceBishopQueen(piece)) {
+                            numAttacked++;
+                            if (Piece.GetColor(piece) != squareColor && Piece.GetColor(piece) != 0) {
+                                isSquareAttacked = true;
+                                numAttacked ++;
+                            }
+                        }
+                        break;
+                    }
+                    tSquare += direction;
+                    piece = squares[tSquare];
+                }
+            }
+            
+            // Check if a King is attacking the square
+            for (int i = 0; i < 8; i++) {
+                int piece = squares[square + Directions.KingDirections[i]];
+                if (piece != OFFBOARD) {
+                    if (IsPieceKing(piece)) {
+                        numAttacked++;
+                        if (Piece.GetColor(piece) != squareColor && Piece.GetColor(piece) != 0) {
+                            isSquareAttacked = true;
+                            numAttacked ++;
+                        }
+                    }
+                }
+            }
+            int finalHeat = numAttacked;
+            if (isSquareAttacked && squares[square] != Piece.Empty) {
+                finalHeat += Piece.NominalPieceValue(squares[square]);
+            } else if (squares[square] != Piece.Empty) {
+                finalHeat++; 
+            }
+
+            return finalHeat;
+        }
 
         public void ShowSquaresAttackedBySide(int side) {
             StringBuilder sb = new StringBuilder();

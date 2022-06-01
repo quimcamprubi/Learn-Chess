@@ -91,6 +91,23 @@ namespace UI {
             squareRenderers[square.fileIndex, square.rankIndex].material.color =
                 square.IsLightSquare() ? boardColors.lightColors.blunder : boardColors.darkColors.blunder;
         }
+        
+        public void SetHeatColor(Coordinates square, int squareHeat, int maxHeat) {
+            float[] initialColor = { 0.75f, 1.0f, 0.0f };
+            float[] finalColor = { 1.0f, 0.0f, 0.0f };
+            squareRenderers[square.fileIndex, square.rankIndex].material.color =
+                GetInterpolatedColor(squareHeat, maxHeat, initialColor, finalColor);
+        }
+
+        public Color GetInterpolatedColor(int value, int numIntervals, float[] initialColor, float[] finalColor) {
+            float currentR = initialColor[0];
+            float currentG = initialColor[1];
+            float currentB = initialColor[2];
+            float intervalR = (finalColor[0] - currentR) / numIntervals;
+            float intervalG = (finalColor[1] - currentG) / numIntervals;
+            float intervalB = (finalColor[2] - currentB) / numIntervals;
+            return new Color(currentR + intervalR * value, currentG + intervalG * value, currentB + intervalB * value, 1f); 
+        }
 
         public void UpdateBoard(Board primaryBoard) {
             for (int rank = 0; rank < Constants.NUM_RANKS; rank++) {
@@ -101,7 +118,7 @@ namespace UI {
                 }
             }
         }
-        
+
         public bool TryGetSquareUnderMouse (Vector2 mouseWorld, out int selectedFile, out int selectedRank) {
             int file = (int) (mouseWorld.x + 4);
             int rank = (int) (mouseWorld.y + 4);
@@ -121,7 +138,7 @@ namespace UI {
             }
         }
         
-        public void OnMoveMade (Board board, Move move, bool animate = false) {
+        /*public void OnMoveMade (Board board, Move move, bool animate = false) {
             lastMadeMove = move;
             if (animate) {
         		StartCoroutine (AnimateMove (move, board));
@@ -129,9 +146,9 @@ namespace UI {
         		UpdateBoard(board);
         		ResetSquareColors();
         	}
-        }
+        }*/
         
-        IEnumerator AnimateMove (Move move, Board board) {
+        /*IEnumerator AnimateMove (Move move, Board board) {
         	float t = 0;
         	const float moveAnimDuration = 0.15f;
             Coordinates fromCoordinates =
@@ -151,7 +168,7 @@ namespace UI {
             UpdateBoard(board);
             ResetSquareColors();
         	pieceT.position = startPos;
-        }
+        }*/
         
         void ResetSquarePositions () {
             for (int rank = 0; rank < 8; rank++) {
@@ -160,6 +177,10 @@ namespace UI {
                     squarePieceRenderers[file, rank].transform.position = PositionFromCoordinates(file, rank, -0.1f);
                 }
             }
+        }
+
+        public void RemovePieces() {
+            squarePieceRenderers = new SpriteRenderer[8, 8];
         }
     }
 }

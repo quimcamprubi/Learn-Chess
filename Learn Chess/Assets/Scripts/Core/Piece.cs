@@ -80,6 +80,25 @@ namespace Core {
                     return 0;
             }
         }
+
+        public static int NominalPieceValue(int piece) {
+            switch (AbsolutePieceType(piece)) {
+                case Pawn:
+                    return 1;
+                case Knight:
+                    return 3;
+                case Bishop:
+                    return 3;
+                case Rook:
+                    return 5;
+                case Queen:
+                    return 9;
+                case King:
+                    return 10;
+                default:
+                    return 0;
+            }
+        }
         public static bool IsPiecePawn(int piece) { return piece == WhitePawn || piece == BlackPawn; }
         public static bool IsPieceBishop(int piece) { return piece == WhiteBishop || piece == BlackBishop; }
         public static bool IsPieceRook(int piece) { return piece == WhiteRook || piece == BlackRook; }
