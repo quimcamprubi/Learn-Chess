@@ -13,7 +13,6 @@ ScriptsOnlyBuild:
     - UnityEditor.U2D.Animation.BoneGizmo
     Unity.2D.IK.Editor.dll:
     - UnityEditor.U2D.IK.IKEditorManager
-    - UnityEditor.U2D.IK.IKGizmos
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
     - UnityEditor.Tilemaps.GridPaletteBrushes
@@ -53,7 +52,7 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.Shadow
     - UnityEngine.UI.Text
   sceneClasses:
-    Assets/Scenes/GameScene.unity:
+    Assets/Prefabs/GameScene.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -75,33 +74,33 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1488}
     - Class: 114
-      Script: {instanceID: 1886}
+      Script: {instanceID: 1796}
     - Class: 114
-      Script: {instanceID: 2824}
+      Script: {instanceID: 2734}
     - Class: 114
-      Script: {instanceID: 3004}
+      Script: {instanceID: 2914}
     - Class: 114
-      Script: {instanceID: 3036}
+      Script: {instanceID: 2946}
     - Class: 114
-      Script: {instanceID: 3080}
+      Script: {instanceID: 2990}
     - Class: 114
-      Script: {instanceID: 3252}
+      Script: {instanceID: 3162}
     - Class: 114
-      Script: {instanceID: 3502}
+      Script: {instanceID: 3412}
     - Class: 114
-      Script: {instanceID: 3636}
+      Script: {instanceID: 3546}
     - Class: 114
-      Script: {instanceID: 3652}
+      Script: {instanceID: 3562}
     - Class: 114
-      Script: {instanceID: 3948}
+      Script: {instanceID: 3858}
     - Class: 114
-      Script: {instanceID: 5536}
+      Script: {instanceID: 5446}
     - Class: 114
-      Script: {instanceID: 5578}
+      Script: {instanceID: 5488}
     - Class: 114
-      Script: {instanceID: 5720}
+      Script: {instanceID: 5630}
     - Class: 114
-      Script: {instanceID: 5998}
+      Script: {instanceID: 5908}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -142,29 +141,29 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1486}
     - Class: 114
-      Script: {instanceID: 1968}
+      Script: {instanceID: 1878}
     - Class: 114
-      Script: {instanceID: 2382}
+      Script: {instanceID: 2292}
     - Class: 114
-      Script: {instanceID: 2824}
+      Script: {instanceID: 2734}
     - Class: 114
-      Script: {instanceID: 3004}
+      Script: {instanceID: 2914}
     - Class: 114
-      Script: {instanceID: 3058}
+      Script: {instanceID: 2968}
     - Class: 114
-      Script: {instanceID: 3252}
+      Script: {instanceID: 3162}
     - Class: 114
-      Script: {instanceID: 3502}
+      Script: {instanceID: 3412}
     - Class: 114
-      Script: {instanceID: 3636}
+      Script: {instanceID: 3546}
     - Class: 114
-      Script: {instanceID: 3972}
+      Script: {instanceID: 3882}
     - Class: 114
-      Script: {instanceID: 4902}
+      Script: {instanceID: 4812}
     - Class: 114
-      Script: {instanceID: 5066}
+      Script: {instanceID: 4976}
     - Class: 114
-      Script: {instanceID: 5468}
+      Script: {instanceID: 5378}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -928,7 +927,7 @@ ScriptsOnlyBuild:
     className: TouchInputModule
   - hash:
       serializedVersion: 2
-      Hash: 7574e09a4031facc807831ae7a5d3c97
+      Hash: 6056d8fe642dd8873371b62fa4a47504
     assemblyName: Assembly-CSharp.dll
     namespaceName: Core
     className: Game
@@ -947,5 +946,6 @@ ScriptsOnlyBuild:
   platform: 19
   scenePathNames:
   - Assets/Scenes/MainMenu.unity
-  - Assets/Scenes/GameScene.unity
-  playerPath: C:/Users/Quim/Desktop/Easy Chess/MonoBleedingEdge/Easy Chess.exe
+  - Assets/Prefabs/GameScene.unity
+  playerPath: C:/Users/Quim/Documents/GitHub/Learn-Chess/Learn Chess/Easy Chess/Easy
+    Chess.exe

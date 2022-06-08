@@ -85,6 +85,15 @@ namespace Core {
             }
             return false;
         }
+        
+        public static bool IsRepeatedThreeTimes(Board board) {
+            int repetition = 0;
+            for (int i = 0; i < board.histPly - 1; i++) {
+                if (board.gameHist[i].positionKey == board.positionKey) repetition++;
+                if (repetition >= 3) return true;
+            }
+            return false;
+        }
 
         public static void ClearForSearch(Board board, SearchInfo searchInfo) {
             board.ClearSearchData(searchInfo.transposition);

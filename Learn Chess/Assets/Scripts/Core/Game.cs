@@ -25,7 +25,6 @@ namespace Core {
         public GameObject lastMoveText;
         public GameObject evaluationText;
         public GameObject gameSituationText;
-        public GameObject bToUndoText;
         public GameObject file1Text;
         public GameObject file2Text;
         public GameObject file3Text;
@@ -47,7 +46,9 @@ namespace Core {
         public GameObject moveReactionText;
         public GameObject heatMapButton;
         public GameObject gameSnapshotButton;
+        public GameObject undoMoveButton;
 
+        private bool unmadeMove = false;
         private bool gameEnded = false;
         private bool hasTurnChanged = false;
         private bool undoPromptEnabled = false;
@@ -159,19 +160,10 @@ namespace Core {
                 } else {
                     CheckSquareSelected(mousePosition);
                 }
-            } /*else if (Input.GetKeyDown(KeyCode.P)) {
-                int max = mainBoard.pvTable.GetPvLineCount(6);
-                Debug.Log("PV line of " + max + " moves.");
-                for (int pvNum = 0; pvNum < max; pvNum++) {
-                    Move move = mainBoard.pvArray[pvNum];
-                    Debug.Log("PV move " + pvNum + ": " + Move.GetMoveString(move));
-                }
-            }*/ else if (Input.GetKeyDown(KeyCode.B) && GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
+            } else if (Input.GetKeyDown(KeyCode.B) && GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
                 searchParameters.stopped = true;
                 UnmakeMove();
-            } /*else if (Input.GetKeyDown(KeyCode.M) ) {
-                mainBoard.PrintMirrorBoardEvaluations();
-            }*/
+            } 
         }
 
         private void CheckSquareSelected(Vector2 mousePosition) {
@@ -218,9 +210,10 @@ namespace Core {
             boardUi.SetHighlightColor(fromCoordinates);
             boardUi.SetHighlightColor(toCoordinates);
             boardUi.UpdateBoard(mainBoard);
-            if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
+            if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode && !unmadeMove) {
                 LearningModeUI(move);
             }
+            unmadeMove = false;
             currentState = InputState.None;
             lastPlayedMove = move;
             ChangeTurn();
@@ -293,6 +286,8 @@ namespace Core {
             if (mainBoard.histPly > 1) {
                 mainBoard.UnmakeMove();
                 mainBoard.UnmakeMove();
+                movesMade -= 2;
+                unmadeMove = true;
                 boardUi.ResetSquareColors();
                 if (mainBoard.histPly != 0) {
                     Move previousMove = new Move(mainBoard.gameHist[mainBoard.histPly - 1].move, 0);
@@ -316,12 +311,6 @@ namespace Core {
             currentPseudoLegalMoves = MoveGenerator.GenerateAllMoves(mainBoard);
             CheckEnding();
             if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) {
-                if (!undoPromptEnabled && currentPlayer == PlayerType.AI) {
-                    bToUndoText.GetComponent<ShowText>().textValue = "Press B to undo your last move.";
-                    undoPromptEnabled = true;
-                } else {
-                    bToUndoText.GetComponent<ShowText>().textValue = "";
-                }
                 string plusModifier = currentPlayerEvaluation >= 0f ? "+" : "";
                 evaluationText.GetComponent<ShowText>().textValue = plusModifier + String.Format(currentPlayerEvaluation % 1 == 0 ? "{0:0}" : "{0:0.00}", currentPlayerEvaluation);
                 if (currentPlayerEvaluation >= 1.0f) {
@@ -335,12 +324,13 @@ namespace Core {
                     gameSituationText.GetComponent<ShowText>().textValue = playerSide == Board.White ? "Black winning!" : "White winning!";
                 }
             }
+            if (movesMade >= 2) undoMoveButton.SetActive(true);
+            else undoMoveButton.SetActive(false);
             string lastPlayedMoveString =
                 lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);
             sideToPlayText.GetComponent<ShowText>().textValue = GetSideToPlayString(mainBoard.sideToPlay);
             lastMoveText.GetComponent<ShowText>().textValue = "Last move: " + lastPlayedMoveString;
             if (changePlayer) StartCoroutine(ChangePlayer());
-            //mainBoard.PrintPawnAnalysis();
         }
 
         private void LearningModeUI(Move move) {
@@ -396,7 +386,6 @@ namespace Core {
 
         private void AISearchAndMakeMove() {
             hasTurnChanged = false;
-            //searchParameters = new SearchInfo(depth: 20, timeSet: true, durationSet: 10, quiescence: true, transposition: true);
             Search.SearchPosition(mainBoard, searchParameters, this, nullMove: true, printAllData: false);
             Move bestMove = mainBoard.pvArray[0];
             StartCoroutine(WaitAndMakeMove(bestMove));
@@ -455,22 +444,29 @@ namespace Core {
                 if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) gameSnapshotButton.SetActive(true);
             } else if (isKingIncheck) {
                 Check();
+            } else if (Search.IsRepeatedThreeTimes(mainBoard)) {
+                gameEnded = true;
+                heatMapButton.SetActive(false);
+                undoMoveButton.SetActive(false);
+                if (GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) gameSnapshotButton.SetActive(true);
+                ForcedDraw();
             }
         }
 
         private void Checkmate() {
-            Debug.Log("Checkmate");
             gameStatusText.GetComponent<ShowText>().textValue = "Checkmate!";
         }
 
         private void Stalemate() {
-            Debug.Log("Stalemate");
             gameStatusText.GetComponent<ShowText>().textValue = "Stalemate!";
         }
 
         private void Check() {
-            Debug.Log("Check");
             gameStatusText.GetComponent<ShowText>().textValue = "Check!";
+        }
+
+        private void ForcedDraw() {
+            gameStatusText.GetComponent<ShowText>().textValue = "Draw! Threefold repetition!";
         }
 
         public void QuitToMainMenu() {
