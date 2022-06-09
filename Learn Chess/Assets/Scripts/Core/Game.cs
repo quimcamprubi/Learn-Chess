@@ -114,6 +114,7 @@ namespace Core {
         }
 
         public void SwitchSides() {
+            gameStatusText.GetComponent<ShowText>().textValue = "";
             if (playerSide == Board.White) {
                 boardUi.SetPerspective(false);
                 playerSide = Board.Black;
@@ -129,6 +130,7 @@ namespace Core {
             InitializeGame();
             gameEnded = false;
             hasTurnChanged = true;
+            movesMade = 0;
         }
         
         IEnumerator ChangePlayer() {
