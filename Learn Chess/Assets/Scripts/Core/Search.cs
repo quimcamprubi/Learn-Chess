@@ -87,7 +87,7 @@ namespace Core {
         }
         
         public static bool IsRepeatedThreeTimes(Board board) {
-            int repetition = 0;
+            int repetition = 1;
             for (int i = 0; i < board.histPly - 1; i++) {
                 if (board.gameHist[i].positionKey == board.positionKey) repetition++;
                 if (repetition >= 3) return true;
