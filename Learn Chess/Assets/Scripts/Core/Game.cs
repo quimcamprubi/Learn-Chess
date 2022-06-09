@@ -59,10 +59,11 @@ namespace Core {
         private int selectedRank;
         private int selectedFile;
         private int lastSelectedIndex = -1;
-        private int playerSide = Board.White;
+        public int playerSide = Board.White;
         private Move lastPlayedMove = null;
         private PlayerType currentPlayer = PlayerType.Human;
         public float currentPlayerEvaluation;
+        public float sideEvaluation;
         public Move suggestedMove = null;
         private int[] cumulativeHeatMap = new int[64];
         private int[] currentHeatMap = new int[64];

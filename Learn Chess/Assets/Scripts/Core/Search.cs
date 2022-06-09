@@ -280,6 +280,7 @@ namespace Core {
                 else board.pvTable.GetPvLineCount(currentDepth);
                 bestMove = board.pvArray[0];
                 game.currentPlayerEvaluation = board.sideToPlay == Board.Black ? -bestScore/100f : bestScore/100f;
+                if (game.playerSide == Board.Black) game.currentPlayerEvaluation = -game.currentPlayerEvaluation;
                 if (bestMove != null) {
                     sb.Append("Depth: " + currentDepth + "  score: " + bestScore + "  best move: " + BoardSquares.GetAlgebraicMove(bestMove.move) + "  nodes: " + searchInfo.nodes + "\n");
                     sb.AppendLine();

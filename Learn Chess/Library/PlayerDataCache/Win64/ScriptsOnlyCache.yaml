@@ -927,7 +927,7 @@ ScriptsOnlyBuild:
     className: TouchInputModule
   - hash:
       serializedVersion: 2
-      Hash: 6056d8fe642dd8873371b62fa4a47504
+      Hash: a618fe30a77558663fd149e1201e8bfb
     assemblyName: Assembly-CSharp.dll
     namespaceName: Core
     className: Game
