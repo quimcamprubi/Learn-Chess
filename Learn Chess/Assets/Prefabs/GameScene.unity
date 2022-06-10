@@ -1371,7 +1371,9 @@ MonoBehaviour:
   heatMapButton: {fileID: 278781078}
   gameSnapshotButton: {fileID: 2138566385}
   undoMoveButton: {fileID: 1811598089}
+  playerSide: 0
   currentPlayerEvaluation: 0
+  sideEvaluation: 0
 --- !u!4 &511656832
 Transform:
   m_ObjectHideFlags: 0
@@ -2059,7 +2061,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 869.85, y: 499.08}
+  m_AnchoredPosition: {x: 869.85, y: 504}
   m_SizeDelta: {x: 434.376, y: 153.8324}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &801741213
