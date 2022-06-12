@@ -327,7 +327,7 @@ namespace Core {
                     gameSituationText.GetComponent<ShowText>().textValue = playerSide == Board.White ? "Black winning!" : "White winning!";
                 }
             }
-            if (movesMade >= 2) undoMoveButton.SetActive(true);
+            if (movesMade >= 2 && GameSettings.GameMode == GameSettings.GameModeEnum.LearningMode) undoMoveButton.SetActive(true);
             else undoMoveButton.SetActive(false);
             string lastPlayedMoveString =
                 lastPlayedMove == null ? "-" : BoardSquares.GetAlgebraicMove(lastPlayedMove.move);

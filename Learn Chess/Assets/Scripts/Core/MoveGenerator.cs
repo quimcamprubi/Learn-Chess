@@ -60,6 +60,7 @@ namespace Core {
             } else {
                 AddQuietMove(new Move(fromSquare, toSquare, Piece.Empty, Piece.Empty), moveList, board);
             }
+            
         }
         
         // Black pieces
