@@ -403,10 +403,10 @@ namespace Core {
         private void InitSearchInfo() {
             switch (GameSettings.Difficulty) {
                 case GameSettings.DifficultyEnum.Beginner:
-                    searchParameters = new SearchInfo(depth: 1, true, 5, quiescence: false, transposition: false);
+                    searchParameters = new SearchInfo(depth: 1, true, 2, quiescence: false, transposition: false);
                     break;
                 case GameSettings.DifficultyEnum.Amateur:
-                    searchParameters = new SearchInfo(depth: 3, true, 5, quiescence: false, transposition: false);
+                    searchParameters = new SearchInfo(depth: 3, true, 2, quiescence: false, transposition: false);
                     break;
                 case GameSettings.DifficultyEnum.Intermediate:
                     searchParameters = new SearchInfo(depth: 5, true, 5, quiescence: true, transposition: true);
